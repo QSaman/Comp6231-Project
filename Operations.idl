@@ -6,7 +6,7 @@ module comp6231 { module project { module common { module corba { module users {
     interface StudentOperations
     {
 	string bookRoom(in string user_id, in string campus_name, in long room_number, in string date, in string time_slot);
-	string getAvailableTimeSlot(in string date);
+	string getAvailableTimeSlot(in string user_id, in string date);
 	string cancelBooking(in string user_id, in string bookingID);
 	string changeReservation(in string user_id, in string booking_id, in string new_campus_name, in long new_room_number, in string new_date, in string new_time_slot);
 	boolean studentLogin(in string studentID);
