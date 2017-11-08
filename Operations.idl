@@ -1,43 +1,22 @@
-module comp6231 { module project { module common { module corba { module data_structure {
-    valuetype nullable_string string;    
-    
-    struct ReplyMsg
-    {
-        nullable_string message;
-        boolean status;
-        nullable_string booking_id;
-    };
-    
-    struct CorbaTimeSlotResult
-    {
-        nullable_string campus_name;
-        long total_available_slots;
-        nullable_string message;
-    };
-};};};};};
-
 module comp6231 { module project { module common { module corba { module users {
-    typedef comp6231::project::common::corba::data_structure::CorbaTimeSlotResult CorbaTimeSlotResult;
-    typedef comp6231::project::common::corba::data_structure::ReplyMsg ReplyMsg;
     valuetype nullable_string string;
     
-    typedef sequence<CorbaTimeSlotResult> corba_timeslot_result_list;
     typedef sequence<nullable_string> corba_timeslot_list;
     
     interface StudentOperations
     {
-	ReplyMsg bookRoom(in string user_id, in string campus_name, in long room_number, in string date, in string time_slot);
-	corba_timeslot_result_list getAvailableTimeSlot(in string date);
-	ReplyMsg cancelBooking(in string user_id, in string bookingID);
-	ReplyMsg changeReservation(in string user_id, in string booking_id, in string new_campus_name, in long new_room_number, in string new_date, in string new_time_slot);
+	string bookRoom(in string user_id, in string campus_name, in long room_number, in string date, in string time_slot);
+	string getAvailableTimeSlot(in string date);
+	string cancelBooking(in string user_id, in string bookingID);
+	string changeReservation(in string user_id, in string booking_id, in string new_campus_name, in long new_room_number, in string new_date, in string new_time_slot);
 	boolean studentLogin(in string studentID);
 	oneway void signOut(in string ID);
     };
     
     interface AdminOperations
     {        
-	ReplyMsg createRoom(in string user_id, in long room_number, in string date, in corba_timeslot_list time_slots);
-	ReplyMsg deleteRoom(in string user_id, in long room_number, in string date, in corba_timeslot_list time_slots);
+	string createRoom(in string user_id, in long room_number, in string date, in corba_timeslot_list time_slots);
+	string deleteRoom(in string user_id, in long room_number, in string date, in corba_timeslot_list time_slots);
 	boolean adminLogin(in string adminID);
 	oneway void signOut(in string ID);
     };
