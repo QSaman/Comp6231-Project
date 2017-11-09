@@ -19,9 +19,9 @@ import comp6231.project.saman.common.users.CampusUser;
  */
 public class LoggerHelper {
 	
-	private static final String student_client_path = "log/users/students";
-	private static final String admin_client_path = "log/users/admins";
-	private static final String campus_server_path = "log/campus_servers";
+	private static final String student_client_path = "log/saman/users/students";
+	private static final String admin_client_path = "log/saman/users/admins";
+	private static final String campus_server_path = "log/saman/campus_servers";
 	public static LogManager log_manger = LogManager.getLogManager();
 	
 	public static String now()
