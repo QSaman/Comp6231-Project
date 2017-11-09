@@ -8,6 +8,7 @@ Hello World From FA2ID
 
 # Student:
 
+```
 JSON bookRoom
 {
 "MessageType"    : Constants.FRONTEND_TO_SERVER/Constants.SERVER_TO_SERVER,
@@ -110,3 +111,4 @@ JSON Logout
 "UserId"         : "studentId",
 "SequenceNumber" : "1"
 }
+```
