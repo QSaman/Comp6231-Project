@@ -6,7 +6,8 @@ import com.google.gson.GsonBuilder;
 import comp6231.project.saman.campus.message_protocol.MessageHeader.CommandType;
 import comp6231.project.saman.campus.message_protocol.MessageHeader.MessageType;
 import comp6231.project.saman.campus.message_protocol.MessageHeader.ProtocolType;
-import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaEncodeBookRoom;
+import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyBookRoom;
+import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaRequestBookRoom;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
 
@@ -19,15 +20,16 @@ public class JsonTest {
 	public static void main(String[] args) {
 		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();
 		
-		//You need to use addClass for all your custom classes derived from MessageHeader named for example Foo to mpa them like:
+		//You need to use addClass for all your custom classes derived from MessageHeader named for example Foo to map them like:
 		//(command_type, message_type, protocol_type) ---> Foo
 		//In this example I only define ReplicaEncodeBookRoom:
-		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.InterReplica, ReplicaEncodeBookRoom.class);
+		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.InterReplica, ReplicaRequestBookRoom.class);
+		ds.addClass(CommandType.Book_Room, MessageType.Reply, ProtocolType.InterReplica, ReplicaReplyBookRoom.class);
 		
 		Gson gson = new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 		
 		
-		MessageHeader msg_obj = new ReplicaEncodeBookRoom(1, "DVLS1111", 777, new DateReservation("17-09-2017"), new TimeSlot("09:15 - 10:15"));
+		MessageHeader msg_obj = new ReplicaRequestBookRoom(1, "DVLS1111", 777, new DateReservation("17-09-2017"), new TimeSlot("09:15 - 10:15"));
 		
 		String json_str = gson.toJson(msg_obj);
 		System.out.println(json_str);
