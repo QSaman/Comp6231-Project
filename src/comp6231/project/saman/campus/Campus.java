@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import comp6231.project.saman.campus.UdpServer.WaitObject;
+import comp6231.project.saman.campus.message_protocol.saman_replica.JsonMessage;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.LoggerHelper;
 import comp6231.project.saman.common.TimeSlot;
@@ -41,6 +42,7 @@ public class Campus implements Serializable {
 	private UdpServer udp_server;
 	private Logger logger;
 	private CampusCommunication campus_comm;
+	private JsonMessage json_message;
 		
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws SocketException, RemoteException
 	{
@@ -54,6 +56,7 @@ public class Campus implements Serializable {
 		this.campus_comm = campus_comm;
 		udp_server.start();
 		this.campus_comm.setCampus(this);
+		json_message = new JsonMessage();
 	}
 	
 	public void starServer() throws RemoteException
