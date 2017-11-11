@@ -8,9 +8,9 @@ public class ReplyMessageHeader extends MessageHeader {
 	
 	public String reply_message;
 	
-	public ReplyMessageHeader(int message_id, CommandType command_type, ProtocolType protocol_type, String reply_message)
+	public ReplyMessageHeader(int sequence_number, CommandType command_type, ProtocolType protocol_type, String reply_message)
 	{
-		super(message_id, command_type, MessageType.Reply, protocol_type);
+		super(sequence_number, command_type, MessageType.Reply, protocol_type);
 		this.reply_message = reply_message;
 	}
 

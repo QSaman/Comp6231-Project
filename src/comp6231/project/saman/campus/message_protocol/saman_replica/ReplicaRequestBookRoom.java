@@ -26,9 +26,13 @@ public class ReplicaRequestBookRoom extends ReplicaRequestMessageHeader {
 
 	@Override
 	public ReplyMessageHeader handleRequest(Campus campus) {
-		ReplicaReplyBookRoom ret = new ReplicaReplyBookRoom(room_number, "", "");
+		ReplicaReplyBookRoom ret = new ReplicaReplyBookRoom(sequence_number, "", protocol_type, "", false);
 		try {
-			ret.booking_id = campus.bookRoom(user_id, campus.getName(), room_number, new DateReservation(date), new TimeSlot(time_slot));
+			String res = campus.bookRoom(user_id, campus.getName(), room_number, new DateReservation(date), new TimeSlot(time_slot));
+			if (res == null)
+				ret.status = false;
+			else
+				ret.booking_id = res;
 			ret.reply_message = "Generated booking id: " + ret.booking_id;
 		} catch (NotBoundException | IOException | InterruptedException e) {
 			ret.reply_message = e.getMessage();

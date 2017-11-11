@@ -1,6 +1,5 @@
 package comp6231.project.saman.campus.message_protocol;
 
-import com.google.gson.Gson;
 
 /**
  * @author saman

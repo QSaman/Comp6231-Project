@@ -1,15 +1,14 @@
 package comp6231.project.saman.campus.message_protocol.saman_replica;
 
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
 
 
-public class ReplicaReplyBookRoom extends ReplyMessageHeader {
+public class ReplicaReplyBookRoom extends ReplicaReplyMessageStatus {
 	
 	public String booking_id;
 	
-	public ReplicaReplyBookRoom(int message_id, String reply_message, String booking_id)
+	public ReplicaReplyBookRoom(int sequence_number, String reply_message, ProtocolType protocol_type, String booking_id, boolean status)
 	{
-		super(message_id, CommandType.Book_Room, ProtocolType.Server_To_Server, reply_message);
+		super(sequence_number, CommandType.Book_Room, protocol_type, reply_message, status);
 		this.booking_id = booking_id;
 	}
 
