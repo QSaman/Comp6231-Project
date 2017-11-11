@@ -23,8 +23,8 @@ public class JsonTest {
 		//You need to use addClass for all your custom classes derived from MessageHeader named for example Foo to map them like:
 		//(command_type, message_type, protocol_type) ---> Foo
 		//In this example I only define ReplicaEncodeBookRoom:
-		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.InterReplica, ReplicaRequestBookRoom.class);
-		ds.addClass(CommandType.Book_Room, MessageType.Reply, ProtocolType.InterReplica, ReplicaReplyBookRoom.class);
+		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, ReplicaRequestBookRoom.class);
+		ds.addClass(CommandType.Book_Room, MessageType.Reply, ProtocolType.Server_To_Server, ReplicaReplyBookRoom.class);
 		
 		Gson gson = new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 		

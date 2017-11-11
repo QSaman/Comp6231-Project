@@ -15,7 +15,7 @@ public class ReplicaRequestBookRoom extends ReplicaRequestMessageHeader {
 	
 	public ReplicaRequestBookRoom(int message_id, String user_id, int room_number, DateReservation date, TimeSlot time_slot)
 	{
-		super(message_id, CommandType.Book_Room, ProtocolType.InterReplica, user_id);
+		super(message_id, CommandType.Book_Room, user_id);
 		this.room_number = room_number;
 		this.date = date.toString();
 		this.time_slot = time_slot.toString();

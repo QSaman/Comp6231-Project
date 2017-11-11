@@ -25,8 +25,8 @@ public class MessageHeader {
 	
 	public enum ProtocolType
 	{
-		FeToReplica,
-		InterReplica
+		Frontend_To_Replica,
+		Server_To_Server
 	}
 	
 	public int sequence_number;

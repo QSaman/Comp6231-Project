@@ -19,9 +19,8 @@ public abstract class  ReplicaRequestMessageHeader extends RequestMessageHeader 
 	 * @param protocol_type
 	 * @param user_id
 	 */
-	public ReplicaRequestMessageHeader(int message_id, CommandType command_type, ProtocolType protocol_type,
-			String user_id) {
-		super(message_id, command_type, protocol_type, user_id);
+	public ReplicaRequestMessageHeader(int message_id, CommandType command_type, String user_id) {
+		super(message_id, command_type, ProtocolType.Server_To_Server, user_id);
 		// TODO Auto-generated constructor stub
 	}
 
