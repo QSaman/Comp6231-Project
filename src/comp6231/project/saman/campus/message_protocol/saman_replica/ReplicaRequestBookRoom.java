@@ -32,7 +32,10 @@ public class ReplicaRequestBookRoom extends ReplicaRequestMessageHeader {
 			if (res == null)
 				ret.status = false;
 			else
+			{
+				ret.status = true;
 				ret.booking_id = res;
+			}
 			ret.reply_message = "Generated booking id: " + ret.booking_id;
 		} catch (NotBoundException | IOException | InterruptedException e) {
 			ret.reply_message = e.getMessage();
