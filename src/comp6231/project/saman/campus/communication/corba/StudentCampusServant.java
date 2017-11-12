@@ -50,9 +50,9 @@ public class StudentCampusServant extends StudentOperationsPOA {
 	 * @see comp6231.a2.common.corba.users.StudentOperationsOperations#getAvailableTimeSlot(comp6231.a2.common.corba.data_structure.CorbaDateReservation)
 	 */
 	@Override
-	public CorbaTimeSlotResult[] getAvailableTimeSlot(CorbaDateReservation date) {
+	public CorbaTimeSlotResult[] getAvailableTimeSlot(String user_id, CorbaDateReservation date) {
 		try {
-			ArrayList<TimeSlotResult> res = campus.getAvailableTimeSlot(new DateReservation(date));
+			ArrayList<TimeSlotResult> res = campus.getAvailableTimeSlot(user_id, new DateReservation(date));
 			CorbaTimeSlotResult[] ret = new CorbaTimeSlotResult[res.size()];
 			for (int i = 0; i < res.size(); ++i)
 				ret[i] = res.get(i).toCorba();

@@ -37,8 +37,8 @@ public class StudentCorba implements StudentInterface {
 	 * @see comp6231.a2.users.StudentInterface#getAvailableTimeSlot(comp6231.a2.common.DateReservation)
 	 */
 	@Override
-	public ArrayList<TimeSlotResult> getAvailableTimeSlot(DateReservation date) {
-		return TimeSlotResult.toArrayList(remote_stub.getAvailableTimeSlot(date.toCorba()));
+	public ArrayList<TimeSlotResult> getAvailableTimeSlot(String user_id, DateReservation date) {
+		return TimeSlotResult.toArrayList(remote_stub.getAvailableTimeSlot(user_id, date.toCorba()));
 	}
 
 	/* (non-Javadoc)

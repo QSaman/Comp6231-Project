@@ -11,7 +11,7 @@ import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
  */
 public class ReplicaReplyMessageStatus extends ReplyMessageHeader {
 	
-	boolean status;
+	public boolean status;
 
 	/**
 	 * @param sequence_number

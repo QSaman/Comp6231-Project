@@ -102,9 +102,9 @@ public class RmiCampusCommunication extends CampusCommunication implements Admin
 	}
 
 	@Override
-	public ArrayList<TimeSlotResult> getAvailableTimeSlot(DateReservation date)
+	public ArrayList<TimeSlotResult> getAvailableTimeSlot(String user_id, DateReservation date)
 			throws RemoteException, NotBoundException, IOException, InterruptedException {
-		return campus.getAvailableTimeSlot(date);
+		return campus.getAvailableTimeSlot(user_id, date);
 	}
 
 	@Override

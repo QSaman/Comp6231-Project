@@ -104,7 +104,7 @@ public class StudentOperationsTest {
 	public final void testGetAvailableTimeSlot() throws Exception {
 		testRemoveBookedRoom();
 		StudentOperations user = (StudentOperations)registry.lookup("DVL");
-		ArrayList<TimeSlotResult> res = user.getAvailableTimeSlot(new DateReservation("19-09-2017"));
+		ArrayList<TimeSlotResult> res = user.getAvailableTimeSlot("DVLS1111", new DateReservation("19-09-2017"));
 		assertTrue(res.size() == 3);
 	}
 

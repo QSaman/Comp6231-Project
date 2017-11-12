@@ -14,8 +14,14 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import comp6231.project.saman.campus.UdpServer.WaitObject;
-import comp6231.project.saman.campus.message_protocol.saman_replica.JsonMessage;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import comp6231.project.saman.campus.message_protocol.InitializeSerializer;
+import comp6231.project.saman.campus.message_protocol.MessageHeader;
+import comp6231.project.saman.campus.message_protocol.MessageHeaderDeserializer;
+import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
+import comp6231.project.saman.campus.message_protocol.saman_replica.*;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.LoggerHelper;
 import comp6231.project.saman.common.TimeSlot;
@@ -43,6 +49,7 @@ public class Campus implements Serializable {
 	private Logger logger;
 	private CampusCommunication campus_comm;
 	private JsonMessage json_message;
+	private Gson gson;
 		
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws SocketException, RemoteException
 	{
@@ -52,11 +59,20 @@ public class Campus implements Serializable {
 		this.address = address;
 		this.port = port;
 		this.logger = logger;
-		udp_server = new UdpServer(this);
+		initGson();
+		udp_server = new UdpServer(this, gson);
+		json_message = new JsonMessage(udp_server, gson);
+		udp_server.setJsonMessage(json_message);		
 		this.campus_comm = campus_comm;
 		udp_server.start();
 		this.campus_comm.setCampus(this);
-		json_message = new JsonMessage();
+	}
+	
+	private void initGson()
+	{
+		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
+		InitializeSerializer.initializeSamanReplica(ds);
+		gson = new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 	}
 	
 	public void starServer() throws RemoteException
@@ -199,7 +215,8 @@ public class Campus implements Serializable {
 			@Override
 			public void onSubValue(ArrayList<TimeSlot> sub_val) {
 				ArrayList<Thread> threads = new ArrayList<>();
-				HashMap<Integer, WaitObject> res = new HashMap<>();	//(message_id, wait ojbect)
+				//HashMap<Integer, WaitObject> res = new HashMap<>();	//(message_id, wait ojbect)
+				HashMap<Integer, ReplicaReplyMessageStatus> res = new HashMap<>();
 				HashMap<Integer, TimeSlot> removed_list = new HashMap<>();	//(message_id, time slot)
 				
 				ArrayList<TimeSlot> new_time_slots = new ArrayList<TimeSlot>();
@@ -238,34 +255,28 @@ public class Campus implements Serializable {
 										" his/her record while I'm deleting this time slot", val1.getUsername(), 
 										a_user.getCampus(), val1, val1.getBookingId()));
 								
-								int message_id = MessageProtocol.generateMessageId();
-								byte[] send_msg = MessageProtocol.encodeRemoveStudentRecordMessage(message_id, val1.getUsername(), val1.getBookingId());								
-								try {
-									UdpServer.WaitObject wait_object = udp_server.new WaitObject();
-									udp_server.addToWaitList(message_id, wait_object);
-									Thread thread = new Thread(new Runnable() {
-										
-										@Override
-										public void run() {
-											synchronized (wait_object) {
-												try {
-													wait_object.wait();
-												} catch (InterruptedException e) {
-													// TODO Auto-generated catch block
-													e.printStackTrace();
-												}
-											}
+								int message_id = MessageProtocol.generateMessageId();								
+								Thread thread = new Thread(new Runnable() {
+									
+									@Override
+									public void run() {
+										ReplicaRequestRemoveStudentRecord send_msg = 
+												new ReplicaRequestRemoveStudentRecord(message_id, val1.getUsername(), val1.getBookingId()); 
+										ReplicaReplyMessageStatus reply = null;
+										try {
+											reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, user.getCampus());
+										} catch (IOException | InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
 										}
-									});
-									res.put(message_id, wait_object);
-									removed_list.put(message_id, val1);
-									thread.start();
-									sendMessage(send_msg, user.getCampus());									
-									threads.add(thread);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+										synchronized (res) {
+											res.put(message_id, reply);												
+										}											
+									}
+								});
+								removed_list.put(message_id, val1);
+								thread.start();									
+								threads.add(thread);
 							}
 						}
 					}
@@ -329,6 +340,7 @@ public class Campus implements Serializable {
 	{
 		db.clear();
 		student_db.clear();
+		System.out.println("revan: " + getName() + " is deleted");
 	}
 	public void startWeek()
 	{
@@ -357,25 +369,21 @@ public class Campus implements Serializable {
 				{
 					if (campus_str.equals(getName()))
 						continue;
-					int message_id = MessageProtocol.generateMessageId();
-					byte[] send_msg = MessageProtocol.encodeStartWeekMessage(message_id);
-					UdpServer.WaitObject wait_object = udp_server.new WaitObject();
-					udp_server.addToWaitList(message_id, wait_object);			
+					int message_id = MessageProtocol.generateMessageId();		
 					Thread thread = new Thread(new Runnable() {				
 						@Override
 						public void run() {
+							ReplicaRequestStartWeek send_msg = new ReplicaRequestStartWeek(message_id, user_id);
 							try {
-								synchronized (wait_object) {
-									wait_object.wait();
-								}
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}					
+								logger.info("Sending request to " + campus_str + " to start a new week");
+								sendMessage(send_msg, campus_str);
+							} catch (IOException | InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
 					});
 					thread.start();
-					sendMessage(send_msg, campus_str);
 					threads.add(thread);
 				}
 				for (Thread thread : threads)
@@ -434,12 +442,13 @@ public class Campus implements Serializable {
 		return ops._time_slots;
 	}
 	
-	private void sendMessage(byte[] message, String campus_name) throws IOException
+	private ReplyMessageHeader sendMessage(ReplicaRequestMessageHeader message, String campus_name) throws IOException, InterruptedException
 	{
 		CampusCommunication.RemoteInfo remote_info = campus_comm.getRemoteInfo(campus_name);
 		InetAddress address = InetAddress.getByName(remote_info.address);
 		int port = remote_info.port;
-		udp_server.sendDatagram(message, address, port);
+		ReplyMessageHeader res = json_message.sendJson(message, address, port);
+		return res;
 	}
 	
 	private boolean userBelongHere(CampusUser user)
@@ -459,7 +468,7 @@ public class Campus implements Serializable {
 		{
 			this._user = user;
 			this._student_db = student_db;
-			_booking_id = null;
+			_booking_id = "";
 			_status = true;
 		}
 		
@@ -536,16 +545,16 @@ public class Campus implements Serializable {
 		if (!user.isStudent())
 		{
 			logger.warning(String.format("user %s is not allowed to changeReservation in %s campus", user_id, getName()));
-			return null;
+			return "";
 		}
 		String new_booking_id = bookRoom(user_id, new_campus_name, new_room_number, new_date, new_time_slot, 4);
-		if (new_booking_id != null)
+		if (!new_booking_id.isEmpty())
 		{
 			boolean status = cancelBooking(user_id, booking_id);
 			if (!status)
 			{
 				cancelBooking(user_id, new_booking_id);
-				return null;
+				return "";
 			}
 		}
 		return new_booking_id;
@@ -593,15 +602,28 @@ public class Campus implements Serializable {
 				if (time_slots == null)
 					return false;
 				TimeSlot ts = null;
+				boolean booked = false;
+				String prev_booking_id = "";
 				for (TimeSlot tmp : time_slots)
-					if (tmp.equals(time_slot) && !tmp.isBooked())
+					if (tmp.equals(time_slot))
 					{
-						ts = tmp;
+						if (!tmp.isBooked())
+						{
+							ts = tmp;							
+						}
+						else
+						{
+							booked = true;
+							prev_booking_id = tmp.getBookingId();
+						}
 						break;
 					}
 				if (ts == null)
 				{
-					logger.warning(String.format("I cannot find time slot %s or it is booked before in database (bookRoom)", time_slot));
+					if (booked)
+						logger.warning(String.format("Time slot %s is booked before in database (bookRoom): " + prev_booking_id, time_slot));
+					else
+						logger.warning(String.format("I cannot find time slot %s in database (bookRoom)", time_slot));
 					return false;
 				}
 				_booking_id = BookingIdGenerator.generate(getName(), date, room_number);
@@ -613,15 +635,10 @@ public class Campus implements Serializable {
 			public boolean onOperationOnOtherCampus(int message_id) throws NotBoundException, IOException, InterruptedException {
 				logger.fine(String.format("I'm going to send a request to campus %s for booking a room", campus_name));
 				int msg_id = MessageProtocol.generateMessageId();
-				byte[] send_msg = MessageProtocol.encodeBookRoomMessage(msg_id, user_id, room_number, date, time_slot);				
-				UdpServer.WaitObject wait_object = udp_server.new WaitObject(); 
-				udp_server.addToWaitList(msg_id, wait_object);				
-				synchronized (wait_object) {
-					sendMessage(send_msg, campus_name);
-					wait_object.wait();
-				}			
-				_booking_id = wait_object.bookingId;
-				return _booking_id != null;
+				ReplicaRequestBookRoom send_msg = new ReplicaRequestBookRoom(msg_id, user_id, room_number, date, time_slot);   
+				ReplicaReplyBookRoom reply = (ReplicaReplyBookRoom) sendMessage(send_msg, campus_name);
+				_booking_id = reply.booking_id;
+				return reply.status;
 			}
 			
 			@Override
@@ -656,14 +673,15 @@ public class Campus implements Serializable {
 		return ret;
 	}	
 
-	public ArrayList<TimeSlotResult> getAvailableTimeSlot(DateReservation date) throws IOException, InterruptedException {
+	public ArrayList<TimeSlotResult> getAvailableTimeSlot(String user_id, DateReservation date) throws IOException, InterruptedException {
 		String log_msg = String.format("received getAvailableTimeSlot(date: %s)", date);
 		logger.info(LoggerHelper.format(log_msg));
 		
 		ArrayList<TimeSlotResult> ret = new ArrayList<TimeSlotResult>();
 		ret.add(new TimeSlotResult(getName(), getThisCampusAvailableTimeSlots(date)));
 		HashMap<Integer, String> hm = new HashMap<>();	//(message_id, campus_name)
-		HashMap<Integer, UdpServer.WaitObject> hm_wo = new HashMap<>();	//(message_id, WaitObject)
+		//HashMap<Integer, UdpServer.WaitObject> hm_wo = new HashMap<>();	//(message_id, WaitObject)
+		HashMap<Integer, ReplicaReplyAvailableTimeSlots> reply_list = new HashMap<>();
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		String[] campus_names = campus_comm.getAllCampusNames();
 		for (String campus_str : campus_names)
@@ -672,32 +690,31 @@ public class Campus implements Serializable {
 				continue;
 			int message_id = MessageProtocol.generateMessageId();
 			byte[] send_msg = MessageProtocol.encodeGetAvailableTimeSlotsMessage(message_id, date);
-			hm.put(message_id, campus_str);			
-			UdpServer.WaitObject wait_object = udp_server.new WaitObject();
-			udp_server.addToWaitList(message_id, wait_object);			
-			hm_wo.put(message_id, wait_object);
+			hm.put(message_id, campus_str);						
 			Thread thread = new Thread(new Runnable() {				
 				@Override
 				public void run() {
+					ReplicaRequestAvailableTimeSlots send_msg = new ReplicaRequestAvailableTimeSlots(message_id, user_id, date.toString());
+					ReplicaReplyAvailableTimeSlots reply = null;
 					try {
-						synchronized (wait_object) {
-							wait_object.wait();
-						}
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}					
+						reply = (ReplicaReplyAvailableTimeSlots)sendMessage(send_msg, campus_str);
+					} catch (IOException | InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					synchronized (reply_list) {
+						reply_list.put(message_id, reply);
+					}					
 				}
 			});
 			thread.start();
-			sendMessage(send_msg, campus_str);
 			threads.add(thread);
 		}
 		System.out.println("threads.length(): " + threads.size()); 
 		for (Thread thread : threads)
 			thread.join();
 		for (int msg_id : hm.keySet())
-			ret.add(new TimeSlotResult(hm.get(msg_id), hm_wo.get(msg_id).available_timeslots));
+			ret.add(new TimeSlotResult(hm.get(msg_id), reply_list.get(msg_id).available_timeslot_number));
 		return ret;
 	}
 	
@@ -752,14 +769,9 @@ public class Campus implements Serializable {
 			@Override
 			public boolean onOperationOnOtherCampus(int message_id) throws NotBoundException, IOException, InterruptedException {
 				int msg_id = MessageProtocol.generateMessageId();
-				byte[] send_msg = MessageProtocol.encodeCancelBookRoomMessage(msg_id, user_id, bookingID);				
-				UdpServer.WaitObject wait_object = udp_server.new WaitObject(); 
-				udp_server.addToWaitList(msg_id, wait_object);
-				synchronized (wait_object) {
-					sendMessage(send_msg, big.getCampusName());
-					wait_object.wait();
-				}
-				_status = wait_object.status;
+				ReplicaRequestCancelBookRoom send_msg = new ReplicaRequestCancelBookRoom(msg_id, user_id, bookingID);				
+				ReplicaReplyMessageStatus reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, big.getCampusName());
+				_status = reply.status;
 				return _status;				
 			}
 			

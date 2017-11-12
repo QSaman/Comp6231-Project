@@ -18,7 +18,7 @@ public class ReplicaRequestRemoveStudentRecord extends ReplicaRequestMessageHead
 	 * @param command_type
 	 * @param user_id
 	 */
-	public ReplicaRequestRemoveStudentRecord(int message_id, CommandType command_type, String user_id, String booking_id) {
+	public ReplicaRequestRemoveStudentRecord(int message_id, String user_id, String booking_id) {
 		super(message_id, CommandType.Remove_Student_Record, user_id);
 		this.booking_id = booking_id;
 	}

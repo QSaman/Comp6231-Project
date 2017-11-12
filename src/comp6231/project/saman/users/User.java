@@ -106,7 +106,7 @@ public class User {
 			System.out.println("cancel booking correct");
 		else
 			System.out.println("cancel booking incorrect");
-		ArrayList<TimeSlotResult> res = user.getAvailableTimeSlot(new DateReservation("17-09-2017"));
+		ArrayList<TimeSlotResult> res = user.getAvailableTimeSlot("DVLS1111", new DateReservation("17-09-2017"));
 		if (res == null)
 			System.out.println("Incorrect");
 		else

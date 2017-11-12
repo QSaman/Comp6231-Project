@@ -45,9 +45,9 @@ public class StudentRmi implements StudentInterface {
 	 * @see comp6231.a2.users.StudentInterface#getAvailableTimeSlot(comp6231.a2.common.DateReservation)
 	 */
 	@Override
-	public ArrayList<TimeSlotResult> getAvailableTimeSlot(DateReservation date) {
+	public ArrayList<TimeSlotResult> getAvailableTimeSlot(String user_id, DateReservation date) {
 		try {
-			return remote_stub.getAvailableTimeSlot(date);
+			return remote_stub.getAvailableTimeSlot(user_id, date);
 		} catch (NotBoundException | IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

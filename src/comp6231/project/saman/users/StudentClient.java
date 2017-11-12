@@ -55,7 +55,7 @@ public class StudentClient {
 	public ArrayList<TimeSlotResult> getAvailableTimeSlot(DateReservation date) {
 		String log_msg = String.format("%s is sending getAvailableTimeSlot(date %s)", user.getUserId(), date);
 		logger.info(LoggerHelper.format(log_msg));
-		ArrayList<TimeSlotResult> res = student_interface.getAvailableTimeSlot(date);
+		ArrayList<TimeSlotResult> res = student_interface.getAvailableTimeSlot(user.getUserId(), date);
 		log_msg = String.format("%s is sending getAvailableTimeSlot(date %s): %s", user.getUserId(), date, res);
 		return res;
 	}

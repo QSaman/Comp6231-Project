@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 
-class MessageHeaderDeserializer implements JsonDeserializer<MessageHeader>
+public class MessageHeaderDeserializer implements JsonDeserializer<MessageHeader>
 {
 	private EnumMap<MessageHeader.CommandType, EnumMap<MessageHeader.MessageType, EnumMap<MessageHeader.ProtocolType, Class<? extends MessageHeader>>>> mp;
 	private Gson gson; 

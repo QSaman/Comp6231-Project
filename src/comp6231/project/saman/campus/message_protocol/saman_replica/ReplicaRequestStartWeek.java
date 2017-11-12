@@ -36,16 +36,9 @@ public class ReplicaRequestStartWeek extends ReplicaRequestMessageHeader {
 	 */
 	@Override
 	public ReplyMessageHeader handleRequest(Campus campus) {
-		ReplicaReplyMessageStatus ret = new ReplicaReplyMessageStatus(sequence_number, command_type, protocol_type, "", false);
-		try {
-			ret.status = campus.startWeek(user_id);
-			if (ret.status)
-				ret.reply_message = "databases reset successfully";
-			else
-				ret.reply_message = "I cannot reset all databases";
-		} catch (IOException | InterruptedException e) {
-			ret.reply_message = e.getMessage();
-		}
+		ReplicaReplyMessageStatus ret = new ReplicaReplyMessageStatus(sequence_number, command_type, protocol_type, "", true);
+		campus.startWeek();
+		ret.reply_message = "databases reset successfully";
 		return ret;
 	}
 
