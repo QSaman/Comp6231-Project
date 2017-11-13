@@ -3,7 +3,6 @@ package comp6231.project.farid.servers.serverDorval;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -19,10 +18,6 @@ import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 public class Student {
 
 	private String studentID;
-
-	public Student() throws RemoteException {
-		super();
-	}
 
 	public boolean setStudentID(String studentID) {
 

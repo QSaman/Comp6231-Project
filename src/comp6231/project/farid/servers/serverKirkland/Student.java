@@ -3,7 +3,6 @@ package comp6231.project.farid.servers.serverKirkland;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -15,10 +14,6 @@ import comp6231.project.farid.sharedPackage.DrrsConstants;
 public class Student {
 
 	private String studentID;
-
-	Student() throws RemoteException {
-		super();
-	}
 
 	boolean setStudentID(String studentID) {
 
