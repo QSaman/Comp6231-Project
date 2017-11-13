@@ -5,8 +5,12 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import com.google.gson.Gson;
+import comp6231.project.messageProtocol.StartGson;
+
 public class Server {
 	public static Logger log;
+	public static Gson gson;
 
 	public static void main(String[] args) throws Exception{
 		if(args[4] == null){
@@ -15,7 +19,8 @@ public class Server {
 		
 		Information.getInstance().initializeServerInformation(Integer.parseInt(args[4]));
 		initializeLog();
-
+		
+		gson = StartGson.initGsonMostafa();
 		log(Information.getInstance().getServerName()+" Started");
 		
 		Thread t = new Thread(new UDPlistener());

@@ -6,7 +6,6 @@ package comp6231.project.saman.campus.message_protocol.saman_replica;
 import java.io.IOException;
 
 import comp6231.project.saman.campus.Campus;
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
 
 /**
  * @author saman
@@ -20,7 +19,7 @@ public class ReplicaRequestStartWeek extends ReplicaRequestMessageHeader {
 	 * @param user_id
 	 */
 	public ReplicaRequestStartWeek(int message_id, String user_id) {
-		super(message_id, CommandType.Start_Week, user_id);
+		super(message_id, CommandType.S_Start_Week, user_id);
 		// TODO Auto-generated constructor stub
 	}
 

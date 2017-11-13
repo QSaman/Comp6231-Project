@@ -7,7 +7,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
+import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.mostafa.core.Constants;
+import comp6231.project.mostafa.serverSide.messages.ReduceBookCountMessage;
+import comp6231.project.mostafa.serverSide.messages.RemoveBookingIdMessage;
 
 public class Database {
 	private static Database instance = null;
@@ -67,7 +72,8 @@ public class Database {
 					}else{
 						int port = Information.getInstance().tryToFindUDPPort(studentId);
 						UDP thread;
-						thread = new UDP(Constants.REDUCE_BOOK_COUNT+" "+studentId, port, "");
+						ReduceBookCountMessage message = new ReduceBookCountMessage(-1, CommandType.M_Reduce_Book_Count, MessageType.Request, ProtocolType.Server_To_Server, id, studentId);
+						thread = new UDP(message, port, "");
 						thread.start();
 						try {
 							thread.join();
@@ -297,9 +303,10 @@ public class Database {
 								if(port == -1){
 									return deleteStatus.DELETE_FAILD;
 								}else{
-									String request =Constants.REDUCE_BOOK_COUNT+" "+e.getValue().getBookedStudentId();
 									UDP thread;
-									thread = new UDP(request, port, "");
+									
+									ReduceBookCountMessage message = new ReduceBookCountMessage(-1, CommandType.M_Reduce_Book_Count, MessageType.Request, ProtocolType.Server_To_Server, "" ,e.getValue().getBookedStudentId());
+									thread = new UDP(message, port, "");
 									thread.start();
 									try {
 										thread.join();
@@ -326,9 +333,10 @@ public class Database {
 								if(port == -1){
 									return deleteStatus.DELETE_FAILD;
 								}else{
-									String request =Constants.REQ_REMOVE_BOOK+" "+bookingId;
 									UDP thread;
-									thread = new UDP(request, port, "");
+									
+									RemoveBookingIdMessage message = new RemoveBookingIdMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, "", bookingId);
+									thread = new UDP(message, port, "");
 									thread.start();
 									try {
 										thread.join();

@@ -4,7 +4,6 @@
 package comp6231.project.saman.campus.message_protocol.saman_replica;
 
 import comp6231.project.saman.campus.Campus;
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
 
 /**
  * @author saman
@@ -19,7 +18,7 @@ public class ReplicaRequestRemoveStudentRecord extends ReplicaRequestMessageHead
 	 * @param user_id
 	 */
 	public ReplicaRequestRemoveStudentRecord(int message_id, String user_id, String booking_id) {
-		super(message_id, CommandType.Remove_Student_Record, user_id);
+		super(message_id, CommandType.S_Remove_Student_Record, user_id);
 		this.booking_id = booking_id;
 	}
 

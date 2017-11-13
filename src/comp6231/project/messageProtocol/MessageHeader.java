@@ -1,4 +1,4 @@
-package comp6231.project.saman.campus.message_protocol;
+package comp6231.project.messageProtocol;
 
 
 /**
@@ -7,13 +7,18 @@ package comp6231.project.saman.campus.message_protocol;
  */
 public class MessageHeader {
 	
+	// some of the Command Types are shared between saman(S),mostafa(M),farid(F).
 	public enum CommandType
 	{
 		Book_Room,
 		Cancel_Book_Room,
 		Get_Available_TimeSlots,
-		Remove_Student_Record,
-		Start_Week,
+		S_Remove_Student_Record,
+		S_Start_Week,
+		M_Reduce_Book_Count,
+		M_Remove_BookingId,
+		M_Commit,
+		M_Rollback
 	}
 	
 	public enum MessageType

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 
 import comp6231.project.saman.campus.Campus;
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
 
 /**
  * @author saman

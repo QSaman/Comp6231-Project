@@ -4,7 +4,13 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
+import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.mostafa.core.Constants;
+import comp6231.project.mostafa.serverSide.messages.BookRoomMessage;
+import comp6231.project.mostafa.serverSide.messages.CancelBookRoomMessage;
+import comp6231.project.mostafa.serverSide.messages.GetAvailableTimeSlotsMessage;
 
 public class ServerImpl{
 
@@ -36,10 +42,11 @@ public class ServerImpl{
 					result = result +" studnet: "+id+" roomNumber: "+roomNumber+" on date: "+date+" in time: "+time+" with bookingId "+bookingId+"\n";
 				}else{
 					int serverPort = Information.getInstance().findUDPPort(campusName);
-					String data = Constants.BOOK_ROOM+" "+roomNumber+" "+date+" "+time+" "+id;
 					if(serverPort != -1){
 						UDP thread;
-						thread = new UDP(data, serverPort, "");
+						
+						BookRoomMessage message = new BookRoomMessage(-1, CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, id, roomNumber, date, time);
+						thread = new UDP(message, serverPort, "");
 						thread.start();
 						try {
 							thread.join();
@@ -121,8 +128,9 @@ public class ServerImpl{
 			List<UDP> threads = new ArrayList<UDP>();
 			int dvlCount = Database.getInstance().findAvailableTimeSlot(date);
 			
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.KKL_PORT_LISTEN, "KKL"));
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.WST_PORT_LISTEN, "WST"));
+			GetAvailableTimeSlotsMessage message = new GetAvailableTimeSlotsMessage(-1, CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Server_To_Server, id, date);
+			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));
+			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -144,9 +152,10 @@ public class ServerImpl{
 		}else if (Information.getInstance().getServerCode().equalsIgnoreCase("KKL")){
 			List<UDP> threads = new ArrayList<UDP>();
 			int kklCount = Database.getInstance().findAvailableTimeSlot(date);
-
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.DVL_PORT_LISTEN, "DVL"));
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.WST_PORT_LISTEN, "WST"));
+			
+			GetAvailableTimeSlotsMessage message = new GetAvailableTimeSlotsMessage(-1, CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Server_To_Server, id, date);
+			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
+			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -168,8 +177,9 @@ public class ServerImpl{
 			List<UDP> threads = new ArrayList<UDP>();
 			int wstCount = Database.getInstance().findAvailableTimeSlot(date);
 
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.KKL_PORT_LISTEN, "KKL"));
-			threads.add(new UDP(Constants.REQ_GETAVTIME+" "+date, Constants.DVL_PORT_LISTEN, "DVL"));
+			GetAvailableTimeSlotsMessage message = new GetAvailableTimeSlotsMessage(-1, CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Server_To_Server, id, date);
+			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));
+			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -204,25 +214,31 @@ public class ServerImpl{
 			if(bookingId.contains("DVL")){
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("WST")){
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.WST_PORT_LISTEN, "WST");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.WST_PORT_LISTEN, "WST");
 			}else{
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.KKL_PORT_LISTEN, "KKL");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.KKL_PORT_LISTEN, "KKL");
 			}
 		}else if(Information.getInstance().getServerCode().equalsIgnoreCase("KKL")){
 			if(bookingId.contains("KKL")){
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("WST")){
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.WST_PORT_LISTEN, "WST");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.WST_PORT_LISTEN, "WST");
 			}else{
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.DVL_PORT_LISTEN, "DVL");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.DVL_PORT_LISTEN, "DVL");
 			}
 		}else{
 			if(bookingId.contains("WST")){
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("KKL")){
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.KKL_PORT_LISTEN, "KKL");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.KKL_PORT_LISTEN, "KKL");
 			}else{
-				thread = new UDP(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, Constants.DVL_PORT_LISTEN, "DVL");
+				CancelBookRoomMessage message = new CancelBookRoomMessage(-1, CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, id, bookingId);
+				thread = new UDP(message, Constants.DVL_PORT_LISTEN, "DVL");
 			}
 		}
 		if(thread != null){

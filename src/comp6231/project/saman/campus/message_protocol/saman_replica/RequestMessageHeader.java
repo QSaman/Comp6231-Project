@@ -1,8 +1,9 @@
 /**
  * 
  */
-package comp6231.project.saman.campus.message_protocol;
+package comp6231.project.saman.campus.message_protocol.saman_replica;
 
+import comp6231.project.messageProtocol.MessageHeader;
 
 /**
  * @author saman

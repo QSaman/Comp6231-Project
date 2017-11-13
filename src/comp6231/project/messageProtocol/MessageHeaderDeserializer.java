@@ -1,4 +1,4 @@
-package comp6231.project.saman.campus.message_protocol;
+package comp6231.project.messageProtocol;
 
 import java.lang.reflect.Type;
 import java.util.EnumMap;

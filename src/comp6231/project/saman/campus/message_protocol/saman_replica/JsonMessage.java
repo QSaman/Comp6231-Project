@@ -11,10 +11,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import comp6231.project.saman.campus.UdpServer;
-import comp6231.project.saman.campus.message_protocol.InitializeSerializer;
-import comp6231.project.saman.campus.message_protocol.MessageHeader;
-import comp6231.project.saman.campus.message_protocol.MessageHeaderDeserializer;
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
+import comp6231.project.messageProtocol.InitializeSerializer;
+import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeaderDeserializer;
 
 /**
  * @author saman

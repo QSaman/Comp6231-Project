@@ -6,13 +6,15 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import comp6231.project.messageProtocol.MessageHeader;
+
 public class UDP extends Thread{		
 	private String result;
-	private String args;
+	private MessageHeader args;
 	private int serverPort;
 	private String udpId;
 	
-	public UDP(String args, int serverPort, String udpId){
+	public UDP(MessageHeader args, int serverPort, String udpId){
 		this.args = args;
 		this.serverPort = serverPort;
 		this.result = null;
@@ -24,7 +26,7 @@ public class UDP extends Thread{
 		DatagramSocket aSocket = null;
 		try {
 			aSocket = new DatagramSocket();
-			byte [] m = args.getBytes();
+			byte [] m = Server.gson.toJson(args).getBytes();
 			InetAddress aHost = InetAddress.getByName("localhost"); 
 			DatagramPacket request =
 					new DatagramPacket(m, m.length, aHost, serverPort); 

@@ -3,6 +3,9 @@ package comp6231.project.saman.campus.message_protocol;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import comp6231.project.messageProtocol.InitializeSerializer;
+import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeaderDeserializer;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaRequestBookRoom;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;

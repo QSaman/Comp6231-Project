@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 
 import comp6231.project.saman.campus.Campus;
-import comp6231.project.saman.campus.message_protocol.ReplyMessageHeader;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
 
