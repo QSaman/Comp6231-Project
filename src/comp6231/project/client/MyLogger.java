@@ -1,4 +1,4 @@
-package comp6231.project.farid.assignment.client;
+package comp6231.project.client;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;

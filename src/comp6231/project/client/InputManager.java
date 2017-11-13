@@ -1,4 +1,4 @@
-package comp6231.project.farid.assignment.client;
+package comp6231.project.client;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,14 +13,12 @@ public class InputManager {
 
 	static int getNumber(String fieldName) {
 		System.out.println("\nPlease enter " + fieldName + " :");
-		Scanner scanner = new Scanner(System.in);
-		return scanner.nextInt();
+		return new Scanner(System.in).nextInt();
 	}
 
 	static String getString(String fieldName) {
 		System.out.println("\nPlease enter " + fieldName + " :");
-		Scanner scanner = new Scanner(System.in);
-		return scanner.nextLine();
+		return new Scanner(System.in).nextLine();
 	}
 
 	public static String getDate() {
@@ -39,13 +37,12 @@ public class InputManager {
 	static String getTime(String timeType) {
 		System.out.println("Please enter " + timeType + " time: HH:MM");
 
-		Scanner scanner = new Scanner(System.in);
-		String time = scanner.nextLine();
+		// String time = new Scanner(System.in).nextLine();
 
 		// int hour = Integer.parseInt(time.substring(0, time.indexOf(":")));
 		// int minute = Integer.parseInt(time.substring(time.indexOf(":") + 1));
 
-		return time;
+		return new Scanner(System.in).nextLine();
 	}
 
 	static String[] getListOfTimesFromAdmin() {

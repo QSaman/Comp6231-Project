@@ -1,4 +1,4 @@
-package assignment.client;
+package comp6231.project.farid.assignment.client;
 
 import java.time.LocalTime;
 import java.util.regex.Matcher;

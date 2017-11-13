@@ -1,4 +1,4 @@
-package comp6231.project.farid.assignment.client;
+package comp6231.project.client;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,7 +29,6 @@ public class Client {
 
 			boolean isTrueID = false;
 			while (!isTrueID) {
-
 				System.out.println("Welcome to the ROOM RESERVATION SYSTEM: ");
 				ID = InputManager.getString("ID").toUpperCase();
 				subIDCampus = ID.substring(0, 3);
@@ -42,38 +41,23 @@ public class Client {
 					logger = new MyLogger(ID); // Creating a Log file for the User who has entered a true ID
 				} else
 					System.out.println("You have entered wrong ID. Please try again!");
-
 			}
-			// ServerInterface serverInterface = null;
 			StudentOperations studentOperations = null;
 			AdminOperations adminOperations = null;
 			// Connect to the server that is associated with the user ID
 			switch (subIDCampus) {
 
 			case ("DVL"):
-				// serverInterface = (ServerInterface)
-				// ServerInterfaceHelper.narrow(ncRef.resolve_str("DVL"));
 				System.out.println("@@@ " + ID + " Connecting to Dorval Campus.");
 				logger.log("@@@ " + ID + " Connecting to Dorval Campus.");
 				break;
 
 			case ("KKL"):
-				// Properties props2 = new Properties();
-				// props2.put("org.omg.CORBA.ORBInitialHost", "localhost");
-				// props2.put("org.omg.CORBA.ORBInitialPort", "1063");
-				// String[] noargs2 = null;
-				// orb = ORB.init(noargs2, props2);
-				// objRef = orb.resolve_initial_references("NameService");
-				// ncRef = NamingContextExtHelper.narrow(objRef);
-				// serverInterface = (ServerInterface)
-				// ServerInterfaceHelper.narrow(ncRef.resolve_str("KKL"));
 				System.out.println("@@@ " + ID + " Connecting to Kirkland Campus.");
 				logger.log("@@@ " + ID + " Connecting to Kirkland Campus.");
 				break;
 
 			case ("WST"):
-				// serverInterface = (ServerInterface)
-				// ServerInterfaceHelper.narrow(ncRef.resolve_str("WST"));
 				System.out.println("@@@ " + ID + " Connecting to Westmount Campus.");
 				logger.log("@@@ " + ID + " Connecting to Westmount Campus.");
 				break;
@@ -184,10 +168,11 @@ public class Client {
 								else
 									System.out.println("Wrong campus number. try again!");
 							}
+							// DATE JUST FOR MOSTAFA !!!!!!!!!!!!!!!!!
 							String changeTimeSlotResult = studentOperations.changeReservation(ID,
 									InputManager.getString("booking ID"),
 									campusChange == 1 ? "DVL" : campusChange == 2 ? "KKL" : "WST",
-									InputManager.getNumber("room number"), " DATE ??????????",
+									InputManager.getNumber("room number"), InputManager.getDate(),
 									InputManager.getTime("start and end"));
 							System.out.println(changeTimeSlotResult);
 							logger.log(changeTimeSlotResult);
