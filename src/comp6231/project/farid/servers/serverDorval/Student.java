@@ -10,17 +10,21 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+import comp6231.project.farid.servers.messages.BookRoomMessageFarid;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
+import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 
 public class Student {
 
 	private String studentID;
 
-	Student() throws RemoteException {
+	public Student() throws RemoteException {
 		super();
 	}
 
-	boolean setStudentID(String studentID) {
+	public boolean setStudentID(String studentID) {
 
 		this.studentID = studentID;
 		ServerDorval.dorvalServerLogger.log("\nStudent " + studentID + " signed in.\n");
@@ -31,7 +35,7 @@ public class Student {
 		ServerDorval.dorvalServerLogger.log("\nStudent " + studentID + " signed out.\n");
 	}
 
-	String bookRoom(int roomNumber, LocalDate date, LocalTime startTime, LocalTime endTime) throws Exception {
+	public String bookRoom(int roomNumber, LocalDate date, LocalTime startTime, LocalTime endTime) throws Exception {
 		StringBuilder resultToSendToStudent = new StringBuilder();
 		resultToSendToStudent.append("\n%%% REQUEST STARTED - Result of booking room ").append(roomNumber)
 				.append(" for the date ").append(date).append(" and time slot: ").append(startTime).append(" / ")
@@ -159,8 +163,9 @@ public class Student {
 				byte[] sendData = new byte[1024];
 				byte[] receiveData = new byte[1024];
 
-				String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
-						+ endTime;
+				// exp. creating a message
+				BookRoomMessageFarid message = new BookRoomMessageFarid(-1, CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, studentID, roomNumber, date, startTime, endTime);
+				String stringToSend = ServerDorval.gson.toJson(message);
 				sendData = stringToSend.getBytes();
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 				clientSocket.send(sendPacket);

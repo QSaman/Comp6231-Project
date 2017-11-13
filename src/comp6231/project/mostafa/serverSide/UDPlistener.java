@@ -31,7 +31,7 @@ public class UDPlistener  implements Runnable {
 			while(true){
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				socket.receive(request);
-				handlePacket(request);
+
 				Thread thread = new Thread(new Runnable() {
 					
 					@Override
@@ -82,26 +82,26 @@ public class UDPlistener  implements Runnable {
 		String result = null;
 		MessageHeader json_msg = Server.gson.fromJson(json_msg_str, MessageHeader.class);
 		
-		if(json_msg.protocol_type.equals(ProtocolType.Server_To_Server)){
-			if(json_msg.equals(CommandType.Book_Room)){
+		if(json_msg.protocol_type == ProtocolType.Server_To_Server){
+			if(json_msg.command_type == CommandType.Book_Room){
 				BookRoomMessage message = (BookRoomMessage)json_msg;
 				result = message.handleRequest();
-			}else if (json_msg.equals(CommandType.M_Reduce_Book_Count)){
+			}else if (json_msg.command_type == CommandType.M_Reduce_Book_Count){
 				ReduceBookCountMessage message = (ReduceBookCountMessage)json_msg;
 				result = message.handleRequest();
-			}else if (json_msg.equals(CommandType.Get_Available_TimeSlots)){
+			}else if (json_msg.command_type == CommandType.Get_Available_TimeSlots){
 				GetAvailableTimeSlotsMessage message = (GetAvailableTimeSlotsMessage)json_msg;
 				result = message.handleRequest();
-			}else if (json_msg.equals(CommandType.Cancel_Book_Room)){
+			}else if (json_msg.command_type == CommandType.Cancel_Book_Room){
 				CancelBookRoomMessage message = (CancelBookRoomMessage)json_msg;
 				result = message.handleRequest();
-			}else if(json_msg.equals(CommandType.M_Remove_BookingId)){
+			}else if(json_msg.command_type == CommandType.M_Remove_BookingId){
 				RemoveBookingIdMessage message = (RemoveBookingIdMessage)json_msg;
 				result = message.handleRequest();
-			}else if(json_msg.equals(CommandType.M_Commit)){
+			}else if(json_msg.command_type == CommandType.M_Commit ){
 				CommitMessage message = (CommitMessage)json_msg;
 				result = message.handleRequest();
-			}else if (json_msg.equals(CommandType.M_Rollback)){
+			}else if (json_msg.command_type == CommandType.M_Rollback){
 				RollBackMessage message = (RollBackMessage)json_msg;
 				result = message.handleRequest();
 			}
