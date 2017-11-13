@@ -1,6 +1,6 @@
 package comp6231.project.mostafa.serverSide;
 
-import core.Constants;
+import comp6231.project.mostafa.core.Constants;
 
 public class Timer implements Runnable{
 	public static int timer = Constants.INITIAL_TIME;

@@ -6,7 +6,7 @@ import org.omg.CORBA.ORBPackage.InvalidName;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
 
-import clientSide.UserInterface;
+import comp6231.project.mostafa.clientSide.UserInterface;
 
 
 public class Program {

@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-import core.Constants;
+import comp6231.project.mostafa.core.Constants;
 
 public class UDPlistener  implements Runnable {
 	private DatagramSocket socket;

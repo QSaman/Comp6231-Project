@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import clientSide.factory.BookRoomFactory;
-import clientSide.factory.CancelBookingIdFactory;
-import clientSide.factory.ChangeReservationFactory;
-import clientSide.factory.CreateFactory;
-import clientSide.factory.DeleteFactory;
-import clientSide.factory.GetAvailableTimeSlotFactory;
-import core.CommandEnum;
-import core.Constants;
+import comp6231.project.mostafa.clientSide.factory.BookRoomFactory;
+import comp6231.project.mostafa.clientSide.factory.CancelBookingIdFactory;
+import comp6231.project.mostafa.clientSide.factory.ChangeReservationFactory;
+import comp6231.project.mostafa.clientSide.factory.CreateFactory;
+import comp6231.project.mostafa.clientSide.factory.DeleteFactory;
+import comp6231.project.mostafa.clientSide.factory.GetAvailableTimeSlotFactory;
+import comp6231.project.mostafa.core.CommandEnum;
+import comp6231.project.mostafa.core.Constants;
 
 public class UserInterface {
 	public UserInterface() {

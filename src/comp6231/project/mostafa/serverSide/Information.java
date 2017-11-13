@@ -3,7 +3,7 @@ package comp6231.project.mostafa.serverSide;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.Constants;
+import comp6231.project.mostafa.core.Constants;
 
 public class Information {
 	private static Information instance = null;

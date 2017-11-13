@@ -2,7 +2,7 @@ package comp6231.project.mostafa.clientSide;
 
 import java.util.HashMap;
 
-import core.CommandEnum;
+import comp6231.project.mostafa.core.CommandEnum;
 
 public class Utility {
 

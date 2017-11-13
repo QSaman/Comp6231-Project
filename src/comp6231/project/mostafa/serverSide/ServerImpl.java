@@ -4,10 +4,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ServerImpl.ServerInterfacePOA;
-import core.Constants;
+import comp6231.project.mostafa.core.Constants;
 
-public class ServerImpl extends ServerInterfacePOA {
+public class ServerImpl{
 
 	private static final Object lock = new Object();
 
@@ -16,7 +15,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		// TODO Auto-generated constructor stub
 	}
 
-	@Override
 	public String bookRoom(String campusName, int roomNumber, String date,
 			String time, String id){
 		if(!Information.getInstance().isUserClient(id)){
@@ -64,7 +62,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		return result;
 	}
 
-	@Override
 	public String create(int roomNumber, String date, String[] time,
 			String id) {
 		if(!Information.getInstance().isUserAdmin(id)){
@@ -86,7 +83,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		return result;
 	}
 
-	@Override
 	public String delete(int roomNumber, String date, String[] time,
 			String id){
 		if(!Information.getInstance().isUserAdmin(id)){
@@ -115,7 +111,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		return result;
 	}
 
-	@Override
 	public String getAvailableTimeSlot(String date, String id){
 		if(!Information.getInstance().isUserClient(id)){
 			return "access denied the id is not in a right format for user";
@@ -198,7 +193,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		return result;
 	}
 
-	@Override
 	public String CancelBookingId(String bookingId, String id){
 		if(!Information.getInstance().isUserClient(id)){
 			return "access denied the id is not in a right format for user";
@@ -246,7 +240,6 @@ public class ServerImpl extends ServerInterfacePOA {
 		return result;
 	}
 
-	@Override
 	public String changeReservation(String bookingId, String newCampusName, String date,
 			int newRoomNo, String newTimeSlot, String id) {
 		if(!Information.getInstance().isUserClient(id)){
