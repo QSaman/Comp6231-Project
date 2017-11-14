@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import comp6231.project.farid.servers.serverKirkland.Student;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
 import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 
@@ -188,7 +187,7 @@ public class Udp  implements Runnable {
 				int day = Integer.parseInt(request.substring(8, 10));
 				packetToSend = Integer.toString(
 						Student.getAvailableTimeFromServerForDate(LocalDate.of(year, month, day)));
-			} else if (json_msg.command_type == CommandType.Book_Room) { // If the receiving package is started with "book"
+			} else if (request.startsWith("book")) { // If the receiving package is started with "book"
 				String tempStudentID = request.substring(5, 13);
 				int tempRoomNumber = Integer
 						.parseInt(request.substring(request.indexOf("@") + 1, request.indexOf("%")));

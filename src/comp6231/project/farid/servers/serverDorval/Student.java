@@ -326,6 +326,7 @@ public class Student {
 						ReserveManager.counterDB.get(studentID).decrementCounter();
 						String bookResult = bookRoom(campus, roomNumber,
 								ReserveManager.reserveMap.get(bookingID).getDate(), startTime, endTime);
+						@SuppressWarnings("resource")
 						Scanner scanner = new Scanner(bookResult);
 						scanner.nextLine();
 						scanner.nextLine();
