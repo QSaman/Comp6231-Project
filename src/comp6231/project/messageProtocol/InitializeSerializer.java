@@ -3,6 +3,7 @@
  */
 package comp6231.project.messageProtocol;
 
+import comp6231.project.farid.servers.messages.BookRoomMessageFarid;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
@@ -48,7 +49,7 @@ public class InitializeSerializer {
 	
 	public static void initializeFaridReplica(MessageHeaderDeserializer ds)
 	{
-		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, ReplicaRequestBookRoom.class);
+		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, BookRoomMessageFarid.class);
 	}
 	
 	public static void initializeMostafaReplica(MessageHeaderDeserializer ds)
