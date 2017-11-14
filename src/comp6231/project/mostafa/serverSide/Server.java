@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import com.google.gson.Gson;
+
 import comp6231.project.messageProtocol.StartGson;
 
 public class Server {
@@ -52,7 +53,7 @@ public class Server {
 		
 //		log.setUseParentHandlers(false);
 	}
-	
+		
 	public static void log(String text){
 		log.info("ServerSide->"+"id: "+Information.getInstance().getServerName()+" Message: "+text);
 	}

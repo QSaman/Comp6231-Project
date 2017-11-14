@@ -15,7 +15,7 @@ public class Student {
 
 	private String studentID;
 
-	boolean setStudentID(String studentID) {
+	public boolean setStudentID(String studentID) {
 
 		this.studentID = studentID;
 		ServerKirkland.kirklandServerLogger.log("\nStudent " + studentID + " signed in.\n");
@@ -26,7 +26,7 @@ public class Student {
 		ServerKirkland.kirklandServerLogger.log("\nStudent " + studentID + " signed out.\n");
 	}
 
-	String bookRoom(int roomNumber, LocalDate date, LocalTime startTime, LocalTime endTime) throws Exception {
+	public String bookRoom(int roomNumber, LocalDate date, LocalTime startTime, LocalTime endTime) throws Exception {
 		StringBuilder resultToSendToStudent = new StringBuilder();
 		resultToSendToStudent.append("\n%%% REQUEST STARTED - Result of booking room ").append(roomNumber)
 				.append(" for the date ").append(date).append(" and time slot: ").append(startTime).append(" / ")
@@ -227,7 +227,7 @@ public class Student {
 		return resultToSendToStudent.toString();
 	}
 
-	static int getAvailableTimeFromServerForDate(LocalDate date) {
+	public static int getAvailableTimeFromServerForDate(LocalDate date) {
 		int result = 0;
 		synchronized (Locker.databaseLock) {
 			try {

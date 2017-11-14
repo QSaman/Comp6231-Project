@@ -9,11 +9,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import comp6231.project.farid.servers.messages.BookRoomMessageFarid;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
-import comp6231.project.messageProtocol.MessageHeader.CommandType;
-import comp6231.project.messageProtocol.MessageHeader.MessageType;
-import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 
 public class Student {
 
@@ -104,7 +100,7 @@ public class Student {
 		byte[] receiveData = new byte[1024];
 
 		String stringToSend = "getCounter-" + studentID;
-		sendData = stringToSend.getBytes();
+		sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, DrrsConstants.KKL_PORT);
 		clientSocket.send(sendPacket);
 
@@ -120,7 +116,7 @@ public class Student {
 		byte[] receiveData2 = new byte[1024];
 
 		String stringToSend2 = "getCounter-" + studentID;
-		sendData2 = stringToSend2.getBytes();
+		sendData2 = ServerDorval.sendMessageServerToserver(stringToSend2,studentID);
 		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, DrrsConstants.WST_PORT);
 		clientSocket2.send(sendPacket2);
 
@@ -158,10 +154,11 @@ public class Student {
 				byte[] sendData = new byte[1024];
 				byte[] receiveData = new byte[1024];
 
-				// exp. creating a message
-				BookRoomMessageFarid message = new BookRoomMessageFarid(-1, CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, studentID, roomNumber, date, startTime, endTime);
-				String stringToSend = ServerDorval.gson.toJson(message);
-				sendData = stringToSend.getBytes();
+				String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
+						 						+ endTime;
+				// exp. creating a ServerToServerMessage
+				sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+				
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 				clientSocket.send(sendPacket);
 
@@ -250,7 +247,9 @@ public class Student {
 		byte[] sendData = new byte[1024];
 		byte[] receiveData = new byte[1024];
 		String sentence = date.toString();
-		sendData = sentence.getBytes();
+
+		sendData = ServerDorval.sendMessageServerToserver(sentence,studentID);
+
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 		clientSocket.send(sendPacket);
 
@@ -297,7 +296,9 @@ public class Student {
 			byte[] receiveData = new byte[1024];
 
 			String stringToSend = "cancel-" + studentID + "#" + bookingID;
-			sendData = stringToSend.getBytes();
+			
+			sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 
@@ -365,7 +366,9 @@ public class Student {
 
 			String stringToSend = "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
 					+ endTime + "&" + bookingID;
-			sendData = stringToSend.getBytes();
+			
+			sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 

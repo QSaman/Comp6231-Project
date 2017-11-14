@@ -3,17 +3,10 @@
  */
 package comp6231.project.messageProtocol;
 
-import comp6231.project.farid.servers.messages.BookRoomMessageFarid;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
-import comp6231.project.mostafa.serverSide.messages.BookRoomMessage;
-import comp6231.project.mostafa.serverSide.messages.CancelBookRoomMessage;
-import comp6231.project.mostafa.serverSide.messages.CommitMessage;
-import comp6231.project.mostafa.serverSide.messages.GetAvailableTimeSlotsMessage;
-import comp6231.project.mostafa.serverSide.messages.ReduceBookCountMessage;
-import comp6231.project.mostafa.serverSide.messages.RemoveBookingIdMessage;
-import comp6231.project.mostafa.serverSide.messages.RollBackMessage;
+import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyAvailableTimeSlots;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyBookRoom;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyMessageStatus;
@@ -49,24 +42,12 @@ public class InitializeSerializer {
 	
 	public static void initializeFaridReplica(MessageHeaderDeserializer ds)
 	{
-		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, BookRoomMessageFarid.class);
+		ds.addClass(CommandType.Quantity, MessageType.Quantity, ProtocolType.Server_To_Server, ServerToServerMessage.class);
 	}
 	
 	public static void initializeMostafaReplica(MessageHeaderDeserializer ds)
 	{
-		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Server_To_Server, BookRoomMessage.class);
-		
-		ds.addClass(CommandType.Cancel_Book_Room, MessageType.Request, ProtocolType.Server_To_Server, CancelBookRoomMessage.class);
-		
-		ds.addClass(CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Server_To_Server, GetAvailableTimeSlotsMessage.class);
-				
-		ds.addClass(CommandType.M_Commit, MessageType.Request, ProtocolType.Server_To_Server, CommitMessage.class);
-		
-		ds.addClass(CommandType.M_Reduce_Book_Count, MessageType.Request, ProtocolType.Server_To_Server, ReduceBookCountMessage.class);
-		
-		ds.addClass(CommandType.M_Remove_BookingId, MessageType.Request, ProtocolType.Server_To_Server, RemoveBookingIdMessage.class);
-		
-		ds.addClass(CommandType.M_Rollback, MessageType.Request, ProtocolType.Server_To_Server, RollBackMessage.class);
+		ds.addClass(CommandType.Quantity, MessageType.Quantity, ProtocolType.Server_To_Server, ServerToServerMessage.class);
 	}
 
 	/**

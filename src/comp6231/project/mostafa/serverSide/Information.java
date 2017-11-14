@@ -3,13 +3,11 @@ package comp6231.project.mostafa.serverSide;
 import java.util.ArrayList;
 import java.util.List;
 
+import comp6231.project.mostafa.serverSide.Database;
+import comp6231.project.mostafa.serverSide.UDP;
 import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.CommandType;
-import comp6231.project.messageProtocol.MessageHeader.MessageType;
-import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
+import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 import comp6231.project.mostafa.core.Constants;
-import comp6231.project.mostafa.serverSide.messages.CommitMessage;
-import comp6231.project.mostafa.serverSide.messages.RollBackMessage;
 
 public class Information {
 	private static Information instance = null;
@@ -60,26 +58,30 @@ public class Information {
 		}
 	}
 	
+	public MessageHeader sendMessageServerToServer(String data, String studentID){
+		return new ServerToServerMessage(data, studentID);
+	}
+	
 	public void transaction(boolean isCommit){
-		MessageHeader message;
+		MessageHeader args;
 		if(isCommit){
 			Database.getInstance().commit();
-			message = new CommitMessage(-1, CommandType.M_Commit, MessageType.Request, ProtocolType.Server_To_Server, "");
+			args = sendMessageServerToServer(Constants.COMMIT, "");
 		}else{
 			Database.getInstance().rollBack();
-			message = new RollBackMessage(-1, CommandType.M_Rollback, MessageType.Request, ProtocolType.Server_To_Server, "");
+			args = sendMessageServerToServer(Constants.ROLLBACK, "");
 		}
 		List<UDP> threads = new ArrayList<UDP>();
 		
 		if(getServerCode().equals("DVL")){
-			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
-			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));	
+			threads.add(new UDP(args, Constants.WST_PORT_LISTEN, "WST"));
+			threads.add(new UDP(args, Constants.KKL_PORT_LISTEN, "KKL"));	
 		}else if(getServerCode().equals("WST")){
-			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
-			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));
+			threads.add(new UDP(args, Constants.DVL_PORT_LISTEN, "DVL"));
+			threads.add(new UDP(args, Constants.KKL_PORT_LISTEN, "KKL"));
 		}else if(getServerCode().equals("KKL")){
-			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
-			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
+			threads.add(new UDP(args, Constants.WST_PORT_LISTEN, "WST"));
+			threads.add(new UDP(args, Constants.DVL_PORT_LISTEN, "DVL"));
 		}
 		
 		for (UDP udp : threads) {

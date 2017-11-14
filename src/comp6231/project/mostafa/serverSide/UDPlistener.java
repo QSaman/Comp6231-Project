@@ -6,16 +6,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import comp6231.project.mostafa.serverSide.Database;
+import comp6231.project.mostafa.serverSide.Information;
 import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
-import comp6231.project.mostafa.serverSide.messages.BookRoomMessage;
-import comp6231.project.mostafa.serverSide.messages.CancelBookRoomMessage;
-import comp6231.project.mostafa.serverSide.messages.CommitMessage;
-import comp6231.project.mostafa.serverSide.messages.GetAvailableTimeSlotsMessage;
-import comp6231.project.mostafa.serverSide.messages.ReduceBookCountMessage;
-import comp6231.project.mostafa.serverSide.messages.RemoveBookingIdMessage;
-import comp6231.project.mostafa.serverSide.messages.RollBackMessage;
+import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
+import comp6231.project.mostafa.core.Constants;
 
 public class UDPlistener  implements Runnable {
 	private DatagramSocket socket;
@@ -83,33 +79,50 @@ public class UDPlistener  implements Runnable {
 		MessageHeader json_msg = Server.gson.fromJson(json_msg_str, MessageHeader.class);
 		
 		if(json_msg.protocol_type == ProtocolType.Server_To_Server){
-			if(json_msg.command_type == CommandType.Book_Room){
-				BookRoomMessage message = (BookRoomMessage)json_msg;
-				result = message.handleRequest();
-			}else if (json_msg.command_type == CommandType.M_Reduce_Book_Count){
-				ReduceBookCountMessage message = (ReduceBookCountMessage)json_msg;
-				result = message.handleRequest();
-			}else if (json_msg.command_type == CommandType.Get_Available_TimeSlots){
-				GetAvailableTimeSlotsMessage message = (GetAvailableTimeSlotsMessage)json_msg;
-				result = message.handleRequest();
-			}else if (json_msg.command_type == CommandType.Cancel_Book_Room){
-				CancelBookRoomMessage message = (CancelBookRoomMessage)json_msg;
-				result = message.handleRequest();
-			}else if(json_msg.command_type == CommandType.M_Remove_BookingId){
-				RemoveBookingIdMessage message = (RemoveBookingIdMessage)json_msg;
-				result = message.handleRequest();
-			}else if(json_msg.command_type == CommandType.M_Commit ){
-				CommitMessage message = (CommitMessage)json_msg;
-				result = message.handleRequest();
-			}else if (json_msg.command_type == CommandType.M_Rollback){
-				RollBackMessage message = (RollBackMessage)json_msg;
-				result = message.handleRequest();
-			}
+			ServerToServerMessage message = (ServerToServerMessage) json_msg;
+			result  = processServerToServer(message.legacy.split(" "));
 		}else{
 			// TODO  front end to server
 		}
 
 		return result;
 	}
-
+	
+	private String processServerToServer(String splited[]){
+		String result = null;
+		if(splited[0].equalsIgnoreCase(Constants.BOOK_ROOM)){
+			int roomNumber =Integer.parseInt(splited[1]);
+			String date = splited[2];
+			String time = splited[3];
+			String id = splited[4];
+			String[] timeSplit = time.split("-");
+ 			result = Database.getInstance().tryToBookRoom(roomNumber, date, Information.getInstance().convertTimeToSec(timeSplit[0]), Information.getInstance().convertTimeToSec(timeSplit[1]), id);
+		}else if (splited[0].equalsIgnoreCase(Constants.REDUCE_BOOK_COUNT)){
+			String id = splited[1];
+			result = Database.getInstance().reduceBookingCount(id);
+		}else if (splited[0].equalsIgnoreCase(Constants.REQ_GETAVTIME)){
+			String date = splited[1];
+			result = Database.getInstance().findAvailableTimeSlot(date)+"";
+		}else if (splited[0].equalsIgnoreCase(Constants.REQ_CANCEL_BOOK)){
+			String bookingId = splited[1];
+			String id = splited[2];
+			result = Database.getInstance().cancelBookingId(bookingId, id);
+		}else if(splited[0].equalsIgnoreCase(Constants.REQ_REMOVE_BOOK)){
+			String bookingId = splited[1];
+			boolean removeResult = Database.getInstance().removeBookingId(bookingId);
+			if (removeResult){
+				result = "bookingId: "+bookingId+" removed";
+			}else{
+				result = Constants.RESULT_UDP_FAILD;
+			}
+			
+		}else if(splited[0].equals(Constants.COMMIT)){
+			Database.getInstance().commit();
+			result = "UDP-Database commited";
+		}else if (splited[0].equals(Constants.ROLLBACK)){
+			Database.getInstance().rollBack();
+			result = "UDP-Database rollBacked";
+		}
+		return result;
+	}
 }

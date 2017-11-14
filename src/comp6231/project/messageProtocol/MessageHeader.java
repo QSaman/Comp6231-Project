@@ -1,6 +1,5 @@
 package comp6231.project.messageProtocol;
 
-
 /**
  * @author saman
  *
@@ -15,16 +14,16 @@ public class MessageHeader {
 		Get_Available_TimeSlots,
 		S_Remove_Student_Record,
 		S_Start_Week,
-		M_Reduce_Book_Count,
-		M_Remove_BookingId,
-		M_Commit,
-		M_Rollback
+		
+		Quantity
 	}
 	
 	public enum MessageType
 	{
 		Request,
-		Reply
+		Reply,
+		
+		Quantity
 	}
 	
 	public enum ProtocolType
