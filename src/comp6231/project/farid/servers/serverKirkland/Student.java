@@ -118,7 +118,7 @@ public class Student {
 		byte[] receiveData2 = new byte[1024];
 
 		String stringToSend2 = "getCounter-" + studentID;
-		sendData2 = stringToSend.getBytes();
+		sendData2 = ServerKirkland.sendMessageServerToserver(stringToSend2,studentID); 
 		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, DrrsConstants.WST_PORT);
 		clientSocket2.send(sendPacket2);
 
@@ -158,7 +158,7 @@ public class Student {
 
 				String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
 						+ endTime;
-				sendData = stringToSend.getBytes();
+				sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID); 
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 				clientSocket.send(sendPacket);
 
@@ -247,7 +247,7 @@ public class Student {
 		byte[] sendData = new byte[1024];
 		byte[] receiveData = new byte[1024];
 		String sentence = date.toString();
-		sendData = sentence.getBytes();
+		sendData = ServerKirkland.sendMessageServerToserver(sentence,studentID);
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 		clientSocket.send(sendPacket);
 
@@ -294,7 +294,7 @@ public class Student {
 			byte[] receiveData = new byte[1024];
 
 			String stringToSend = "cancel-" + studentID + "#" + bookingID;
-			sendData = stringToSend.getBytes();
+			sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID); 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 
@@ -324,6 +324,7 @@ public class Student {
 						String bookResult = bookRoom(campus, roomNumber,
 								ReserveManager.reserveMap.get(bookingID).getDate(), startTime,
 								endTime);
+						@SuppressWarnings("resource") 
 						Scanner scanner = new Scanner(bookResult);
 						scanner.nextLine();
 						scanner.nextLine();
@@ -365,7 +366,7 @@ public class Student {
 
 			String stringToSend = "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
 					+ endTime + "&" + bookingID;
-			sendData = stringToSend.getBytes();
+			sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID); 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 

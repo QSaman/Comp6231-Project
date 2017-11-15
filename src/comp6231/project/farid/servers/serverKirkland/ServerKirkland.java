@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 
 import comp6231.project.messageProtocol.StartGson;
+import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 
 public class ServerKirkland {
 
@@ -51,6 +52,12 @@ public class ServerKirkland {
 		udpThread.start();
 
 	}
+	
+	public static byte[] sendMessageServerToserver(String stringToSend, String studentID){
+		ServerToServerMessage message = new ServerToServerMessage(stringToSend, studentID);
+		return gson.toJson(message).getBytes();
+	}
+	
 
 	static void printCurrentDatabase() {
 		StringBuilder log = new StringBuilder();

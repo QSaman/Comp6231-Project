@@ -60,7 +60,7 @@ public class ReserveManager {
         byte[] receiveData3 = new byte[1024];
 
         String stringToSend3 = "reset-" + studentID;
-        sendData3 = stringToSend3.getBytes();
+        sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,studentID);
         DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
         clientSocket3.send(sendPacket3);
 
@@ -76,7 +76,7 @@ public class ReserveManager {
         byte[] receiveData4 = new byte[1024];
 
         String stringToSend4 = "reset-" + studentID;
-        sendData4 = stringToSend4.getBytes();
+        sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,studentID);
         DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.DVL_PORT);
         clientSocket4.send(sendPacket4);
 
@@ -146,7 +146,7 @@ public class ReserveManager {
         byte[] receiveData3 = new byte[1024];
 
         String stringToSend3 = "getExpire-" + id;
-        sendData3 = stringToSend3.getBytes();
+        sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,""); 
         DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
         clientSocket3.send(sendPacket3);
 
@@ -162,7 +162,7 @@ public class ReserveManager {
         byte[] receiveData4 = new byte[1024];
 
         String stringToSend4 = "getExpire-" + id;
-        sendData4 = stringToSend4.getBytes();
+        sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,""); 
         DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.DVL_PORT);
         clientSocket4.send(sendPacket4);
 

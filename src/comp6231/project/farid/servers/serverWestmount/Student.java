@@ -100,7 +100,7 @@ public class Student {
 		byte[] receiveData = new byte[1024];
 
 		String stringToSend = "getCounter-" + studentID;
-		sendData = stringToSend.getBytes();
+		sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, DrrsConstants.KKL_PORT);
 		clientSocket.send(sendPacket);
 
@@ -116,7 +116,7 @@ public class Student {
 		byte[] receiveData2 = new byte[1024];
 
 		String stringToSend2 = "getCounter-" + studentID;
-		sendData2 = stringToSend2.getBytes();
+		sendData2 = ServerWestmount.sendMessageServerToserver(stringToSend2,studentID); 
 		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, DrrsConstants.DVL_PORT);
 		clientSocket2.send(sendPacket2);
 
@@ -156,7 +156,7 @@ public class Student {
 
 				String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
 						+ endTime;
-				sendData = stringToSend.getBytes();
+				sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
 				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 				clientSocket.send(sendPacket);
 
@@ -241,7 +241,7 @@ public class Student {
 		byte[] sendData = new byte[1024];
 		byte[] receiveData = new byte[1024];
 		String sentence = date.toString();
-		sendData = sentence.getBytes();
+		sendData = ServerWestmount.sendMessageServerToserver(sentence,studentID); 
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 		clientSocket.send(sendPacket);
 
@@ -288,7 +288,7 @@ public class Student {
 			byte[] receiveData = new byte[1024];
 
 			String stringToSend = "cancel-" + studentID + "#" + bookingID;
-			sendData = stringToSend.getBytes();
+			sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 
@@ -316,6 +316,7 @@ public class Student {
 						ReserveManager.counterDB.get(studentID).decrementCounter();
 						String bookResult = bookRoom(campus, roomNumber,
 								ReserveManager.reserveMap.get(bookingID).getDate(), startTime, endTime);
+						@SuppressWarnings("resource") 
 						Scanner scanner = new Scanner(bookResult);
 						scanner.nextLine();
 						scanner.nextLine();
@@ -356,7 +357,7 @@ public class Student {
 
 			String stringToSend = "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
 					+ endTime + "&" + bookingID;
-			sendData = stringToSend.getBytes();
+			sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			clientSocket.send(sendPacket);
 
