@@ -1,8 +1,6 @@
 package comp6231.project.farid.servers.serverWestmount;
 
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,14 +8,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
+import com.google.gson.Gson;
+
+import comp6231.project.messageProtocol.StartGson;
 
 public class ServerWestmount {
 
+	public static Gson gson;
 	static Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
 	static MyLogger westmountServerLogger;
@@ -46,124 +45,9 @@ public class ServerWestmount {
 	public static void main(String[] args) throws Exception {
 		addTestCase();
 		westmountServerLogger = new MyLogger("WestmountServer");
-
-		Thread udpThread = new Thread(() -> {
-			try {
-				serverSocket = new DatagramSocket(DrrsConstants.WST_PORT);
-				byte[] receiveData = new byte[1024];
-				byte[] sendData = new byte[1024];
-
-				while (true) {
-					DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-					serverSocket.receive(receivePacket);
-					String request = new String(receivePacket.getData(), 0, receivePacket.getLength()).trim();
-					int port = receivePacket.getPort();
-					String packetToSend = null;
-
-					Pattern datePattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}$");
-					Matcher dateMatcher = datePattern.matcher(request);
-
-					if (dateMatcher.find() && dateMatcher.group().equals(request)) {
-						int year = Integer.parseInt(request.substring(0, 4));
-						int month = Integer.parseInt(request.substring(5, 7));
-						int day = Integer.parseInt(request.substring(8, 10));
-						packetToSend = Integer
-								.toString(Student.getAvailableTimeFromServerForDate(LocalDate.of(year, month, day)));
-					} else if (request.startsWith("book")) {
-						String tempStudentID = request.substring(5, 13);
-						int tempRoomNumber = Integer
-								.parseInt(request.substring(request.indexOf("@") + 1, request.indexOf("%")));
-						int year = Integer
-								.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 5));
-						int month = Integer
-								.parseInt(request.substring(request.indexOf("%") + 6, request.indexOf("%") + 8));
-						int day = Integer
-								.parseInt(request.substring(request.indexOf("%") + 9, request.indexOf("%") + 11));
-						int startHour = Integer
-								.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
-						int startMinute = Integer
-								.parseInt(request.substring(request.indexOf("#") + 4, request.indexOf("#") + 6));
-						int endHour = Integer
-								.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
-						int endMinute = Integer
-								.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
-
-						Student tempStudent = new Student();
-						tempStudent.setStudentID(tempStudentID);
-
-						packetToSend = tempStudent.bookRoom(tempRoomNumber, LocalDate.of(year, month, day),
-								LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute));
-
-						tempStudent.signOut();
-
-					} else if (request.startsWith("cancel")) {
-						String tempStudentID = request.substring(7, 15);
-						String tempBookingID = request.substring(request.indexOf("#") + 1).trim();
-
-						Student tempStudent = new Student();
-						tempStudent.setStudentID(tempStudentID);
-
-						packetToSend = tempStudent.cancelBooking(tempBookingID);
-						tempStudent.signOut();
-					} else if (request.startsWith("getCounter")) {
-						String tempStudentID = request.substring(11, 19);
-						synchronized (Locker.counterLock) {
-							if (ReserveManager.counterDB.containsKey(tempStudentID))
-								packetToSend = String.valueOf(ReserveManager.counterDB.get(tempStudentID).getCounter());
-							else
-								packetToSend = "0";
-						}
-					} else if (request.startsWith("getExpire")) {
-						String tempStudentID = request.substring(10, 18);
-						synchronized (Locker.counterLock) {
-							if (ReserveManager.counterDB.containsKey(tempStudentID))
-								packetToSend = String
-										.valueOf(ReserveManager.counterDB.get(tempStudentID).getExpireDate());
-							else
-								packetToSend = "0";
-						}
-					} else if (request.startsWith("reset")) {
-						String tempStudentID = request.substring(6, 14);
-						if (ReserveManager.counterDB.containsKey(tempStudentID))
-							ReserveManager.counterDB.get(tempStudentID).reset(LocalDate.now());
-						packetToSend = "RESET";
-					} else if (request.startsWith("chan")) {
-						// "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
-						// + endTime + "&" + bookingID;
-						String tempStudentID = request.substring(5, 13);
-						int tempRoomNumber = Integer
-								.parseInt(request.substring(request.indexOf("@") + 1, request.indexOf("%")));
-						int campus = Integer
-								.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 2));
-						int startHour = Integer
-								.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
-						int startMinute = Integer
-								.parseInt(request.substring(request.indexOf("#") + 4, request.indexOf("#") + 6));
-						int endHour = Integer
-								.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
-						int endMinute = Integer
-								.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
-						String bookingID = request.substring(request.indexOf("&") + 1).trim();
-
-						Student tempStudent = new Student();
-						tempStudent.setStudentID(tempStudentID);
-
-						packetToSend = tempStudent.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
-								LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute));
-
-						tempStudent.signOut();
-					}
-
-					InetAddress IPAddress = receivePacket.getAddress();
-					// assert packetToSend != null;
-					sendData = packetToSend.getBytes();
-					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-					serverSocket.send(sendPacket);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
+		
+		gson = StartGson.initGsonFarid();
+		Thread udpThread = new Thread(new Udp());
 		udpThread.start();
 	}
 
