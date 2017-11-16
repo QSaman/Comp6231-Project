@@ -69,7 +69,7 @@ public class Client {
 			String role = (ID.charAt(3) == 'S' ? "student" : "admin");
 			boolean signedIn;
 			if (role.equals("admin")) {
-				adminOperations = (AdminOperations) AdminOperationsHelper.narrow(ncRef.resolve_str("FE"));
+				adminOperations = (AdminOperations) AdminOperationsHelper.narrow(ncRef.resolve_str("FEA"));
 				signedIn = adminOperations.adminLogin(ID);
 				if (!signedIn) {
 					System.out.println("!!!!!!!!!!! User has already signed in with other system.");
@@ -78,7 +78,7 @@ public class Client {
 					logger.log("\"@@@ \"+ID+\" Connected to server\"");
 				}
 			} else {
-				studentOperations = (StudentOperations) StudentOperationsHelper.narrow(ncRef.resolve_str("FE"));
+				studentOperations = (StudentOperations) StudentOperationsHelper.narrow(ncRef.resolve_str("FES"));
 				signedIn = studentOperations.studentLogin(ID);
 				if (!signedIn) {
 					System.out.println("!!!!!!!!!!! User has already signed in with other system.");

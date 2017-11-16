@@ -81,7 +81,7 @@ public class InputManager {
 				System.out.println("==> Add next time: ");
 		}
 
-		String[] reslut = new String[] {};
+		String[] reslut = new String[listOfTimesFromAdmin.size()];
 		int counter = 0;
 		for (Entry<LocalTime, LocalTime> entry : listOfTimesFromAdmin.entrySet()) {
 			reslut[counter] = entry.toString() + "-" + entry.toString();
