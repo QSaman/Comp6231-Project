@@ -12,14 +12,26 @@ import java.util.regex.Pattern;
 
 import comp6231.project.farid.servers.serverKirkland.Student;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FECancelBookingMessage;
+import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
+import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
+import comp6231.project.frontEnd.messages.FELoginAdminMessage;
+import comp6231.project.frontEnd.messages.FELoginStudentMessage;
+import comp6231.project.frontEnd.messages.FEReplyMessage;
+import comp6231.project.frontEnd.messages.FESignOutMessage;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 
-public class Udp  implements Runnable {
+public class Udp implements Runnable {
 	private DatagramSocket serverSocket;
 	private final Object sendLock = new Object();
 	private byte[] sendData;
+
 	@Override
 	public void run() {
 		serverSocket = null;
@@ -27,13 +39,13 @@ public class Udp  implements Runnable {
 			serverSocket = new DatagramSocket(DrrsConstants.KKL_PORT);
 			byte[] receiveData = new byte[1024];
 			sendData = new byte[1024];
-			
-			while(true){
+
+			while (true) {
 				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 				serverSocket.receive(receivePacket);
 
 				Thread thread = new Thread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						try {
@@ -49,27 +61,23 @@ public class Udp  implements Runnable {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			if(serverSocket != null) serverSocket.close();
+		} finally {
+			if (serverSocket != null)
+				serverSocket.close();
 		}
 	}
-	
+
 	private void handlePacket(DatagramPacket receivePacket) throws Exception {
-			String json = new String(receivePacket.getData(),0,receivePacket.getLength()).trim();
+		String json = new String(receivePacket.getData(), 0, receivePacket.getLength()).trim();
 
-			String packetToSend = processData(json);
-			sendData = packetToSend.getBytes();
+		String packetToSend = processData(json);
+		sendData = packetToSend.getBytes();
 
-			send(receivePacket.getAddress(), receivePacket.getPort(), sendData);
+		send(receivePacket.getAddress(), receivePacket.getPort(), sendData);
 	}
-	
-	private void send(InetAddress address, int port, byte[] data){
-		DatagramPacket reply = new DatagramPacket(
-				data, 
-				data.length, 
-				address, 
-				port
-		);
+
+	private void send(InetAddress address, int port, byte[] data) {
+		DatagramPacket reply = new DatagramPacket(data, data.length, address, port);
 
 		try {
 			synchronized (sendLock) {
@@ -79,105 +87,128 @@ public class Udp  implements Runnable {
 			e.getMessage();
 		}
 	}
-	
-	private static String processData(String json) throws Exception{
+
+	private static String processData(String json) throws Exception {
 		String packetToSend = null;
 		MessageHeader json_msg = ServerKirkland.gson.fromJson(json, MessageHeader.class);
 		boolean isFeToServer = json_msg.protocol_type == ProtocolType.Frontend_To_Replica ? true : false;
 		if (isFeToServer) {
-			// TODO 
-			json = json.substring(3);
-			if (json.startsWith("signInStudent")) {
-				
-				String tempStudentID = "DVLS1234"; 
-				packetToSend = ServerKirkland.setStudentID(tempStudentID)?"True":"False";
 
-			} else if (json.startsWith("signInAdmin")) {
-				
-				String tempAdminID = "DVLA1234"; 
-				packetToSend = ServerKirkland.setAdminID(tempAdminID)?"True":"False";
-				
-			} else if(json.startsWith("signOut")){
-				
-				String tempID = "DVLS1234";
+			FEReplyMessage replyMessage = null;
+			// json = json.substring(3);
+			if (json_msg.command_type == CommandType.LoginStudent) {
+
+				FELoginStudentMessage message = (FELoginStudentMessage) json_msg;
+
+				String tempStudentID = message.userId.toUpperCase();
+				packetToSend = ServerKirkland.setStudentID(tempStudentID) ? "True" : "False";
+				replyMessage = new FEReplyMessage(1, CommandType.LoginStudent, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.LoginAdmin) {
+
+				FELoginAdminMessage message = (FELoginAdminMessage) json_msg;
+
+				String tempAdminID = message.userId.toUpperCase();
+				packetToSend = ServerKirkland.setAdminID(tempAdminID) ? "True" : "False";
+				replyMessage = new FEReplyMessage(1, CommandType.LoginAdmin, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.SignOut) {
+
+				FESignOutMessage message = (FESignOutMessage) json_msg;
+
+				String tempID = message.userId.toUpperCase();
 				ServerKirkland.signOut(tempID);
-				
-			} else if(json.startsWith("bookRoom")){
-				
-				String tempStudentID = json.substring(5, 13);
-				int tempRoomNumber = 1;
-				int campus = 1;
-				int year = 2017;
-				int month = 1;
-				int day = 1;
-				int startHour = 8;
-				int startMinute = 0;
-				int endHour = 9;
-				int endMinute = 0;
+				replyMessage = new FEReplyMessage(1, CommandType.SignOut, "Sign Out Called", true);
 
-				packetToSend = ServerKirkland.bookRoom(tempStudentID,campus,tempRoomNumber, LocalDate.of(year, month, day),
-						LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute));
-			
-			} else if(json.startsWith("cancelBooking")) {
-				
-				String tempStudentID = json.substring(5, 13);
-				String tempBookingID = "DVL-128913289sdhjkqjh19";
+			} else if (json_msg.command_type == CommandType.Book_Room) {
 
-				packetToSend = ServerKirkland.cancelBooking(tempStudentID,tempBookingID);
-				
-			} else if(json.startsWith("getAvailableTime")) {
-				
-				String tempStudentID = "DVLS1234";
-				int year = 2017;
-				int month = 1;
-				int day = 1;
-				
-				packetToSend = ServerKirkland.getAvailableTimeSlot(tempStudentID, LocalDate.of(year, month, day));
-				
-			} else if(json.startsWith("changeReservation")) {
-				
-			String tempStudentID = "DVLS1234";
-			String bookingID = "DVLS-12313984sddfiuh19dsadoifh";
-			int tempRoomNumber = 1;
-			int campus = 1;
-			
-			int startHour = 8;
-			int startMinute = 0;
-			int endHour = 9;
-			int endMinute = 0;
+				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json_msg;
 
-			packetToSend = ServerKirkland.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
-					LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute));
-			} else if(json.startsWith("create")) {
-											
-				String adminID = "DVLA1234";
-				int roomNumber = 1;
-				int year = 2017;
-				int month = 1;
-				int day = 1;
+				String tempStudentID = message.userId.toUpperCase();
+				int tempRoomNumber = message.roomNumber;
+				int campus = message.campusName.toUpperCase() == "DVL" ? 1
+						: message.campusName.toUpperCase() == "KKL" ? 2 : 3;
+				LocalDate date = getLocalDate(message.date);
+				LocalTime startTime = getLocalTime(message.timeSlot.substring(0, 5));
+				LocalTime endTime = getLocalTime(message.timeSlot.substring(6));
+
+				packetToSend = ServerKirkland.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime, endTime);
+				replyMessage = new FEReplyMessage(1, CommandType.Book_Room, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
+
+				FECancelBookingMessage message = (FECancelBookingMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				String tempBookingID = message.booking_id;
+
+				packetToSend = ServerKirkland.cancelBooking(tempStudentID, tempBookingID);
+				replyMessage = new FEReplyMessage(1, CommandType.Cancel_Book_Room, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.Get_Available_TimeSlots) {
+
+				FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				LocalDate date = getLocalDate(message.date);
+
+				packetToSend = ServerKirkland.getAvailableTimeSlot(tempStudentID, date);
+				replyMessage = new FEReplyMessage(1, CommandType.Get_Available_TimeSlots, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.Change_Reservation) {
+
+				FEChangeReservationMessage message = (FEChangeReservationMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				String bookingID = message.booking_id;
+				int tempRoomNumber = message.new_room_number;
+				int campus = message.new_campus_name.toUpperCase() == "DVL" ? 1
+						: message.new_campus_name.toUpperCase() == "KKL" ? 2 : 3;
+
+				LocalTime startTime = getLocalTime(message.new_time_slot.substring(0, 5));
+				LocalTime endTime = getLocalTime(message.new_time_slot.substring(6));
+
+				packetToSend = ServerKirkland.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
+						startTime, endTime);
+				replyMessage = new FEReplyMessage(1, CommandType.Change_Reservation, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.Create_Room) {
+
+				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json_msg;
+
+				String adminID = message.userId.toUpperCase();
+				int roomNumber = message.roomNumber;
+				LocalDate date = getLocalDate(message.date);
 				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
-				listOfTimeSlots.put(LocalTime.of(20, 0), LocalTime.of(21, 0));
-				
-				packetToSend = ServerKirkland.createRoom(adminID, roomNumber, LocalDate.of(year, month, day), listOfTimeSlots);
-				
-			} else if(json.startsWith("delete")){
-				
-				String adminID = "DVLA1234";
-				int roomNumber = 1;
-				int year = 2017;
-				int month = 1;
-				int day = 1;
+				for (String timeSlot : message.timeSlots) {
+					listOfTimeSlots.put(getLocalTime(message.date.substring(0, 5)),
+							getLocalTime(message.date.substring(6)));
+				}
+
+				packetToSend = ServerKirkland.createRoom(adminID, roomNumber, date, listOfTimeSlots);
+				replyMessage = new FEReplyMessage(1, CommandType.Create_Room, packetToSend, true);
+
+			} else if (json_msg.command_type == CommandType.Delete_Room) {
+
+				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json_msg;
+
+				String adminID = message.userId.toUpperCase();
+				int roomNumber = message.roomNumber;
+				LocalDate date = getLocalDate(message.date);
 				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
-				
-				packetToSend = ServerKirkland.deleteRoom(adminID, roomNumber, LocalDate.of(year, month, day), listOfTimeSlots);
+				for (String timeSlot : message.timeSlots) {
+					listOfTimeSlots.put(getLocalTime(message.date.substring(0, 5)),
+							getLocalTime(message.date.substring(6)));
+				}
+
+				packetToSend = ServerKirkland.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
+				replyMessage = new FEReplyMessage(1, CommandType.Delete_Room, packetToSend, true);
 			}
-		}
-		else 
-		{
+		} else {
 			// legacy code
 			ServerToServerMessage message = (ServerToServerMessage) json_msg;
 			String request = message.legacy;
-			
+
 			Pattern datePattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}$");
 			Matcher dateMatcher = datePattern.matcher(request);
 			// If the receiving package is started with a date
@@ -185,26 +216,20 @@ public class Udp  implements Runnable {
 				int year = Integer.parseInt(request.substring(0, 4));
 				int month = Integer.parseInt(request.substring(5, 7));
 				int day = Integer.parseInt(request.substring(8, 10));
-				packetToSend = Integer.toString(
-						Student.getAvailableTimeFromServerForDate(LocalDate.of(year, month, day)));
+				packetToSend = Integer
+						.toString(Student.getAvailableTimeFromServerForDate(LocalDate.of(year, month, day)));
 			} else if (request.startsWith("book")) { // If the receiving package is started with "book"
 				String tempStudentID = request.substring(5, 13);
 				int tempRoomNumber = Integer
 						.parseInt(request.substring(request.indexOf("@") + 1, request.indexOf("%")));
-				int year = Integer
-						.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 5));
-				int month = Integer
-						.parseInt(request.substring(request.indexOf("%") + 6, request.indexOf("%") + 8));
-				int day = Integer
-						.parseInt(request.substring(request.indexOf("%") + 9, request.indexOf("%") + 11));
-				int startHour = Integer
-						.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
+				int year = Integer.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 5));
+				int month = Integer.parseInt(request.substring(request.indexOf("%") + 6, request.indexOf("%") + 8));
+				int day = Integer.parseInt(request.substring(request.indexOf("%") + 9, request.indexOf("%") + 11));
+				int startHour = Integer.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
 				int startMinute = Integer
 						.parseInt(request.substring(request.indexOf("#") + 4, request.indexOf("#") + 6));
-				int endHour = Integer
-						.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
-				int endMinute = Integer
-						.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
+				int endHour = Integer.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
+				int endMinute = Integer.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
 
 				Student tempStudent = new Student();
 				tempStudent.setStudentID(tempStudentID);
@@ -227,8 +252,7 @@ public class Udp  implements Runnable {
 				String tempStudentID = request.substring(11, 19);
 				synchronized (Locker.counterLock) {
 					if (ReserveManager.counterDB.containsKey(tempStudentID))
-						packetToSend = String
-								.valueOf(ReserveManager.counterDB.get(tempStudentID).getCounter());
+						packetToSend = String.valueOf(ReserveManager.counterDB.get(tempStudentID).getCounter());
 					else
 						packetToSend = "0";
 				}
@@ -237,8 +261,7 @@ public class Udp  implements Runnable {
 				String tempStudentID = request.substring(10, 18);
 				synchronized (Locker.counterLock) {
 					if (ReserveManager.counterDB.containsKey(tempStudentID))
-						packetToSend = String
-								.valueOf(ReserveManager.counterDB.get(tempStudentID).getExpireDate());
+						packetToSend = String.valueOf(ReserveManager.counterDB.get(tempStudentID).getExpireDate());
 					else
 						packetToSend = "0";
 				}
@@ -254,29 +277,37 @@ public class Udp  implements Runnable {
 				String tempStudentID = request.substring(5, 13);
 				int tempRoomNumber = Integer
 						.parseInt(request.substring(request.indexOf("@") + 1, request.indexOf("%")));
-				int campus = Integer
-						.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 2));
-				int startHour = Integer
-						.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
+				int campus = Integer.parseInt(request.substring(request.indexOf("%") + 1, request.indexOf("%") + 2));
+				int startHour = Integer.parseInt(request.substring(request.indexOf("#") + 1, request.indexOf("#") + 3));
 				int startMinute = Integer
 						.parseInt(request.substring(request.indexOf("#") + 4, request.indexOf("#") + 6));
-				int endHour = Integer
-						.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
-				int endMinute = Integer
-						.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
+				int endHour = Integer.parseInt(request.substring(request.indexOf("*") + 1, request.indexOf("*") + 3));
+				int endMinute = Integer.parseInt(request.substring(request.indexOf("*") + 4, request.indexOf("*") + 6));
 				String bookingID = request.substring(request.indexOf("&") + 1).trim();
 
 				Student tempStudent = new Student();
 				tempStudent.setStudentID(tempStudentID);
 
-				packetToSend = tempStudent.changeReservation(tempStudentID, bookingID, campus,
-						tempRoomNumber, LocalTime.of(startHour, startMinute),
-						LocalTime.of(endHour, endMinute));
+				packetToSend = tempStudent.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
+						LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute));
 
 				tempStudent.signOut();
 			}
 		}
 		return packetToSend;
+	}
+	
+	static LocalTime getLocalTime(String string) {
+		int hour = Integer.parseInt(string.substring(0, 2));
+		int minute = Integer.parseInt(string.substring(3));
+		return LocalTime.of(hour, minute);
+	}
+
+	static LocalDate getLocalDate(String string) {
+		int year = Integer.parseInt(string.substring(0, 5));
+		int month = Integer.parseInt(string.substring(6, 8));
+		int day = Integer.parseInt(string.substring(9));
+		return LocalDate.of(year, month, day);
 	}
 
 }
