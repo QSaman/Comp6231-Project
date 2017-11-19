@@ -37,7 +37,7 @@ public class Server {
 		try {  
 
 			// This block configure the logger with handler and formatter  
-			fh = new FileHandler("/Users/wmg/Documents/workspace/Comp6231-Project//log/mostafa"+id+".log");  
+			fh = new FileHandler("log/mostafa/"+id+".log");  
 			log.addHandler(fh);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fh.setFormatter(formatter);  

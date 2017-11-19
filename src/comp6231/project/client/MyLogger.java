@@ -16,7 +16,7 @@ public class MyLogger {
 		try {
 
 			fileHandler = new FileHandler(
-					"/Users/wmg/Documents/workspace/Comp6231-Project/log/mostafa" + ID + "-LogFile.log");
+					"log/client/" + ID + "-LogFile.log");
 			logger.addHandler(fileHandler);
 			SimpleFormatter formatter = new SimpleFormatter();
 			fileHandler.setFormatter(formatter);
