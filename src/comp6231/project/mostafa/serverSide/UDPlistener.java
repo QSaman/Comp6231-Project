@@ -129,8 +129,10 @@ public class UDPlistener  implements Runnable {
 			FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json;
 			String result = ServerImpl.GetInstance().getAvailableTimeSlot(message.date, message.user_id);
 			replyMessage = new FEReplyMessage(1, CommandType.Get_Available_TimeSlots, result, true);
-		}else if (json.command_type == CommandType.Login){
-			replyMessage = new FEReplyMessage(1, CommandType.Login, "logined-mostafa", true);
+		}else if (json.command_type == CommandType.LoginStudent){
+			replyMessage = new FEReplyMessage(1, CommandType.LoginStudent, "logined-mostafa", true);
+		}else if (json.command_type == CommandType.LoginAdmin){
+			replyMessage = new FEReplyMessage(1, CommandType.LoginAdmin, "logined-mostafa", true);
 		}else if (json.command_type == CommandType.SignOut){
 			replyMessage = new FEReplyMessage(1, CommandType.SignOut, "signOut-mostafa", true);
 		}else{

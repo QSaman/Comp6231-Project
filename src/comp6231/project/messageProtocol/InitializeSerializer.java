@@ -77,8 +77,11 @@ public class InitializeSerializer {
 		ds.addClass(CommandType.Delete_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, FEDeleteRoomRequestMessage.class);
 		ds.addClass(CommandType.Delete_Room, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.Login, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
-		ds.addClass(CommandType.Login, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
+		ds.addClass(CommandType.LoginStudent, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.LoginStudent, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
+		
+		ds.addClass(CommandType.LoginAdmin, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.LoginAdmin, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
 		ds.addClass(CommandType.SignOut, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
 		ds.addClass(CommandType.SignOut, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
