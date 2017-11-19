@@ -24,7 +24,7 @@ public class StudentImpl extends StudentOperationsPOA {
 		}
 		return thread.getResult();
 	}
-
+ 
 	@Override
 	public String getAvailableTimeSlot(String user_id, String date) {
 		FE.log("getAvailableTimeSlot");

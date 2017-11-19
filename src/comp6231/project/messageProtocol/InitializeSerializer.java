@@ -9,7 +9,10 @@ import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
+import comp6231.project.frontEnd.messages.FELoginAdminMessage;
+import comp6231.project.frontEnd.messages.FELoginStudentMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
+import comp6231.project.frontEnd.messages.FESignOutMessage;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
@@ -77,13 +80,13 @@ public class InitializeSerializer {
 		ds.addClass(CommandType.Delete_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, FEDeleteRoomRequestMessage.class);
 		ds.addClass(CommandType.Delete_Room, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.LoginStudent, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.LoginStudent, MessageType.Request, ProtocolType.Frontend_To_Replica, FELoginStudentMessage.class);
 		ds.addClass(CommandType.LoginStudent, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.LoginAdmin, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.LoginAdmin, MessageType.Request, ProtocolType.Frontend_To_Replica, FELoginAdminMessage.class);
 		ds.addClass(CommandType.LoginAdmin, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.SignOut, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.SignOut, MessageType.Request, ProtocolType.Frontend_To_Replica, FESignOutMessage.class);
 		ds.addClass(CommandType.SignOut, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 	}
 	
