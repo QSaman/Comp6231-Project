@@ -14,11 +14,11 @@ public class Server {
 	public static Gson gson;
 
 	public static void main(String[] args) throws Exception{
-		if(args[4] == null){
+		if(args[0] == null){
 			return;
 		}
 		
-		Information.getInstance().initializeServerInformation(Integer.parseInt(args[4]));
+		Information.getInstance().initializeServerInformation(Integer.parseInt(args[0]));
 		initializeLog();
 		
 		gson = StartGson.initGsonMostafa();
@@ -37,7 +37,7 @@ public class Server {
 		try {  
 
 			// This block configure the logger with handler and formatter  
-			fh = new FileHandler("/Users/wmg/Documents/workspace/Corba/"+id+".log");  
+			fh = new FileHandler("/Users/wmg/Documents/workspace/Comp6231-Project//log/mostafa"+id+".log");  
 			log.addHandler(fh);
 			SimpleFormatter formatter = new SimpleFormatter();  
 			fh.setFormatter(formatter);  

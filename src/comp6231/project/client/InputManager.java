@@ -11,11 +11,13 @@ import java.util.Scanner;
  */
 public class InputManager {
 
+	@SuppressWarnings("resource")
 	static int getNumber(String fieldName) {
 		System.out.println("\nPlease enter " + fieldName + " :");
 		return new Scanner(System.in).nextInt();
 	}
 
+	@SuppressWarnings("resource")
 	static String getString(String fieldName) {
 		System.out.println("\nPlease enter " + fieldName + " :");
 		return new Scanner(System.in).nextLine();
@@ -24,6 +26,7 @@ public class InputManager {
 	public static String getDate() {
 		System.out.println("Please enter a date: YYYY/MM/DD");
 
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String input = scanner.nextLine();
 
@@ -34,6 +37,7 @@ public class InputManager {
 		return LocalDate.of(year, month, day).toString();
 	}
 
+	@SuppressWarnings("resource")
 	static String getTime(String timeType) {
 		System.out.println("Please enter " + timeType + " time: HH:MM");
 
@@ -47,6 +51,7 @@ public class InputManager {
 
 	static String[] getListOfTimesFromAdmin() {
 		LinkedHashMap<LocalTime, LocalTime> listOfTimesFromAdmin = new LinkedHashMap<>();
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		boolean isFinishedListInput = false;
 
@@ -84,9 +89,13 @@ public class InputManager {
 		String[] reslut = new String[listOfTimesFromAdmin.size()];
 		int counter = 0;
 		for (Entry<LocalTime, LocalTime> entry : listOfTimesFromAdmin.entrySet()) {
-			reslut[counter] = entry.toString() + "-" + entry.toString();
+			reslut[counter] = toString(entry.getKey()) + "-" + toString(entry.getValue());
 			counter++;
 		}
 		return reslut;
+	}
+	
+	private static String toString(LocalTime time){
+		return time.getHour()+":"+time.getMinute();		
 	}
 }

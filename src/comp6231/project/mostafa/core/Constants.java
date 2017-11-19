@@ -4,10 +4,12 @@ public class Constants {
 	public static final int KKL_PORT = 2962;
 	public static final int DVL_PORT = 2963;
 	public static final int WST_PORT = 2961;
-	
+	public static final int FE_PORT = 2960;
+			
 	public static final int KKL_PORT_LISTEN = 2900;
 	public static final int DVL_PORT_LISTEN = 2901;
 	public static final int WST_PORT_LISTEN = 2902;
+	public static final int FE_PORT_LISTEN = 2903;
 	
 	public static final int INITIAL_TIME = 7*24*60*3600;
 //	public static final int INITIAL_TIME = 60;

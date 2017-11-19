@@ -12,6 +12,10 @@ public class MessageHeader {
 		Book_Room,
 		Cancel_Book_Room,
 		Get_Available_TimeSlots,
+		Create_Room,
+		Delete_Room,
+		Login,
+		SignOut,
 		S_Remove_Student_Record,
 		S_Start_Week,
 		

@@ -7,6 +7,18 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.mostafa.core.Constants;
 
 public class ServerImpl{
+	private static ServerImpl instance = null;
+	
+	private ServerImpl(){
+		
+	}
+	
+	public static ServerImpl GetInstance(){
+		if(instance == null){
+			instance = new ServerImpl();
+		}
+		return instance;
+	}
 
 	private static final Object lock = new Object();
 

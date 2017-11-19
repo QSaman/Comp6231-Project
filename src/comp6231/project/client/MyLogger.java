@@ -16,7 +16,7 @@ public class MyLogger {
 		try {
 
 			fileHandler = new FileHandler(
-					"C:/Users/farid/Google Drive/Projects/Java/Corba/corbaDRRS/LogClients/" + ID + "-LogFile.log");
+					"/Users/wmg/Documents/workspace/Comp6231-Project/log/mostafa" + ID + "-LogFile.log");
 			logger.addHandler(fileHandler);
 			SimpleFormatter formatter = new SimpleFormatter();
 			fileHandler.setFormatter(formatter);

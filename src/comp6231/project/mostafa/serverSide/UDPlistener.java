@@ -6,9 +6,14 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.mostafa.serverSide.Database;
 import comp6231.project.mostafa.serverSide.Information;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 import comp6231.project.mostafa.core.Constants;
@@ -52,6 +57,7 @@ public class UDPlistener  implements Runnable {
 
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
+			Server.log("UDP Socket Listener Result: "+result);
 			byte[] data = result.getBytes();
 
 			send(request.getAddress(), request.getPort(), data);
@@ -82,10 +88,32 @@ public class UDPlistener  implements Runnable {
 			ServerToServerMessage message = (ServerToServerMessage) json_msg;
 			result  = processServerToServer(message.legacy.split(" "));
 		}else{
-			// TODO  front end to server
+			if(json_msg.message_type == MessageType.Request){
+				result = processFrontEndToServer(json_msg);
+			}else{
+				Server.log("message type is reply");
+			}
 		}
 
 		return result;
+	}
+	
+	private String processFrontEndToServer(MessageHeader json){
+
+		FEReplyMessage replyMessage = null;
+		if(json.command_type == CommandType.Create_Room){
+			FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json;
+			String result = ServerImpl.GetInstance().create(message.roomNumber, message.date, message.timeSlots, message.userId);
+			replyMessage = new FEReplyMessage(1, CommandType.Book_Room, result, true);
+		}else if(json.command_type == CommandType.Book_Room){
+			FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json;
+			String result = ServerImpl.GetInstance().bookRoom(message.campusName, message.roomNumber, message.date, message.timeSlot, message.userId);
+			replyMessage = new FEReplyMessage(1, CommandType.Create_Room, result, true);
+		}else{
+			Server.log(" Bad CommandType in udp listener");
+		}
+		
+		return Server.gson.toJson(replyMessage);
 	}
 	
 	private String processServerToServer(String splited[]){

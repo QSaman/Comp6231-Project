@@ -35,11 +35,11 @@ public class Information {
 	}
 	
 	public boolean isUserClient(String id){
-		if(id.contains("dvls")){
+		if(id.contains("dvls") || id.contains("DVLS")){
 			return true;
-		}else if (id.contains("kkls")){
+		}else if (id.contains("kkls")|| id.contains("KKLS")){
 			return true;
-		}else if (id.contains("wsts")){
+		}else if (id.contains("wsts")|| id.contains("WSTS")){
 			return true;
 		}else {
 			return false;
@@ -47,11 +47,11 @@ public class Information {
 	}
 	
 	public boolean isUserAdmin(String id){
-		if(id.contains("dvla")){
+		if(id.contains("dvla")|| id.contains("DVLA")){
 			return true;
-		}else if (id.contains("kkla")){
+		}else if (id.contains("kkla")|| id.contains("KKLA")){
 			return true;
-		}else if (id.contains("wsta")){
+		}else if (id.contains("wsta")|| id.contains("WSTA")){
 			return true;
 		}else {
 			return false;

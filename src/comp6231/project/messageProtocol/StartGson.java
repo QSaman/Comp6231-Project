@@ -8,6 +8,7 @@ public class StartGson {
 	{
 		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
 		InitializeSerializer.initializeMostafaReplica(ds);
+		InitializeSerializer.initializeFrontendTOReplica(ds);
 		return new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 	}
 	
@@ -15,6 +16,14 @@ public class StartGson {
 	{
 		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
 		InitializeSerializer.initializeFaridReplica(ds);
+		InitializeSerializer.initializeFrontendTOReplica(ds);
+		return new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
+	}
+	
+	public static Gson initFE()
+	{
+		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
+		InitializeSerializer.initializeAll(ds);
 		return new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 	}
 }
