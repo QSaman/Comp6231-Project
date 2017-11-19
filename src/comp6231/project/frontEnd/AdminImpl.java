@@ -4,7 +4,6 @@ import comp6231.project.common.corba.users.AdminOperationsPOA;
 import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
 import comp6231.project.frontEnd.udp.MultiCastRUDPSender;
-import comp6231.project.mostafa.core.Constants;
 
 public class AdminImpl extends AdminOperationsPOA {
 
@@ -13,7 +12,7 @@ public class AdminImpl extends AdminOperationsPOA {
 			String[] time_slots) {
 		FE.log("CREATE ROOM");
 		 FECreateRoomRequestMessage message = new FECreateRoomRequestMessage(1, user_id, room_number, date, time_slots);
-		 MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		 MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		 thread.start();
 		 try {
 			thread.join();
@@ -29,7 +28,7 @@ public class AdminImpl extends AdminOperationsPOA {
 			String[] time_slots) {
 		FE.log("Delete ROOM");
 		FEDeleteRoomRequestMessage message = new FEDeleteRoomRequestMessage(1, user_id, room_number, date, time_slots);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
