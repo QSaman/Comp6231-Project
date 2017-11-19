@@ -8,6 +8,7 @@ import java.net.SocketException;
 
 import comp6231.project.frontEnd.FE;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.mostafa.core.Constants;
 
 public class MultiCastRUDPSender extends Thread{
 
@@ -34,7 +35,7 @@ public class MultiCastRUDPSender extends Thread{
 					new DatagramPacket(m, m.length, aHost, serverPort); 
 			aSocket.send(request);
 			FE.log("UDP Socket Requested: "+ args);
-			byte[] buffer = new byte[1000];
+			byte[] buffer = new byte[Constants.BUFFER_SIZE];
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 			aSocket.receive(reply);
 			

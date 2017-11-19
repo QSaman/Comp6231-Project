@@ -4,8 +4,11 @@
 package comp6231.project.messageProtocol;
 
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FECancelBookingMessage;
+import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
+import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
@@ -59,11 +62,14 @@ public class InitializeSerializer {
 		ds.addClass(CommandType.Book_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, FEBookRoomRequestMessage.class);
 		ds.addClass(CommandType.Book_Room, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.Cancel_Book_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.Cancel_Book_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, FECancelBookingMessage.class);
 		ds.addClass(CommandType.Cancel_Book_Room, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
-		ds.addClass(CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Frontend_To_Replica, ServerToServerMessage.class);
+		ds.addClass(CommandType.Get_Available_TimeSlots, MessageType.Request, ProtocolType.Frontend_To_Replica, FEGetAvailableTimeSlotMessage.class);
 		ds.addClass(CommandType.Get_Available_TimeSlots, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
+		
+		ds.addClass(CommandType.Change_Reservation, MessageType.Request, ProtocolType.Frontend_To_Replica, FEChangeReservationMessage.class);
+		ds.addClass(CommandType.Change_Reservation, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 		
 		ds.addClass(CommandType.Create_Room, MessageType.Request, ProtocolType.Frontend_To_Replica, FECreateRoomRequestMessage.class);
 		ds.addClass(CommandType.Create_Room, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);

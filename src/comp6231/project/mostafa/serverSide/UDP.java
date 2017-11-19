@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.mostafa.core.Constants;
 
 public class UDP extends Thread{		
 	private String result;
@@ -32,7 +33,7 @@ public class UDP extends Thread{
 					new DatagramPacket(m, m.length, aHost, serverPort); 
 			aSocket.send(request);
 			Server.log("UDP Socket Requested: "+ args);
-			byte[] buffer = new byte[1000];
+			byte[] buffer = new byte[Constants.BUFFER_SIZE];
 			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
 			aSocket.receive(reply);
 			
