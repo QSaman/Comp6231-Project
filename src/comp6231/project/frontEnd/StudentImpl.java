@@ -6,7 +6,6 @@ import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.udp.MultiCastRUDPSender;
-import comp6231.project.mostafa.core.Constants;
 
 public class StudentImpl extends StudentOperationsPOA {
 
@@ -15,7 +14,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			String date, String time_slot) {
 		FE.log("Book ROOM");
 		FEBookRoomRequestMessage message = new FEBookRoomRequestMessage(1, user_id, campus_name, room_number, date, time_slot);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -30,7 +29,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public String getAvailableTimeSlot(String user_id, String date) {
 		FE.log("getAvailableTimeSlot");
 		FEGetAvailableTimeSlotMessage message = new FEGetAvailableTimeSlotMessage(1, user_id, date);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -45,7 +44,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public String cancelBooking(String user_id, String bookingID) {
 		FE.log("cancelBooking");
 		FECancelBookingMessage message = new FECancelBookingMessage(1, user_id, bookingID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -62,7 +61,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			String new_time_slot) {
 		FE.log("changeReservation");
 		FEChangeReservationMessage message = new FEChangeReservationMessage(1, user_id, booking_id, new_campus_name, new_room_number, new_date, new_time_slot);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, Constants.DVL_PORT_LISTEN, "DVL");
+		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
