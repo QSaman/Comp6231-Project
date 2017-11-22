@@ -12,7 +12,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	@Override
 	public String bookRoom(String user_id, String campus_name, int room_number,
 			String date, String time_slot) {
-		FE.log("Book ROOM");
+		FE.log("Book ROOM"+ Thread.currentThread().getId()+ " Time: " + time_slot);
 		FEBookRoomRequestMessage message = new FEBookRoomRequestMessage(1, user_id, campus_name, room_number, date, time_slot);
 		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		thread.start();

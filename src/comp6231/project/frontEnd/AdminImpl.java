@@ -10,7 +10,7 @@ public class AdminImpl extends AdminOperationsPOA {
 	@Override
 	public String createRoom(String user_id, int room_number, String date,
 			String[] time_slots) {
-		FE.log("CREATE ROOM");
+		FE.log("CREATE ROOM ");
 		 FECreateRoomRequestMessage message = new FECreateRoomRequestMessage(1, user_id, room_number, date, time_slots);
 		 MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findMostafaUDPListenerPort(user_id), "");
 		 thread.start();
