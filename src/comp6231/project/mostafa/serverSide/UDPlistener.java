@@ -31,9 +31,9 @@ public class UDPlistener  implements Runnable {
 		socket = null;
 		try {
 			socket = new DatagramSocket(Information.getInstance().getUDPListenPort());
-			byte[] buffer = new byte[Constants.BUFFER_SIZE];
-			
+
 			while(true){
+				byte[] buffer = new byte[Constants.BUFFER_SIZE];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				socket.receive(request);
 

@@ -22,9 +22,9 @@ public class MultiCastRUDPListener implements Runnable{
 		socket = null;
 		try {
 			socket = new DatagramSocket(Constants.FE_PORT_LISTEN);
-			byte[] buffer = new byte[Constants.BUFFER_SIZE];
-			
+
 			while(true){
+				byte[] buffer = new byte[Constants.BUFFER_SIZE];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				socket.receive(request);
 

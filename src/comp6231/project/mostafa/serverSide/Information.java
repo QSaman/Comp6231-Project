@@ -11,6 +11,7 @@ import comp6231.project.mostafa.core.Constants;
 
 public class Information {
 	private static Information instance = null;
+	private static Object singeltoneLock = new Object();
 	
 	private String serverCode;
 	private String serverName;
@@ -23,10 +24,12 @@ public class Information {
 	}
 	
 	public static Information getInstance(){
-		if(instance == null){
-			instance = new Information();
+		synchronized (singeltoneLock) {
+			if(instance == null){
+				instance = new Information();
+			}
+			return instance;
 		}
-		return instance;
 	}
 
 	public void initializeServerInformation(int port){
