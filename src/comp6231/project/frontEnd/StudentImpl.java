@@ -90,6 +90,7 @@ public class StudentImpl extends StudentOperationsPOA {
 		}
 		String result = "";
 		String json = thread.getResult();
+		FE.log("debug: "+json);
 		MessageHeader resultMessage = FE.gson.fromJson(json, MessageHeader.class);
 		if(resultMessage.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) resultMessage;
