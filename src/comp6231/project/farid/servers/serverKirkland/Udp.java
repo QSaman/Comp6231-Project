@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.farid.servers.serverKirkland.Student;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
@@ -92,9 +93,10 @@ public class Udp implements Runnable {
 		String packetToSend = null;
 		MessageHeader json_msg = ServerKirkland.gson.fromJson(json, MessageHeader.class);
 		boolean isFeToServer = json_msg.protocol_type == ProtocolType.Frontend_To_Replica ? true : false;
+		FEReplyMessage replyMessage = null;
+
 		if (isFeToServer) {
 
-			FEReplyMessage replyMessage = null;
 			// json = json.substring(3);
 			if (json_msg.command_type == CommandType.LoginStudent) {
 
@@ -294,6 +296,9 @@ public class Udp implements Runnable {
 				tempStudent.signOut();
 			}
 		}
+		if (isFeToServer) {
+			return ServerDorval.gson.toJson(replyMessage);
+		}
 		return packetToSend;
 	}
 	
@@ -304,9 +309,9 @@ public class Udp implements Runnable {
 	}
 
 	static LocalDate getLocalDate(String string) {
-		int year = Integer.parseInt(string.substring(0, 5));
-		int month = Integer.parseInt(string.substring(6, 8));
-		int day = Integer.parseInt(string.substring(9));
+		int year = Integer.parseInt(string.substring(0, 4));
+		int month = Integer.parseInt(string.substring(5, 7));
+		int day = Integer.parseInt(string.substring(8));
 		return LocalDate.of(year, month, day);
 	}
 
