@@ -5,8 +5,11 @@ import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FELoginAdminMessage;
 import comp6231.project.frontEnd.messages.FELoginStudentMessage;
+import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
 import comp6231.project.frontEnd.udp.MultiCastRUDPSender;
+import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
 
 public class AdminImpl extends AdminOperationsPOA {
 
@@ -53,7 +56,16 @@ public class AdminImpl extends AdminOperationsPOA {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return thread.getResult().equals("True")?true:false;
+		
+		String result = "";
+		String json = thread.getResult();
+		MessageHeader resultMessage = FE.gson.fromJson(json, MessageHeader.class);
+		if(resultMessage.message_type == MessageType.Reply){
+			FEReplyMessage replyMessage = (FEReplyMessage) resultMessage;
+			result = replyMessage.replyMessage;
+		}
+		FE.log("reply: "+result);
+		return result.equals("True")?true:false;
 	}
 
 	@Override
