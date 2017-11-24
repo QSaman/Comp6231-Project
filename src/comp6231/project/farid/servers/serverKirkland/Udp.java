@@ -126,13 +126,11 @@ public class Udp implements Runnable {
 
 				String tempStudentID = message.userId.toUpperCase();
 				int tempRoomNumber = message.roomNumber;
-				System.out.println(message.campusName.toUpperCase());
 				int campus = message.campusName.toUpperCase().equals("DVL") ? 1
 						: message.campusName.toUpperCase().equals("KKL") ? 2 : 3;
 				LocalDate date = getLocalDate(message.date);
 				LocalTime startTime = getLocalTime(message.timeSlot.substring(0, message.timeSlot.indexOf("-")));
 				LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-")+1));
-				System.out.println(campus);
 
 				packetToSend = ServerKirkland.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime, endTime);
 				replyMessage = new FEReplyMessage(1, CommandType.Book_Room, packetToSend, true);
