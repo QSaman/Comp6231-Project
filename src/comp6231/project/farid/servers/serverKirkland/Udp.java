@@ -10,8 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
-import comp6231.project.farid.servers.serverKirkland.Student;
 import comp6231.project.farid.sharedPackage.DrrsConstants;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
@@ -128,11 +126,13 @@ public class Udp implements Runnable {
 
 				String tempStudentID = message.userId.toUpperCase();
 				int tempRoomNumber = message.roomNumber;
-				int campus = message.campusName.toUpperCase() == "DVL" ? 1
-						: message.campusName.toUpperCase() == "KKL" ? 2 : 3;
+				System.out.println(message.campusName.toUpperCase());
+				int campus = message.campusName.toUpperCase().equals("DVL") ? 1
+						: message.campusName.toUpperCase().equals("KKL") ? 2 : 3;
 				LocalDate date = getLocalDate(message.date);
-				LocalTime startTime = getLocalTime(message.timeSlot.substring(0, 5));
-				LocalTime endTime = getLocalTime(message.timeSlot.substring(6));
+				LocalTime startTime = getLocalTime(message.timeSlot.substring(0, message.timeSlot.indexOf("-")));
+				LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-")+1));
+				System.out.println(campus);
 
 				packetToSend = ServerKirkland.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime, endTime);
 				replyMessage = new FEReplyMessage(1, CommandType.Book_Room, packetToSend, true);
@@ -164,11 +164,11 @@ public class Udp implements Runnable {
 				String tempStudentID = message.user_id.toUpperCase();
 				String bookingID = message.booking_id;
 				int tempRoomNumber = message.new_room_number;
-				int campus = message.new_campus_name.toUpperCase() == "DVL" ? 1
-						: message.new_campus_name.toUpperCase() == "KKL" ? 2 : 3;
+				int campus = message.new_campus_name.toUpperCase().equals("DVL") ? 1
+						: message.new_campus_name.toUpperCase().equals("KKL") ? 2 : 3;
 
-				LocalTime startTime = getLocalTime(message.new_time_slot.substring(0, 5));
-				LocalTime endTime = getLocalTime(message.new_time_slot.substring(6));
+				LocalTime startTime = getLocalTime(message.new_time_slot.substring(0, message.new_time_slot.indexOf("-")));
+				LocalTime endTime = getLocalTime(message.new_time_slot.substring(message.new_time_slot.indexOf("-")+1));
 
 				packetToSend = ServerKirkland.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
 						startTime, endTime);
@@ -183,8 +183,8 @@ public class Udp implements Runnable {
 				LocalDate date = getLocalDate(message.date);
 				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
 				for (String timeSlot : message.timeSlots) {
-					listOfTimeSlots.put(getLocalTime(message.date.substring(0, 5)),
-							getLocalTime(message.date.substring(6)));
+					listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
+							getLocalTime(timeSlot.substring(timeSlot.indexOf("-")+1)));
 				}
 
 				packetToSend = ServerKirkland.createRoom(adminID, roomNumber, date, listOfTimeSlots);
@@ -199,8 +199,8 @@ public class Udp implements Runnable {
 				LocalDate date = getLocalDate(message.date);
 				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
 				for (String timeSlot : message.timeSlots) {
-					listOfTimeSlots.put(getLocalTime(message.date.substring(0, 5)),
-							getLocalTime(message.date.substring(6)));
+					listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
+							getLocalTime(timeSlot.substring(timeSlot.indexOf("-")+1)));
 				}
 
 				packetToSend = ServerKirkland.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
@@ -297,14 +297,14 @@ public class Udp implements Runnable {
 			}
 		}
 		if (isFeToServer) {
-			return ServerDorval.gson.toJson(replyMessage);
+			return ServerKirkland.gson.toJson(replyMessage);
 		}
 		return packetToSend;
 	}
 	
 	static LocalTime getLocalTime(String string) {
-		int hour = Integer.parseInt(string.substring(0, 2));
-		int minute = Integer.parseInt(string.substring(3));
+		int hour = Integer.parseInt(string.substring(0, string.indexOf(":")));
+		int minute = Integer.parseInt(string.substring(string.indexOf(":")+1));
 		return LocalTime.of(hour, minute);
 	}
 

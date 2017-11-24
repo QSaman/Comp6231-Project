@@ -39,7 +39,7 @@ public class InputManager {
 
 	@SuppressWarnings("resource")
 	static String getTime(String timeType) {
-		System.out.println("Please enter " + timeType + " time: HH:MM");
+		System.out.println("Please enter " + timeType + " time: HH:MM-HH:MM");
 
 		// String time = new Scanner(System.in).nextLine();
 

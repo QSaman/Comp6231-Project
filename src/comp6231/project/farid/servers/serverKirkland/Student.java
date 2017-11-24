@@ -102,7 +102,7 @@ public class Student {
 		byte[] receiveData = new byte[1024];
 
 		String stringToSend = "getCounter-" + studentID;
-		sendData = stringToSend.getBytes();
+		sendData = ServerKirkland.sendMessageServerToserver(stringToSend, studentID);
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, DrrsConstants.DVL_PORT);
 		clientSocket.send(sendPacket);
 
