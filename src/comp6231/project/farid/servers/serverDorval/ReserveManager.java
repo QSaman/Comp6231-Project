@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.shared.Constants;
 
 /**
  * Created by Farid on 9/24/2017.
@@ -61,7 +61,7 @@ public class ReserveManager {
 
         String stringToSend3 = "reset-" + studentID;
         sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,studentID);
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -77,7 +77,7 @@ public class ReserveManager {
 
         String stringToSend4 = "reset-" + studentID;
         sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,studentID);
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.WST_PORT);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.WST_PORT_FARID);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);
@@ -148,7 +148,7 @@ public class ReserveManager {
 
         String stringToSend3 = "getExpire-" + id;
         sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,"");
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -164,7 +164,7 @@ public class ReserveManager {
 
         String stringToSend4 = "getExpire-" + id;
         sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,"");
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.WST_PORT);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.WST_PORT_FARID);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);

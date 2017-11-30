@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.shared.Constants;
 
 public class Student {
 
@@ -101,7 +101,7 @@ public class Student {
 
 		String stringToSend = "getCounter-" + studentID;
 		sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, DrrsConstants.KKL_PORT);
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Constants.KKL_PORT_FARID);
 		clientSocket.send(sendPacket);
 
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -117,7 +117,7 @@ public class Student {
 
 		String stringToSend2 = "getCounter-" + studentID;
 		sendData2 = ServerWestmount.sendMessageServerToserver(stringToSend2,studentID); 
-		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, DrrsConstants.DVL_PORT);
+		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, Constants.DVL_PORT_FARID);
 		clientSocket2.send(sendPacket2);
 
 		DatagramPacket receivePacket2 = new DatagramPacket(receiveData2, receiveData2.length);
@@ -145,9 +145,9 @@ public class Student {
 			if (campus != 3) {
 				int port = 0;
 				if (campus == 2)
-					port = DrrsConstants.KKL_PORT;
+					port = Constants.KKL_PORT_FARID;
 				else if (campus == 1)
-					port = DrrsConstants.DVL_PORT;
+					port = Constants.DVL_PORT_FARID;
 
 				DatagramSocket clientSocket = new DatagramSocket();
 				InetAddress IPAddress = InetAddress.getByName("localhost");
@@ -190,14 +190,14 @@ public class Student {
 		});
 		Thread threadKKL = new Thread(() -> {
 			try {
-				kklNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(DrrsConstants.KKL_PORT, date).trim());
+				kklNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.KKL_PORT_FARID, date).trim());
 			} catch (Exception e) {
 				// e.printStackTrace();
 			}
 		});
 		Thread threadDVL = new Thread(() -> {
 			try {
-				dvlNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(DrrsConstants.DVL_PORT, date).trim());
+				dvlNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.DVL_PORT_FARID, date).trim());
 			} catch (Exception e) {
 				// e.printStackTrace();
 			}
@@ -277,9 +277,9 @@ public class Student {
 		} else {
 			int port = 0;
 			if (bookingID.startsWith("DVL")) {
-				port = DrrsConstants.DVL_PORT;
+				port = Constants.DVL_PORT_FARID;
 			} else if (bookingID.startsWith("KKL")) {
-				port = DrrsConstants.KKL_PORT;
+				port = Constants.KKL_PORT_FARID;
 			}
 
 			DatagramSocket clientSocket = new DatagramSocket();
@@ -345,9 +345,9 @@ public class Student {
 		} else {
 			int port = 0;
 			if (bookingID.startsWith("DVL")) {
-				port = DrrsConstants.DVL_PORT;
+				port = Constants.DVL_PORT_FARID;
 			} else if (bookingID.startsWith("KKL")) {
-				port = DrrsConstants.KKL_PORT;
+				port = Constants.KKL_PORT_FARID;
 			}
 
 			DatagramSocket clientSocket = new DatagramSocket();

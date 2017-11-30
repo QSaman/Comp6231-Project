@@ -5,7 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Scanner;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.shared.Constants;
 
 public class Client {
 
@@ -24,7 +24,7 @@ public class Client {
 
 			sendData = stringToSend.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress,
-					DrrsConstants.DVL_PORT);
+					Constants.DVL_PORT_FARID);
 			clientSocket.send(sendPacket);
 
 			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);

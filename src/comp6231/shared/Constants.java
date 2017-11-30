@@ -1,6 +1,7 @@
 package comp6231.shared;
 
 public class Constants {
+	
 	public static final int KKL_PORT = 2962;
 	public static final int DVL_PORT = 2963;
 	public static final int WST_PORT = 2961;
@@ -31,4 +32,8 @@ public class Constants {
 	public static final String ROLLBACK = "rollBack";
 	
 	public static final int BUFFER_SIZE = 2000;
+	
+	public static final int DVL_PORT_FARID = 9763;
+	public static final int KKL_PORT_FARID = 9867;
+	public static final int WST_PORT_FARID = 9635;
 }
