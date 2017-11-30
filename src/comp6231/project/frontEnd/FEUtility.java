@@ -1,7 +1,7 @@
 package comp6231.project.frontEnd;
 
 import comp6231.project.farid.sharedPackage.DrrsConstants;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
 
 public class FEUtility {
 	private static FEUtility instance = null;

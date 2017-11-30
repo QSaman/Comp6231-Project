@@ -1,4 +1,4 @@
-package comp6231.project.mostafa.core;
+package comp6231.shared;
 
 public class Constants {
 	public static final int KKL_PORT = 2962;

@@ -20,7 +20,7 @@ import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
 
 public class UDPlistener  implements Runnable {
 	private DatagramSocket socket;

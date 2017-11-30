@@ -11,7 +11,7 @@ import comp6231.project.mostafa.clientSide.factory.CreateFactory;
 import comp6231.project.mostafa.clientSide.factory.DeleteFactory;
 import comp6231.project.mostafa.clientSide.factory.GetAvailableTimeSlotFactory;
 import comp6231.project.mostafa.core.CommandEnum;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
 
 public class UserInterface {
 	public UserInterface() {

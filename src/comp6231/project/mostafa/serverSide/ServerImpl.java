@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
 
 public class ServerImpl{
 	private static ServerImpl instance = null;

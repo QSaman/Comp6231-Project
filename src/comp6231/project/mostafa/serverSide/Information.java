@@ -7,7 +7,7 @@ import comp6231.project.mostafa.serverSide.Database;
 import comp6231.project.mostafa.serverSide.UDP;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
 
 public class Information {
 	private static Information instance = null;

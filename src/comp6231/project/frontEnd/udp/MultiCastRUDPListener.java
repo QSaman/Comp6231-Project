@@ -11,17 +11,18 @@ import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
-import comp6231.project.mostafa.core.Constants;
+import comp6231.shared.Constants;
+import net.rudp.ReliableServerSocket;
 
 public class MultiCastRUDPListener implements Runnable{
-	private DatagramSocket socket;
+	private ReliableServerSocket socket;
 	private final Object sendLock = new Object();
 	
 	@Override
 	public void run() {
 		socket = null;
 		try {
-			socket = new DatagramSocket(Constants.FE_PORT_LISTEN);
+			socket = new ReliableServerSocket(Constants.FE_PORT_LISTEN);
 
 			while(true){
 				byte[] buffer = new byte[Constants.BUFFER_SIZE];
