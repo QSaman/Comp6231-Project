@@ -1,10 +1,11 @@
 package comp6231.project.farid.servers.serverKirkland;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
-public class Admin {
+public class Admin implements Serializable {
 
     private String adminID;
 

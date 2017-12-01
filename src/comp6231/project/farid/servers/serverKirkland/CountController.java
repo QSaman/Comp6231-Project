@@ -1,8 +1,9 @@
 package comp6231.project.farid.servers.serverKirkland;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-class CountController {
+class CountController implements Serializable {
 
     private int counter;
     private LocalDate expireDate;

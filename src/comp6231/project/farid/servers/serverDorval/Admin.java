@@ -1,10 +1,11 @@
 package comp6231.project.farid.servers.serverDorval;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
-public class Admin {
+public class Admin implements Serializable {
 
     private String adminID;
 

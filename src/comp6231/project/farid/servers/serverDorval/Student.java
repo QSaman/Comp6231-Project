@@ -1,5 +1,6 @@
 package comp6231.project.farid.servers.serverDorval;
 
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -11,7 +12,7 @@ import java.util.Scanner;
 
 import comp6231.shared.Constants;
 
-public class Student {
+public class Student implements Serializable {
 
 	private String studentID;
 

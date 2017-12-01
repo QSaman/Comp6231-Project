@@ -1,5 +1,6 @@
 package comp6231.project.farid.servers.serverWestmount;
 
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,7 +16,7 @@ import comp6231.shared.Constants;
 /**
  * Created by Farid on 9/24/2017.
  */
-public class ReserveManager {
+public class ReserveManager implements Serializable {
 
     static Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
     static Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
