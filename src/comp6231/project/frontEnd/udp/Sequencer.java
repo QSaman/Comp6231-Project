@@ -43,19 +43,19 @@ public class Sequencer extends Thread{
 
 		switch (group) {
 		case Constants.DVL_GROUP:
-			replicaPorts[0] = Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
-			replicaPorts[1] = Constants.DVL_PORT_LISTEN_RE1_ACTIVE;
-			replicaPorts[2] = Constants.DVL_PORT_LISTEN_RE2_ACTIVE;
+			replicaPorts[0] = Constants.dvlPortListenFaridActive;
+			replicaPorts[1] = Constants.dvlPortListenRe1Active;
+			replicaPorts[2] = Constants.dvlPortListenRe2Active;
 			break;
 		case Constants.KKL_GROUP:
-			replicaPorts[0] = Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
-			replicaPorts[1] = Constants.KKL_PORT_LISTEN_RE1_ACTIVE;
-			replicaPorts[2] = Constants.KKL_PORT_LISTEN_RE2_ACTIVE;
+			replicaPorts[0] = Constants.kklPortListenFaridActive;
+			replicaPorts[1] = Constants.kklPortListenRe1Active;
+			replicaPorts[2] = Constants.kklPortListenRe2Active;
 			break;
 		case Constants.WST_GROUP:
-			replicaPorts[0] = Constants.WST_PORT_LISTEN_FARID_ACTIVE;
-			replicaPorts[1] = Constants.WST_PORT_LISTEN_RE1_ACTIVE;
-			replicaPorts[2] = Constants.WST_PORT_LISTEN_RE2_ACTIVE;
+			replicaPorts[0] = Constants.wstPortListenFaridActive;
+			replicaPorts[1] = Constants.wstPortListenRe1Active;
+			replicaPorts[2] = Constants.wstPortListenRe2Active;
 			break;
 		}
 

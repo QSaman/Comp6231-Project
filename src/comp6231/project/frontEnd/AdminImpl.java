@@ -90,8 +90,8 @@ public class AdminImpl extends AdminOperationsPOA {
 
 	@Override
 	public String killServer(String campusName) {
-		// TODO Auto-generated method stub
-		return null;
+		PortSwitcher.switchServer(campusName);
+		return "Server killed";
 	}
 
 }

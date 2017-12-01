@@ -20,9 +20,9 @@ public class Constants {
 	public static final int DVL_PORT_RE1_BACKUP = 2965;
 	public static final int WST_PORT_RE1_BACKUP = 2966;
 			
-	public static int KKL_PORT_LISTEN_RE1_ACTIVE = KKL_PORT_LISTEN_RE1_ORIGINAL;
-	public static int DVL_PORT_LISTEN_RE1_ACTIVE = DVL_PORT_LISTEN_RE1_ORIGINAL;
-	public static int WST_PORT_LISTEN_RE1_ACTIVE = WST_PORT_LISTEN_RE1_ORIGINAL;
+	public static int kklPortListenRe1Active = KKL_PORT_LISTEN_RE1_ORIGINAL;
+	public static int dvlPortListenRe1Active = DVL_PORT_LISTEN_RE1_ORIGINAL;
+	public static int wstPortListenRe1Active = WST_PORT_LISTEN_RE1_ORIGINAL;
 	
 	//RE2
 	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 2906;
@@ -41,9 +41,9 @@ public class Constants {
 	public static final int DVL_PORT_RE2_BACKUP = 2971;
 	public static final int WST_PORT_RE2_BACKUP = 2972;
 			
-	public static int KKL_PORT_LISTEN_RE2_ACTIVE = KKL_PORT_LISTEN_RE2_ORIGINAL;
-	public static int DVL_PORT_LISTEN_RE2_ACTIVE = DVL_PORT_LISTEN_RE2_ORIGINAL;
-	public static int WST_PORT_LISTEN_RE2_ACTIVE = WST_PORT_LISTEN_RE2_ORIGINAL;
+	public static int kklPortListenRe2Active = KKL_PORT_LISTEN_RE2_ORIGINAL;
+	public static int dvlPortListenRe2Active = DVL_PORT_LISTEN_RE2_ORIGINAL;
+	public static int wstPortListenRe2Active = WST_PORT_LISTEN_RE2_ORIGINAL;
 	
 	//FE
 	public static final int FE_PORT = 2960;
@@ -83,9 +83,9 @@ public class Constants {
 	public static final int WST_PORT_LISTEN_FARID_BACKUP = 9636;
 	
 	
-	public static int DVL_PORT_LISTEN_FARID_ACTIVE = DVL_PORT_LISTEN_FARID_ORIGINAL;
-	public static int KKL_PORT_LISTEN_FARID_ACTIVE = KKL_PORT_LISTEN_FARID_ORIGINAL;
-	public static int WST_PORT_LISTEN_FARID_ACTIVE = WST_PORT_LISTEN_FARID_ORIGINAL;
+	public static int dvlPortListenFaridActive = DVL_PORT_LISTEN_FARID_ORIGINAL;
+	public static int kklPortListenFaridActive = KKL_PORT_LISTEN_FARID_ORIGINAL;
+	public static int wstPortListenFaridActive = WST_PORT_LISTEN_FARID_ORIGINAL;
 
 	// multi cast group
 	
