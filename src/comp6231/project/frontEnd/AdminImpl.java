@@ -22,7 +22,6 @@ public class AdminImpl extends AdminOperationsPOA {
 		 try {
 			thread.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 //		return thread.getResult();

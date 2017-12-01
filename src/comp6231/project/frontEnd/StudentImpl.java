@@ -21,6 +21,8 @@ public class StudentImpl extends StudentOperationsPOA {
 		FEBookRoomRequestMessage message = new FEBookRoomRequestMessage(1, user_id, campus_name, room_number, date, time_slot);
 		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findUDPListenerPort(user_id));
 		thread.start();
+		
+//		setTimeOut();
 		try {
 			thread.join();
 		} catch (InterruptedException e) {
