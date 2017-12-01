@@ -30,5 +30,5 @@ public class Constants {
 	public static final String COMMIT = "commit";
 	public static final String ROLLBACK = "rollBack";
 	
-	public static final int BUFFER_SIZE = 2000;
+	public static final int BUFFER_SIZE = 1024;
 }

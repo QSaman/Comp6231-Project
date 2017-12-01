@@ -1,8 +1,9 @@
 package comp6231.project.frontEnd.udp;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
@@ -12,67 +13,67 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.shared.Constants;
+import net.rudp.ReliableSocket;
 
-public class MultiCastRUDPListener implements Runnable{
-	private DatagramSocket socket;
+public class FEUDPConnection extends Thread{
+	private ReliableSocket socket;
+	private InputStream in;
+	private OutputStream out;
 	private final Object sendLock = new Object();
 	
-	@Override
-	public void run() {
-		socket = null;
-		try {
-			socket = new DatagramSocket(Constants.FE_PORT_LISTEN);
-
-			while(true){
-				byte[] buffer = new byte[Constants.BUFFER_SIZE];
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				socket.receive(request);
-
-				Thread thread = new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						MultiCastRUDPListener.this.handlePacket(request);
-					}
-				});
-				thread.start();
-			}
-
-		}catch (SocketException e){
-			FE.log("Socket: " + e.getMessage());
-		}catch (IOException e){
-			FE.log("IO: " + e.getMessage());
-		}finally {
-			if(socket != null) socket.close();
-		}
+	public FEUDPConnection(ReliableSocket socket) {
+		this.socket = socket;
 	}
 	
-	private void handlePacket(DatagramPacket request) {
-			String json_msg_str = new String(request.getData(),0,request.getLength());
+	@Override
+	public void run() {	
+		try {
+			in = socket.getInputStream();
+			out = socket.getOutputStream();
+			
+			byte[] buffer = new byte[Constants.BUFFER_SIZE];
+			int size = in.read();
+			
+			String json_msg_str = new String(buffer,0,size);
 
 			FE.log("MULTI CAST UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			byte[] data = result.getBytes();
 
-			send(request.getAddress(), request.getPort(), data);
-	}
-	
-	private void send(InetAddress address, int port, byte[] data){
-		DatagramPacket reply = new DatagramPacket(
-				data, 
-				data.length, 
-				address, 
-				port
-		);
-
-		try {
-			synchronized (sendLock) {
-				socket.send(reply);
-			}
-		} catch (IOException e) {
-			FE.log(e.getMessage());
+//			send(request.getAddress(), request.getPort(), data);
+			
+			
+		}catch (SocketException e){
+			FE.log("Socket: " + e.getMessage());
+		}catch (IOException e){
+			FE.log("IO: " + e.getMessage());
+		}finally {
+			if(socket != null)
+				try {
+					socket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 	}
+	
+//	private void send(InetAddress address, int port, byte[] data){
+//		DatagramPacket reply = new DatagramPacket(
+//				data, 
+//				data.length, 
+//				address, 
+//				port
+//		);
+//
+//		try {
+//			synchronized (sendLock) {
+//				socket.send(reply);
+//			}
+//		} catch (IOException e) {
+//			FE.log(e.getMessage());
+//		}
+//	}
 	
 	private String process(String json_msg_str){
 		String result = null;
