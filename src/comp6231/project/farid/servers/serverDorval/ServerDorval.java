@@ -1,5 +1,6 @@
 package comp6231.project.farid.servers.serverDorval;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -21,10 +22,44 @@ public class ServerDorval {
 	static MyLogger dorvalServerLogger;
 
 	// students will be used by server to know which students have already signed in
-	private static Map<String, Student> students = Collections.synchronizedMap(new HashMap<>());
+	static Map<String, Student> students = Collections.synchronizedMap(new HashMap<>());
 	// admins will be used by server to know which admins have already signed in
-	private static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
+	static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
 
+	private static void save() throws Exception {
+		
+		SaverLoader saverLoader = new SaverLoader();
+		saverLoader.copyServerToObject();
+		saverLoader.printCurrentDatabase();
+		ReserveManager.printCurrentReserveList();
+		try {
+			saverLoader.serializeDataOut();
+			System.out.println("Saved");
+		} catch (IOException e) {
+			System.out.println("ERROR IN SERIALIZING");
+		}
+	}
+	
+	private static void load() throws Exception{
+		SaverLoader saverLoader = null;
+		try {
+			saverLoader = SaverLoader.serializeDataIn();
+			saverLoader.printCurrentDatabase();
+			ReserveManager.printCurrentReserveList();
+			saverLoader.copyObjectToServer();
+			System.out.println("Loaded");
+		} catch (ClassNotFoundException|IOException e) {
+			System.out.println("ERROR IN LOADING");
+		}
+	}
+	
+	private static void bookTestCase() throws Exception {
+		setStudentID("DVLS1234");
+		bookRoom("DVLS1234", 1, 1, LocalDate.of(2017, 1, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+		printCurrentDatabase();
+		ReserveManager.printCurrentReserveList();
+	}
+	
 	private static void addTestCase() {
 		HashMap<LocalTime, LocalTime> times = new HashMap<>();
 		times.put(LocalTime.of(8, 0), LocalTime.of(9, 0));
@@ -39,8 +74,12 @@ public class ServerDorval {
 	}
 
 	public static void main(String[] args) throws Exception {
-		addTestCase();
 		dorvalServerLogger = new MyLogger("DorvalServer"); // Creating Log file for this server
+
+		addTestCase();
+		bookTestCase();
+		save();
+		//load();
 		
 		gson = StartGson.initGsonFarid();
 		Thread udpThread = new Thread(new Udp());

@@ -10,7 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -25,6 +24,7 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
+import comp6231.shared.Constants;
 
 public class Udp implements Runnable {
 	private DatagramSocket serverSocket;
@@ -35,7 +35,7 @@ public class Udp implements Runnable {
 	public void run() {
 		serverSocket = null;
 		try {
-			serverSocket = new DatagramSocket(DrrsConstants.DVL_PORT);
+			serverSocket = new DatagramSocket(Constants.DVL_PORT_FARID);
 			byte[] receiveData = new byte[1024];
 			sendData = new byte[1024];
 

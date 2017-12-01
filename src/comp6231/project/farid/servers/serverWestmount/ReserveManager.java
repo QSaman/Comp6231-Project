@@ -1,5 +1,6 @@
 package comp6231.project.farid.servers.serverWestmount;
 
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -10,12 +11,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import comp6231.project.farid.sharedPackage.DrrsConstants;
+import comp6231.shared.Constants;
 
 /**
  * Created by Farid on 9/24/2017.
  */
-public class ReserveManager {
+public class ReserveManager implements Serializable {
 
     static Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
     static Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
@@ -61,7 +62,7 @@ public class ReserveManager {
 
         String stringToSend3 = "reset-" + studentID;
         sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,studentID);
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -77,7 +78,7 @@ public class ReserveManager {
 
         String stringToSend4 = "reset-" + studentID;
         sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,studentID);
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.DVL_PORT);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_FARID);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);
@@ -147,7 +148,7 @@ public class ReserveManager {
 
         String stringToSend3 = "getExpire-" + id;
         sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,""); 
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, DrrsConstants.KKL_PORT);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -163,7 +164,7 @@ public class ReserveManager {
 
         String stringToSend4 = "getExpire-" + id;
         sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,""); 
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, DrrsConstants.DVL_PORT);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_FARID);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);

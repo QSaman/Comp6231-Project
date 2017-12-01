@@ -31,9 +31,13 @@ public class Constants {
 	public static final String COMMIT = "commit";
 	public static final String ROLLBACK = "rollBack";
 	
+<<<<<<< HEAD
+	public static final int BUFFER_SIZE = 1024;
+=======
 	public static final int BUFFER_SIZE = 2000;
 	
 	public static final int DVL_PORT_FARID = 9763;
 	public static final int KKL_PORT_FARID = 9867;
 	public static final int WST_PORT_FARID = 9635;
+>>>>>>> 05fa3240f31c13ccaaf2f24d4076d172e2ea8201
 }

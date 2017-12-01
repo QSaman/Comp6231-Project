@@ -1,7 +1,7 @@
 package comp6231.project.farid.servers.serverKirkland;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
-import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -22,12 +22,34 @@ public class ServerKirkland {
 			.synchronizedMap(new HashMap<>());
 	static MyLogger kirklandServerLogger;
 
-	private static Map<String, Student> students = Collections.synchronizedMap(new HashMap<>());
-	private static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
+	static Map<String, Student> students = Collections.synchronizedMap(new HashMap<>());
+	static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
 	private static DatagramSocket serverSocket;
 
-	private ServerKirkland() throws RemoteException {
-		super();
+	private static void save() throws Exception {
+		setStudentID("DVLS1234");
+		bookRoom("DVLS1234", 1, 1, LocalDate.of(2017, 1, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+		SaverLoader saverLoader = new SaverLoader();
+		saverLoader.copyServerToObject();
+		saverLoader.printCurrentDatabase();
+		try {
+			saverLoader.serializeDataOut();
+			System.out.println("Saved");
+		} catch (IOException e) {
+			System.out.println("ERROR IN SERIALIZING");
+		}
+	}
+	
+	private static void load() throws Exception{
+		SaverLoader saverLoader = null;
+		try {
+			saverLoader = SaverLoader.serializeDataIn();
+			saverLoader.printCurrentDatabase();
+			saverLoader.copyObjectToServer();
+			System.out.println("Loaded");
+		} catch (ClassNotFoundException|IOException e) {
+			System.out.println("ERROR IN LOADING");
+		}
 	}
 
 	private static void addTestCase() {
