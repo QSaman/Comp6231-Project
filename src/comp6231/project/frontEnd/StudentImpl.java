@@ -8,7 +8,7 @@ import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.messages.FELoginStudentMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
-import comp6231.project.frontEnd.udp.MultiCastRUDPSender;
+import comp6231.project.frontEnd.udp.Sequencer;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 
@@ -19,7 +19,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			String date, String time_slot) {
 		FE.log("Book ROOM"+ Thread.currentThread().getId()+ " Time: " + time_slot);
 		FEBookRoomRequestMessage message = new FEBookRoomRequestMessage(1, user_id, campus_name, room_number, date, time_slot);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -34,7 +34,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public String getAvailableTimeSlot(String user_id, String date) {
 		FE.log("getAvailableTimeSlot");
 		FEGetAvailableTimeSlotMessage message = new FEGetAvailableTimeSlotMessage(1, user_id, date);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -49,7 +49,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public String cancelBooking(String user_id, String bookingID) {
 		FE.log("cancelBooking");
 		FECancelBookingMessage message = new FECancelBookingMessage(1, user_id, bookingID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -66,7 +66,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			String new_time_slot) {
 		FE.log("changeReservation");
 		FEChangeReservationMessage message = new FEChangeReservationMessage(1, user_id, booking_id, new_campus_name, new_room_number, new_date, new_time_slot);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -81,7 +81,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public boolean studentLogin(String studentID) {
 		FE.log("Studnet login");
 		FELoginStudentMessage message = new FELoginStudentMessage(1, studentID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(studentID), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(studentID), "");
 		thread.start();
 		try {
 			thread.join();
@@ -104,7 +104,7 @@ public class StudentImpl extends StudentOperationsPOA {
 	public void signOut(String ID) {
 		FE.log("Student signout");
 		FESignOutMessage message = new FESignOutMessage(1, ID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(ID), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(ID), "");
 		thread.start();
 		try {
 			thread.join();

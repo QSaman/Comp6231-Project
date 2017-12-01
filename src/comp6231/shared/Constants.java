@@ -87,4 +87,10 @@ public class Constants {
 	public static int KKL_PORT_LISTEN_FARID_ACTIVE = KKL_PORT_LISTEN_FARID_ORIGINAL;
 	public static int WST_PORT_LISTEN_FARID_ACTIVE = WST_PORT_LISTEN_FARID_ORIGINAL;
 
+	// multi cast group
+	
+	public static final int DVL_GROUP  = 10;
+	public static final int KKL_GROUP  = 20;
+	public static final int WST_GROUP  = 30;
+	public static final int ACTIVE_SERVERS = 3;
 }

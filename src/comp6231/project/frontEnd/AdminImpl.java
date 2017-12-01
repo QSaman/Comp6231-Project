@@ -7,7 +7,7 @@ import comp6231.project.frontEnd.messages.FELoginAdminMessage;
 import comp6231.project.frontEnd.messages.FELoginStudentMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
-import comp6231.project.frontEnd.udp.MultiCastRUDPSender;
+import comp6231.project.frontEnd.udp.Sequencer;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 
@@ -18,7 +18,7 @@ public class AdminImpl extends AdminOperationsPOA {
 			String[] time_slots) {
 		FE.log("CREATE ROOM ");
 		 FECreateRoomRequestMessage message = new FECreateRoomRequestMessage(1, user_id, room_number, date, time_slots);
-		 MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		 Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		 thread.start();
 		 try {
 			thread.join();
@@ -34,7 +34,7 @@ public class AdminImpl extends AdminOperationsPOA {
 			String[] time_slots) {
 		FE.log("Delete ROOM");
 		FEDeleteRoomRequestMessage message = new FEDeleteRoomRequestMessage(1, user_id, room_number, date, time_slots);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(user_id), "");
 		thread.start();
 		try {
 			thread.join();
@@ -49,7 +49,7 @@ public class AdminImpl extends AdminOperationsPOA {
 	public boolean adminLogin(String adminID) {
 		FE.log("Admin login");
 		FELoginAdminMessage message = new FELoginAdminMessage(1, adminID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(adminID), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(adminID), "");
 		thread.start();
 		try {
 			thread.join();
@@ -73,7 +73,7 @@ public class AdminImpl extends AdminOperationsPOA {
 	public void signOut(String ID) {
 		FE.log("Admin signout");
 		FESignOutMessage message = new FESignOutMessage(1, ID);
-		MultiCastRUDPSender thread = new MultiCastRUDPSender (message, FEUtility.getInstance().findFaridUDPListenerPort(ID), "");
+		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findFaridUDPListenerPort(ID), "");
 		thread.start();
 		try {
 			thread.join();
