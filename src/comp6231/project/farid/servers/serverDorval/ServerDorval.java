@@ -77,12 +77,12 @@ public class ServerDorval {
 		dorvalServerLogger = new MyLogger("DorvalServer"); // Creating Log file for this server
 
 		addTestCase();
-		bookTestCase();
-		save();
+		//bookTestCase();
+		//save();
 		//load();
 		
 		gson = StartGson.initGsonFarid();
-		Thread udpThread = new Thread(new Udp());
+		Thread udpThread = new Thread(new Udp(args));
 		udpThread.start();
 		
 	}

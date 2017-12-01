@@ -30,12 +30,18 @@ public class Udp implements Runnable {
 	private DatagramSocket serverSocket;
 	private final Object sendLock = new Object();
 	private byte[] sendData;
-
+	String udp_name;
+	Udp(String args[]){
+		udp_name = args[0];
+	}
 	@Override
 	public void run() {
 		serverSocket = null;
 		try {
-			serverSocket = new DatagramSocket(Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
+			serverSocket = new DatagramSocket(udp_name.equals("dvl_org")
+					?Constants.DVL_PORT_LISTEN_FARID_ORIGINAL
+							:
+								Constants.DVL_PORT_LISTEN_FARID_BACKUP);
 			byte[] receiveData = new byte[1024];
 			sendData = new byte[1024];
 
