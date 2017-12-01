@@ -24,7 +24,7 @@ public class Client {
 
 			sendData = stringToSend.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress,
-					Constants.DVL_PORT_FARID);
+					Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
 			clientSocket.send(sendPacket);
 
 			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);

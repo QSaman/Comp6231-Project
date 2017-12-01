@@ -17,6 +17,7 @@ public class Information {
 	private String serverName;
 	private int serverPort;
 	private int UDPListenPort;
+	public boolean isReOne;
 	
 	private Information(){
 		setServerName(null);
@@ -77,14 +78,14 @@ public class Information {
 		List<UDP> threads = new ArrayList<UDP>();
 		
 		if(getServerCode().equals("DVL")){
-			threads.add(new UDP(args, Constants.WST_PORT_LISTEN, "WST"));
-			threads.add(new UDP(args, Constants.KKL_PORT_LISTEN, "KKL"));	
+			threads.add(new UDP(args, isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
+			threads.add(new UDP(args, isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));	
 		}else if(getServerCode().equals("WST")){
-			threads.add(new UDP(args, Constants.DVL_PORT_LISTEN, "DVL"));
-			threads.add(new UDP(args, Constants.KKL_PORT_LISTEN, "KKL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));
 		}else if(getServerCode().equals("KKL")){
-			threads.add(new UDP(args, Constants.WST_PORT_LISTEN, "WST"));
-			threads.add(new UDP(args, Constants.DVL_PORT_LISTEN, "DVL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
+			threads.add(new UDP(args, isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
 		}
 		
 		for (UDP udp : threads) {
@@ -123,11 +124,11 @@ public class Information {
 	
 	public int tryToFindUDPPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
-			return Constants.DVL_PORT_LISTEN;
+			return isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE;
 		}else if (id.contains("KKL") || id.contains("kkl")){
-			return Constants.KKL_PORT_LISTEN;
+			return isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE;
 		}else if(id.contains("WST") || id.contains("wst")) {
-			return Constants.WST_PORT_LISTEN;
+			return isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE;
 		}else{
 			return -1;	
 		}
@@ -153,20 +154,77 @@ public class Information {
 
 	private void setServer(int port){
 		switch (port) {
-		case Constants.DVL_PORT:
-			serverName = "DVLServer";
+		case Constants.DVL_PORT_RE1_ORIGINAL:
+			serverName = "DVLServer_RE1_Original";
 			serverCode = "DVL";
-			UDPListenPort = Constants.DVL_PORT_LISTEN;
+			UDPListenPort = Constants.DVL_PORT_LISTEN_RE1_ORIGINAL;
+			isReOne = true;
 			break;
-		case Constants.KKL_PORT:
-			serverName = "KKLServer";
+		case Constants.KKL_PORT_RE1_ORIGINAL:
+			serverName = "KKLServer_RE1_Original";
 			serverCode = "KKL";
-			UDPListenPort = Constants.KKL_PORT_LISTEN;
+			UDPListenPort = Constants.KKL_PORT_LISTEN_RE1_ORIGINAL;
+			isReOne = true;
 			break;
-		case Constants.WST_PORT:
-			serverName = "WSTServer";
+		case Constants.WST_PORT_RE1_ORGINAL:
+			serverName = "WSTServer_RE1_Original";
 			serverCode = "WST";
-			UDPListenPort = Constants.WST_PORT_LISTEN;
+			UDPListenPort = Constants.WST_PORT_LISTEN_RE1_ORIGINAL;
+			isReOne = true;
+			break;
+		case Constants.DVL_PORT_RE1_BACKUP:
+			serverName = "DVLServer_RE1_Backup";
+			serverCode = "DVL";
+			UDPListenPort = Constants.DVL_PORT_LISTEN_RE1_BACKUP;
+			isReOne = true;
+			break;
+		case Constants.KKL_PORT_RE1_BACKUP:
+			serverName = "KKLServer_RE1_Backup";
+			serverCode = "KKL";
+			UDPListenPort = Constants.KKL_PORT_LISTEN_RE1_BACKUP;
+			isReOne = true;
+			break;
+		case Constants.WST_PORT_RE1_BACKUP:
+			serverName = "WSTServer_RE1_Backup";
+			serverCode = "WST";
+			UDPListenPort = Constants.WST_PORT_LISTEN_RE1_BACKUP;
+			isReOne = true;
+			break;
+		case Constants.DVL_PORT_RE2_ORIGINAL:
+			serverName = "DVLServer_RE2_Original";
+			serverCode = "DVL";
+			UDPListenPort = Constants.DVL_PORT_LISTEN_RE2_ORIGINAL;
+			isReOne = false;
+			break;
+		case Constants.KKL_PORT_RE2_ORIGINAL:
+			serverName = "KKLServer_RE2_Original";
+			serverCode = "KKL";
+			UDPListenPort = Constants.KKL_PORT_LISTEN_RE2_ORIGINAL;
+			isReOne = false;
+			break;
+		case Constants.WST_PORT_RE2_ORGINAL:
+			serverName = "WSTServer_RE2_Original";
+			serverCode = "WST";
+			UDPListenPort = Constants.WST_PORT_LISTEN_RE2_ORIGINAL;
+			isReOne = false;
+			break;
+		case Constants.DVL_PORT_RE2_BACKUP:
+			serverName = "DVLServer_RE2_Backup";
+			serverCode = "DVL";
+			UDPListenPort = Constants.DVL_PORT_LISTEN_RE2_BACKUP;
+			isReOne = false;
+			break;
+		case Constants.KKL_PORT_RE2_BACKUP:
+			serverName = "KKLServer_RE2_Backup";
+			serverCode = "KKL";
+			UDPListenPort = Constants.KKL_PORT_LISTEN_RE2_BACKUP;
+			isReOne = false;
+			break;
+		case Constants.WST_PORT_RE2_BACKUP:
+			serverName = "WSTServer_RE2_Backup";
+			serverCode = "WST";
+			UDPListenPort = Constants.WST_PORT_LISTEN_RE2_BACKUP;
+			isReOne = false;
 			break;
 		default:
 			break;
@@ -175,11 +233,11 @@ public class Information {
 	
 	public int findUDPPort(String campusName){
 		if(campusName.equalsIgnoreCase("KKL")){
-			return Constants.KKL_PORT_LISTEN;
+			return isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE;
 		}else if(campusName.equalsIgnoreCase("DVL")){
-			return Constants.DVL_PORT_LISTEN;
+			return isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE;
 		}else if(campusName.equalsIgnoreCase("WST")){
-			return Constants.WST_PORT_LISTEN;
+			return isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE;
 		}else {
 			return -1;
 		}

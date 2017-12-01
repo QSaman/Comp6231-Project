@@ -62,7 +62,7 @@ public class ReserveManager implements Serializable {
 
         String stringToSend3 = "reset-" + studentID;
         sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,studentID);
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_LISTEN_FARID_ACTIVE);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -78,7 +78,7 @@ public class ReserveManager implements Serializable {
 
         String stringToSend4 = "reset-" + studentID;
         sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,studentID);
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_FARID);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);
@@ -148,7 +148,7 @@ public class ReserveManager implements Serializable {
 
         String stringToSend3 = "getExpire-" + id;
         sendData3 = ServerWestmount.sendMessageServerToserver(stringToSend3,""); 
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_FARID);
+        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.KKL_PORT_LISTEN_FARID_ACTIVE);
         clientSocket3.send(sendPacket3);
 
         DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
@@ -164,7 +164,7 @@ public class ReserveManager implements Serializable {
 
         String stringToSend4 = "getExpire-" + id;
         sendData4 = ServerWestmount.sendMessageServerToserver(stringToSend4,""); 
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_FARID);
+        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
         clientSocket4.send(sendPacket4);
 
         DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);

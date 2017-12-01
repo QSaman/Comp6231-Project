@@ -1,4 +1,4 @@
-package comp6231.project.farid.sharedPackage;
+package comp6231.shared;
 
 public class DrrsConstants {
 	

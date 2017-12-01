@@ -35,7 +35,7 @@ public class Udp implements Runnable {
 	public void run() {
 		serverSocket = null;
 		try {
-			serverSocket = new DatagramSocket(Constants.DVL_PORT_FARID);
+			serverSocket = new DatagramSocket(Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
 			byte[] receiveData = new byte[1024];
 			sendData = new byte[1024];
 

@@ -198,11 +198,11 @@ public class UserInterface {
 	
 	public int findServer(String id){
 		if(id.contains("dvl")){
-			return Constants.DVL_PORT;
+			return Constants.DVL_PORT_RE1_ORIGINAL;
 		}else if (id.contains("kkl")){
-			return Constants.KKL_PORT;
+			return Constants.KKL_PORT_RE1_ORIGINAL;
 		}else if (id.contains("wst")){
-			return Constants.WST_PORT;
+			return Constants.WST_PORT_RE1_ORGINAL;
 		}else {
 			return 0;
 		}

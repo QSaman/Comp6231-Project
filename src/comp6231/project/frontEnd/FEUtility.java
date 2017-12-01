@@ -20,11 +20,11 @@ public class FEUtility {
 	
 	public int findMostafaUDPListenerPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
-			return Constants.DVL_PORT_LISTEN;
+			return Constants.DVL_PORT_LISTEN_RE1_ACTIVE;
 		}else if (id.contains("KKL") || id.contains("kkl")){
-			return Constants.KKL_PORT_LISTEN;
+			return Constants.KKL_PORT_LISTEN_RE1_ACTIVE;
 		}else if(id.contains("WST") || id.contains("wst")) {
-			return Constants.WST_PORT_LISTEN;
+			return Constants.WST_PORT_LISTEN_RE1_ACTIVE;
 		}else{
 			return -1;	
 		}
@@ -32,11 +32,11 @@ public class FEUtility {
 	
 	public int findFaridUDPListenerPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
-			return Constants.DVL_PORT_FARID;
+			return Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
 		}else if (id.contains("KKL") || id.contains("kkl")){
-			return Constants.KKL_PORT_FARID;
+			return Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
 		}else if(id.contains("WST") || id.contains("wst")) {
-			return Constants.WST_PORT_FARID;
+			return Constants.WST_PORT_LISTEN_FARID_ACTIVE;
 		}else{
 			return -1;	
 		}

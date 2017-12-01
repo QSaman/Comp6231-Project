@@ -130,8 +130,8 @@ public class ServerImpl{
 			int dvlCount = Database.getInstance().findAvailableTimeSlot(date);
 			
 			MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_GETAVTIME+" "+date, "");
-			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));
-			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -155,8 +155,8 @@ public class ServerImpl{
 			int kklCount = Database.getInstance().findAvailableTimeSlot(date);
 			
 			MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_GETAVTIME+" "+date, "");
-			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
-			threads.add(new UDP(message, Constants.WST_PORT_LISTEN, "WST"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -179,8 +179,8 @@ public class ServerImpl{
 			int wstCount = Database.getInstance().findAvailableTimeSlot(date);
 
 			MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_GETAVTIME+" "+date, "");
-			threads.add(new UDP(message, Constants.KKL_PORT_LISTEN, "KKL"));
-			threads.add(new UDP(message, Constants.DVL_PORT_LISTEN, "DVL"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));
+			threads.add(new UDP(message, Information.getInstance().isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
 			for (UDP udp : threads) {
 				udp.start();
 			}
@@ -216,30 +216,30 @@ public class ServerImpl{
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("WST")){
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.WST_PORT_LISTEN, "WST");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST");
 			}else{
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.KKL_PORT_LISTEN, "KKL");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL");
 			}
 		}else if(Information.getInstance().getServerCode().equalsIgnoreCase("KKL")){
 			if(bookingId.contains("KKL")){
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("WST")){
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.WST_PORT_LISTEN, "WST");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST");
 			}else{
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.DVL_PORT_LISTEN, "DVL");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL");
 			}
 		}else{
 			if(bookingId.contains("WST")){
 				result = Database.getInstance().cancelBookingId(bookingId, id);
 			}else if(bookingId.contains("KKL")){
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.KKL_PORT_LISTEN, "KKL");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL");
 			}else{
 				MessageHeader message = Information.getInstance().sendMessageServerToServer(Constants.REQ_CANCEL_BOOK+" "+bookingId+" "+id, "");
-				thread = new UDP(message, Constants.DVL_PORT_LISTEN, "DVL");
+				thread = new UDP(message, Information.getInstance().isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL");
 			}
 		}
 		if(thread != null){
