@@ -18,27 +18,15 @@ public class FEUtility {
 		return instance;
 	}
 	
-	public int findMostafaUDPListenerPort(String id){
+	public int findUDPListenerPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
-			return Constants.DVL_PORT_LISTEN_RE1_ACTIVE;
+			return Constants.DVL_GROUP;
 		}else if (id.contains("KKL") || id.contains("kkl")){
-			return Constants.KKL_PORT_LISTEN_RE1_ACTIVE;
+			return Constants.KKL_GROUP;
 		}else if(id.contains("WST") || id.contains("wst")) {
-			return Constants.WST_PORT_LISTEN_RE1_ACTIVE;
+			return Constants.WST_GROUP;
 		}else{
-			return -1;	
-		}
-	}
-	
-	public int findFaridUDPListenerPort(String id){
-		if(id.contains("DVL") || id.contains("dvl")){
-			return Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
-		}else if (id.contains("KKL") || id.contains("kkl")){
-			return Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
-		}else if(id.contains("WST") || id.contains("wst")) {
-			return Constants.WST_PORT_LISTEN_FARID_ACTIVE;
-		}else{
-			return -1;	
+			return -1;
 		}
 	}
 }
