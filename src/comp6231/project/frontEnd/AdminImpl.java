@@ -88,4 +88,10 @@ public class AdminImpl extends AdminOperationsPOA {
 		}		
 	}
 
+	@Override
+	public String killServer(String campusName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

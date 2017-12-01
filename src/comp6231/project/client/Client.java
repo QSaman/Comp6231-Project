@@ -96,6 +96,7 @@ public class Client {
 					if (role.equals("admin")) {
 						System.out.println("1- Create room");
 						System.out.println("2- Delete room");
+						System.out.println("3- ** KILL SERVER **");
 						int choice = InputManager.getNumber("number of choice");
 						switch (choice) {
 						case (1):
@@ -110,6 +111,23 @@ public class Client {
 							System.out.println(deleteResult);
 							logger.log(deleteResult);
 							break;
+						case (3):
+							int campusKill;
+							while (true) {
+								System.out.println("\nWhich server do you want to kill?\n");
+								System.out.println("1- Dorval");
+								System.out.println("2- Kirkland");
+								System.out.println("3- Westmount");
+								campusKill = InputManager.getNumber("number of choice");
+								if (campusKill == 1 || campusKill == 2 || campusKill == 3)
+									break;
+								else
+									System.out.println("Wrong campus number. try again!");
+							}
+							String killServerString = studentOperations.killServer(campusKill==1?"DVL":campusKill==2?"KKL":"WST");
+							System.out.println(killServerString);
+							logger.log(killServerString);
+							break;
 						default:
 							System.out.println("Wrong choice. Go back to menu and try again!");
 						}
@@ -121,6 +139,7 @@ public class Client {
 						System.out.println("2- Get all available times number");
 						System.out.println("3- Cancel reservation");
 						System.out.println("4- Change time slot");
+						System.out.println("5- ** KILL SERVER **");
 						int choice = InputManager.getNumber("number of choice");
 						switch (choice) {
 						case (1):
@@ -176,6 +195,23 @@ public class Client {
 									InputManager.getTime("start and end"));
 							System.out.println(changeTimeSlotResult);
 							logger.log(changeTimeSlotResult);
+							break;
+						case (5):
+							int campusKill;
+							while (true) {
+								System.out.println("\nWhich server do you want to kill?\n");
+								System.out.println("1- Dorval");
+								System.out.println("2- Kirkland");
+								System.out.println("3- Westmount");
+								campusKill = InputManager.getNumber("number of choice");
+								if (campusKill == 1 || campusKill == 2 || campusKill == 3)
+									break;
+								else
+									System.out.println("Wrong campus number. try again!");
+							}
+							String killServerString = studentOperations.killServer(campusKill==1?"DVL":campusKill==2?"KKL":"WST");
+							System.out.println(killServerString);
+							logger.log(killServerString);
 							break;
 						default:
 							System.out.println("Wrong choice. Go back to menu and try again!");

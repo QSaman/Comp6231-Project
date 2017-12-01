@@ -10,7 +10,8 @@ module comp6231 { module project { module common { module corba { module users {
 	string cancelBooking(in string user_id, in string bookingID);
 	string changeReservation(in string user_id, in string booking_id, in string new_campus_name, in long new_room_number, in string new_date, in string new_time_slot);
 	boolean studentLogin(in string studentID);
-	oneway void signOut(in string ID);
+	oneway void signOut(in string ID); 
+	string killServer(in string campusName);
     };
     
     interface AdminOperations
@@ -19,6 +20,7 @@ module comp6231 { module project { module common { module corba { module users {
 	string deleteRoom(in string user_id, in long room_number, in string date, in corba_timeslot_list time_slots);
 	boolean adminLogin(in string adminID);
 	oneway void signOut(in string ID);
+	string killServer(in string campusName);
     };
     
 };};};};};
