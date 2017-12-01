@@ -7,6 +7,8 @@ import java.util.logging.SimpleFormatter;
 
 import com.google.gson.Gson;
 
+import comp6231.project.farid.servers.serverDorval.ReserveManager;
+import comp6231.project.farid.servers.serverDorval.SaverLoader;
 import comp6231.project.messageProtocol.StartGson;
 
 public class Server {
@@ -17,6 +19,9 @@ public class Server {
 		if(args[0] == null){
 			return;
 		}
+		
+		// save(); //This is for saving the getInstance of Database to the file
+		// load(); //This is for loading and setting the instance of Database from the file
 		
 		Information.getInstance().initializeServerInformation(Integer.parseInt(args[0]));
 		initializeLog();
@@ -30,6 +35,23 @@ public class Server {
 		time.start();
 	}
 
+private static void save() throws Exception {
+		try {
+			Database.getInstance().serializeDataOut();
+			System.out.println("Saved");
+		} catch (IOException e) {
+			System.out.println("ERROR IN SERIALIZING");
+		}
+	}
+	
+	private static void load() throws Exception{
+		try {
+			Database.serializeDataIn();
+			System.out.println("Loaded");
+		} catch (ClassNotFoundException|IOException e) {
+			System.out.println("ERROR IN LOADING");
+		}
+	}
 	private static void initializeLog(){
 		String id = Information.getInstance().getServerName();
 		log = Logger.getLogger(id);

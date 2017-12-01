@@ -1,6 +1,9 @@
 package comp6231.project.mostafa.serverSide;
 
-public class RoomRecord {
+import java.io.Serializable;
+
+public class RoomRecord implements Serializable {
+	
 	private static int idGenerator = 00000;
 	private static final Object idGeneratorLock = new Object();
 	private static final Object bookedStudentIdLock = new Object();
@@ -64,6 +67,10 @@ public class RoomRecord {
 	 */
 	public static int getIdGenerator() {
 		return idGenerator;
+	}
+	
+	public static void setIdGenerator(int idGenerator) {
+		RoomRecord.idGenerator = idGenerator;
 	}
 
 	/**

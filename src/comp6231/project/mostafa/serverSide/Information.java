@@ -78,14 +78,14 @@ public class Information {
 		List<UDP> threads = new ArrayList<UDP>();
 		
 		if(getServerCode().equals("DVL")){
-			threads.add(new UDP(args, isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
-			threads.add(new UDP(args, isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));	
+			threads.add(new UDP(args, isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active, "WST"));
+			threads.add(new UDP(args, isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active, "KKL"));	
 		}else if(getServerCode().equals("WST")){
-			threads.add(new UDP(args, isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
-			threads.add(new UDP(args, isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE, "KKL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active, "DVL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active, "KKL"));
 		}else if(getServerCode().equals("KKL")){
-			threads.add(new UDP(args, isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE, "WST"));
-			threads.add(new UDP(args, isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE, "DVL"));
+			threads.add(new UDP(args, isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active, "WST"));
+			threads.add(new UDP(args, isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active, "DVL"));
 		}
 		
 		for (UDP udp : threads) {
@@ -124,11 +124,11 @@ public class Information {
 	
 	public int tryToFindUDPPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
-			return isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active;
 		}else if (id.contains("KKL") || id.contains("kkl")){
-			return isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active;
 		}else if(id.contains("WST") || id.contains("wst")) {
-			return isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active;
 		}else{
 			return -1;	
 		}
@@ -233,11 +233,11 @@ public class Information {
 	
 	public int findUDPPort(String campusName){
 		if(campusName.equalsIgnoreCase("KKL")){
-			return isReOne == true ? Constants.KKL_PORT_LISTEN_RE1_ACTIVE : Constants.KKL_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active;
 		}else if(campusName.equalsIgnoreCase("DVL")){
-			return isReOne == true ? Constants.DVL_PORT_LISTEN_RE1_ACTIVE : Constants.DVL_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active;
 		}else if(campusName.equalsIgnoreCase("WST")){
-			return isReOne == true ? Constants.WST_PORT_LISTEN_RE1_ACTIVE : Constants.WST_PORT_LISTEN_RE2_ACTIVE;
+			return isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active;
 		}else {
 			return -1;
 		}

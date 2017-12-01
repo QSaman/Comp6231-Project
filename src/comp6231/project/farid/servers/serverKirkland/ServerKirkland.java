@@ -70,7 +70,7 @@ public class ServerKirkland {
 		kirklandServerLogger = new MyLogger("KirklandServer");
 		
 		gson = StartGson.initGsonFarid();
-		Thread udpThread = new Thread(new Udp());
+		Thread udpThread = new Thread(new Udp(args));
 		udpThread.start();
 
 	}

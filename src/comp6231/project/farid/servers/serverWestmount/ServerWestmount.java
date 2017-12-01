@@ -70,7 +70,7 @@ public class ServerWestmount {
 		westmountServerLogger = new MyLogger("WestmountServer");
 		
 		gson = StartGson.initGsonFarid();
-		Thread udpThread = new Thread(new Udp());
+		Thread udpThread = new Thread(new Udp(args));
 		udpThread.start();
 	}
 	

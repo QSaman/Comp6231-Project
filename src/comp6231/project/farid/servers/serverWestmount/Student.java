@@ -102,7 +102,7 @@ public class Student implements Serializable {
 
 		String stringToSend = "getCounter-" + studentID;
 		sendData = ServerWestmount.sendMessageServerToserver(stringToSend,studentID); 
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Constants.KKL_PORT_LISTEN_FARID_ACTIVE);
+		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Constants.kklPortListenFaridActive);
 		clientSocket.send(sendPacket);
 
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -118,7 +118,7 @@ public class Student implements Serializable {
 
 		String stringToSend2 = "getCounter-" + studentID;
 		sendData2 = ServerWestmount.sendMessageServerToserver(stringToSend2,studentID); 
-		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, Constants.DVL_PORT_LISTEN_FARID_ACTIVE);
+		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, Constants.dvlPortListenFaridActive);
 		clientSocket2.send(sendPacket2);
 
 		DatagramPacket receivePacket2 = new DatagramPacket(receiveData2, receiveData2.length);
@@ -146,9 +146,9 @@ public class Student implements Serializable {
 			if (campus != 3) {
 				int port = 0;
 				if (campus == 2)
-					port = Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
+					port = Constants.kklPortListenFaridActive;
 				else if (campus == 1)
-					port = Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
+					port = Constants.dvlPortListenFaridActive;
 
 				DatagramSocket clientSocket = new DatagramSocket();
 				InetAddress IPAddress = InetAddress.getByName("localhost");
@@ -191,14 +191,14 @@ public class Student implements Serializable {
 		});
 		Thread threadKKL = new Thread(() -> {
 			try {
-				kklNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.KKL_PORT_LISTEN_FARID_ACTIVE, date).trim());
+				kklNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.kklPortListenFaridActive, date).trim());
 			} catch (Exception e) {
 				// e.printStackTrace();
 			}
 		});
 		Thread threadDVL = new Thread(() -> {
 			try {
-				dvlNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.DVL_PORT_LISTEN_FARID_ACTIVE, date).trim());
+				dvlNumber = Integer.parseInt(getNumberOfAvailableTimesFromOtherServer(Constants.dvlPortListenFaridActive, date).trim());
 			} catch (Exception e) {
 				// e.printStackTrace();
 			}
@@ -278,9 +278,9 @@ public class Student implements Serializable {
 		} else {
 			int port = 0;
 			if (bookingID.startsWith("DVL")) {
-				port = Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
+				port = Constants.dvlPortListenFaridActive;
 			} else if (bookingID.startsWith("KKL")) {
-				port = Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
+				port = Constants.kklPortListenFaridActive;
 			}
 
 			DatagramSocket clientSocket = new DatagramSocket();
@@ -346,9 +346,9 @@ public class Student implements Serializable {
 		} else {
 			int port = 0;
 			if (bookingID.startsWith("DVL")) {
-				port = Constants.DVL_PORT_LISTEN_FARID_ACTIVE;
+				port = Constants.dvlPortListenFaridActive;
 			} else if (bookingID.startsWith("KKL")) {
-				port = Constants.KKL_PORT_LISTEN_FARID_ACTIVE;
+				port = Constants.kklPortListenFaridActive;
 			}
 
 			DatagramSocket clientSocket = new DatagramSocket();
