@@ -1,9 +1,10 @@
 package comp6231.project.mostafa.serverSide;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CopyDatabase {
+public class CopyDatabase implements Serializable {
 	private HashMap<String, HashMap<Integer, HashMap<Integer, RoomRecord>>> roomRecords;
 
 	private HashMap<String, Integer> bookingCount;

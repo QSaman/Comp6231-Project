@@ -45,8 +45,8 @@ public class ServerDorval {
 		try {
 			saverLoader = SaverLoader.serializeDataIn();
 			saverLoader.printCurrentDatabase();
-			ReserveManager.printCurrentReserveList();
 			saverLoader.copyObjectToServer();
+			ReserveManager.printCurrentReserveList();
 			System.out.println("Loaded");
 		} catch (ClassNotFoundException|IOException e) {
 			System.out.println("ERROR IN LOADING");
@@ -76,15 +76,14 @@ public class ServerDorval {
 	public static void main(String[] args) throws Exception {
 		dorvalServerLogger = new MyLogger("DorvalServer"); // Creating Log file for this server
 
-		addTestCase();
-		//bookTestCase();
-		//save();
-		//load();
-		
 		gson = StartGson.initGsonFarid();
 		Thread udpThread = new Thread(new Udp(args));
 		udpThread.start();
 		
+//		addTestCase();
+//		bookTestCase();
+//		save();
+//		load();		
 	}
 	
 	public static byte[] sendMessageServerToserver(String stringToSend, String studentID){
