@@ -1,11 +1,12 @@
 package comp6231.project.mostafa.serverSide;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.SocketException;
 
+import net.rudp.ReliableServerSocket;
+import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -23,64 +24,73 @@ import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 import comp6231.shared.Constants;
 
 public class UDPlistener  implements Runnable {
-	private DatagramSocket socket;
-	private final Object sendLock = new Object();
+	private ReliableServerSocket socket;
 	
 	@Override
 	public void run() {
 		socket = null;
 		try {
-			socket = new DatagramSocket(Information.getInstance().getUDPListenPort());
+			socket = new ReliableServerSocket(Information.getInstance().getUDPListenPort());
 
 			while(true){
-				byte[] buffer = new byte[Constants.BUFFER_SIZE];
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				socket.receive(request);
-
-				Thread thread = new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						UDPlistener.this.handlePacket(request);
-					}
-				});
-				thread.start();
+				ReliableSocket aSocket = (ReliableSocket) socket.accept();
+				new Handler(aSocket).start();
 			}
 
-		}catch (SocketException e){
-			Server.log("Socket: " + e.getMessage());
 		}catch (IOException e){
-			Server.log("IO: " + e.getMessage());
-		}finally {
-			if(socket != null) socket.close();
+			Server.log("Socket: " + e.getMessage());
 		}
 	}
 	
-	private void handlePacket(DatagramPacket request) {
-			String json_msg_str = new String(request.getData(),0,request.getLength());
+	class Handler extends Thread{
+		
+		ReliableSocket socket;
+		
+		public Handler(ReliableSocket socket) {
+			this.socket = socket;
+		}
+		
+		@Override
+		public void run(){
+			try {
+				InputStream in = socket.getInputStream();
+				byte[] buffer = new byte[Constants.BUFFER_SIZE];
+
+				int size = in.read(buffer);
+				handlePacket(buffer, size);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}finally{
+				if(socket !=null){try {
+					socket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}}
+			}
+		}
+		
+		private void handlePacket(byte[] buffer, int size) {
+			String json_msg_str = new String(buffer,0,size);
 
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
 			byte[] data = result.getBytes();
 
-			send(request.getAddress(), request.getPort(), data);
+			send(socket.getInetAddress(), socket.getPort(), data);
 	}
 	
 	private void send(InetAddress address, int port, byte[] data){
-		DatagramPacket reply = new DatagramPacket(
-				data, 
-				data.length, 
-				address, 
-				port
-		);
-
+		OutputStream out;
 		try {
-			synchronized (sendLock) {
-				socket.send(reply);
-			}
+			out = socket.getOutputStream();
+			out.write(data);
+			out.flush();
+			out.close();
 		} catch (IOException e) {
-			Server.log(e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -179,4 +189,7 @@ public class UDPlistener  implements Runnable {
 		}
 		return result;
 	}
+	}
+	
+
 }

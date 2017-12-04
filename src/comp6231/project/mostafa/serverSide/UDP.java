@@ -1,11 +1,12 @@
 package comp6231.project.mostafa.serverSide;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 
+import net.rudp.ReliableSocket;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.shared.Constants;
 
@@ -24,26 +25,36 @@ public class UDP extends Thread{
 
 	@Override
 	public void run() {
-		DatagramSocket aSocket = null;
+		ReliableSocket aSocket = null;
 		try {
-			aSocket = new DatagramSocket();
+			aSocket = new ReliableSocket();
+			aSocket.connect(new InetSocketAddress("127.0.0.1", serverPort));
 			byte [] m = Server.gson.toJson(args).getBytes();
-			InetAddress aHost = InetAddress.getByName("localhost"); 
-			DatagramPacket request =
-					new DatagramPacket(m, m.length, aHost, serverPort); 
-			aSocket.send(request);
+
+			OutputStream out = aSocket.getOutputStream();
+			out.write(m);
+			out.flush();
+			out.close();
+
 			Server.log("UDP Socket Requested: "+ args);
-			byte[] buffer = new byte[Constants.BUFFER_SIZE];
-			DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-			aSocket.receive(reply);
 			
-			result = new String(reply.getData()).trim();
+			byte[] buffer = new byte[Constants.BUFFER_SIZE];
+			InputStream in = aSocket.getInputStream();
+			int size = in.read(buffer);
+			
+			result = new String(buffer, 0 ,size);
 		}catch (SocketException e){
 			Server.log("Socket: " + e.getMessage());
 		}catch (IOException e){
 			Server.log("IO: " + e.getMessage());
 		}finally {
-			if(aSocket != null) aSocket.close();
+			if(aSocket != null)
+				try {
+					aSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		} 	
 	}
 
