@@ -6,11 +6,8 @@ import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.messages.FELoginStudentMessage;
-import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
 import comp6231.project.frontEnd.udp.Sequencer;
-import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.MessageType;
 
 public class StudentImpl extends StudentOperationsPOA {
 
@@ -21,16 +18,14 @@ public class StudentImpl extends StudentOperationsPOA {
 		FEBookRoomRequestMessage message = new FEBookRoomRequestMessage(1, user_id, campus_name, room_number, date, time_slot);
 		Sequencer thread = new Sequencer (message, FEUtility.getInstance().findUDPListenerPort(user_id));
 		thread.start();
-		
-//		setTimeOut();
+
 		try {
 			thread.join();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return "";
-		// TO DO  fix return
+		return thread.getResult();
 	}
  
 	@Override
@@ -45,8 +40,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return "";
-		// TO DO  fix return
+		return thread.getResult();
 	}
 
 	@Override
@@ -61,8 +55,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return "";
-		// TO DO  fix return
+		return thread.getResult();
 	}
 
 	@Override
@@ -79,8 +72,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return "";
-		// TO DO  fix return
+		return thread.getResult();
 	}
 
 	@Override
@@ -94,18 +86,12 @@ public class StudentImpl extends StudentOperationsPOA {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		String result = "";
-//		String json = thread.getResult();
-		String json = "";
-		// TO DO  fix json return
-		FE.log("debug: "+json);
-		MessageHeader resultMessage = FE.gson.fromJson(json, MessageHeader.class);
-		if(resultMessage.message_type == MessageType.Reply){
-			FEReplyMessage replyMessage = (FEReplyMessage) resultMessage;
-			result = replyMessage.replyMessage;
+		
+		if(thread.returnStatus == ReturnStatus.CantLogin){
+			return false;
+		}else{
+			return true;
 		}
-		FE.log("reply: "+result);
-		return result.equals("True")?true:false;
 	}
 
 	@Override

@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import net.rudp.ReliableServerSocket;
+import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
@@ -14,16 +16,20 @@ import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
-	private DatagramSocket socket;
+	private ReliableServerSocket socket;
 	private final Object sendLock = new Object();
 	
 	@Override
 	public void run() {
 		socket = null;
 		try {
-			socket = new DatagramSocket(Constants.FE_PORT_LISTEN);
+			socket = new ReliableServerSocket(Constants.FE_PORT_LISTEN);
 
 			while(true){
+				ReliableSocket clientSocket = (ReliableSocket) socket.accept();
+				
+				new Handler().start();
+				
 				byte[] buffer = new byte[Constants.BUFFER_SIZE];
 				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 				socket.receive(request);
@@ -45,6 +51,10 @@ public class MultiCastRUDPListener implements Runnable{
 		}finally {
 			if(socket != null) socket.close();
 		}
+	}
+	
+	class Handler extends Thread{
+		
 	}
 	
 	private void handlePacket(DatagramPacket request) {

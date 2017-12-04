@@ -2,6 +2,7 @@ package comp6231.shared;
 
 public class Constants {
 	
+	public static final String NULL_STRING = "Null String";
 	
 	//RE1
 	public static final int KKL_PORT_LISTEN_RE1_ORIGINAL = 2900;
@@ -89,8 +90,8 @@ public class Constants {
 
 	// multi cast group
 	
-	public static final int DVL_GROUP  = 10;
-	public static final int KKL_GROUP  = 20;
-	public static final int WST_GROUP  = 30;
+	public static final String DVL_GROUP  = "DVL";
+	public static final String KKL_GROUP  = "KKL";
+	public static final String WST_GROUP  = "WST";
 	public static final int ACTIVE_SERVERS = 3;
 }

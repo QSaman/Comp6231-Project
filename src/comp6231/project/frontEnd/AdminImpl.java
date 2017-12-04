@@ -4,11 +4,8 @@ import comp6231.project.common.corba.users.AdminOperationsPOA;
 import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FELoginAdminMessage;
-import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
 import comp6231.project.frontEnd.udp.Sequencer;
-import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.MessageType;
 
 public class AdminImpl extends AdminOperationsPOA {
 
@@ -24,9 +21,7 @@ public class AdminImpl extends AdminOperationsPOA {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-//		return thread.getResult();
-		 return "";
-		 // TO DO FIX RETURN
+		return thread.getResult();
 	}
 
 	@Override
@@ -42,9 +37,7 @@ public class AdminImpl extends AdminOperationsPOA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		return thread.getResult();
-		 return "";
-		 // TO DO FIX RETURN
+		return thread.getResult();
 	}
 
 	@Override
@@ -59,19 +52,11 @@ public class AdminImpl extends AdminOperationsPOA {
 			e.printStackTrace();
 		}
 		
-		String result = "";
-//		String json = thread.getResult();
-		String json = "";
-		 // TO DO FIX JsonRETURN
-		
-		FE.log("debug: "+json);
-		MessageHeader resultMessage = FE.gson.fromJson(json, MessageHeader.class);
-		if(resultMessage.message_type == MessageType.Reply){
-			FEReplyMessage replyMessage = (FEReplyMessage) resultMessage;
-			result = replyMessage.replyMessage;
+		if(thread.returnStatus == ReturnStatus.CantLogin){
+			return false;
+		}else{
+			return true;
 		}
-		FE.log("reply: "+result);
-		return result.equals("True")?true:false;
 	}
 
 	@Override

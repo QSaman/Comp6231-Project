@@ -4,7 +4,8 @@ import comp6231.shared.Constants;
 
 public class FEUtility {
 	private static FEUtility instance = null;
-		
+	private static final Object lock = new Object();
+	
 	private FEUtility(){
 	}
 
@@ -12,13 +13,15 @@ public class FEUtility {
 	 * @return the instance
 	 */
 	public static FEUtility getInstance() {
-		if(instance == null){
-			instance = new FEUtility();
+		synchronized (lock) {
+			if(instance == null){
+				instance = new FEUtility();
+			}
+			return instance;
 		}
-		return instance;
 	}
 	
-	public int findUDPListenerPort(String id){
+	public String findUDPListenerPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
 			return Constants.DVL_GROUP;
 		}else if (id.contains("KKL") || id.contains("kkl")){
@@ -26,7 +29,7 @@ public class FEUtility {
 		}else if(id.contains("WST") || id.contains("wst")) {
 			return Constants.WST_GROUP;
 		}else{
-			return -1;
+			return Constants.NULL_STRING;
 		}
 	}
 }

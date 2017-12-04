@@ -8,7 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
+import comp6231.project.frontEnd.ReturnStatus;
+import comp6231.project.frontEnd.messages.FEReplyMessage;
+import comp6231.project.frontEnd.udp.FEPair.Info;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
+import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.shared.Constants;
 
 public class Sequencer extends Thread{
@@ -22,11 +27,14 @@ public class Sequencer extends Thread{
 	private static final Object lock = new Object();
 
 	private MessageHeader args;
-	private int group;
+	private String group;
+	private String result;
+	public ReturnStatus returnStatus;
 	
-	public Sequencer(MessageHeader args, int group){
+	public Sequencer(MessageHeader args, String group){
 		this.args = args;
 		this.group = group;
+		result = "";
 	}
 
 	@Override
@@ -40,9 +48,9 @@ public class Sequencer extends Thread{
 	private void adjustSeqNumber(){
 		synchronized (lock) {
 			args.sequence_number = sequenceNumber;
-			sequenceNumber ++;
-			pair = new FEPair();
+			pair = new FEPair(sequenceNumber, group);
 			holdBack.put(sequenceNumber, pair);
+			sequenceNumber ++;
 		}
 	}
 
@@ -51,22 +59,21 @@ public class Sequencer extends Thread{
 		int[] replicaPorts =  new int[3];
 
 
-		switch (group) {
-		case Constants.DVL_GROUP:
+		if(group.equals(Constants.DVL_GROUP)){
 			replicaPorts[0] = Constants.dvlPortListenFaridActive;
 			replicaPorts[1] = Constants.dvlPortListenRe1Active;
 			replicaPorts[2] = Constants.dvlPortListenRe2Active;
-			break;
-		case Constants.KKL_GROUP:
+		}else if(group.equals(Constants.KKL_GROUP)){
 			replicaPorts[0] = Constants.kklPortListenFaridActive;
 			replicaPorts[1] = Constants.kklPortListenRe1Active;
 			replicaPorts[2] = Constants.kklPortListenRe2Active;
-			break;
-		case Constants.WST_GROUP:
+		}else if(group.equals(Constants.WST_GROUP)){
 			replicaPorts[0] = Constants.wstPortListenFaridActive;
 			replicaPorts[1] = Constants.wstPortListenRe1Active;
 			replicaPorts[2] = Constants.wstPortListenRe2Active;
-			break;
+		}else{
+			FE.log("group is not valid in sequencer class: " + group);
+			return;
 		}
 
 		for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
@@ -81,7 +88,7 @@ public class Sequencer extends Thread{
 						ReliableSocket sendToReplica = new ReliableSocket();
 
 						sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
-
+						
 						OutputStream out = sendToReplica.getOutputStream();
 						out.write(sendBuffer);
 
@@ -98,115 +105,61 @@ public class Sequencer extends Thread{
 	}
 	
 	public void setTimeOut(){
-        ErrorHandler res = new ErrorHandler(pair, id, city);
-        res.start();
+		try {
+			if(pair.semaphore.tryAcquire(2,TimeUnit.MINUTES)){
+					for(int i = 0 ; i< Constants.ACTIVE_SERVERS; ++i){
+						handlePair(i);
+					}
+					if(returnStatus != ReturnStatus.ErrorInMessageType && returnStatus != ReturnStatus.FakeGenertor && returnStatus != ReturnStatus.CantLogin){
+						returnStatus = ReturnStatus.Ok;
+					}
+			}else{
+				generateResult("Time out for sequence Number: "+ pair.id+ " for the group of : "+ pair.group, ReturnStatus.Timeout);
+				// TODO handle rm that killed here if needed
+			}
+		} catch (InterruptedException e) {
+			generateResult(ReturnStatus.ErrorSetTimeOut.toString(), ReturnStatus.ErrorSetTimeOut);
+			e.printStackTrace();
+		}
+		
 	}
 	
-	class ErrorHandler extends Thread {
+	private void handlePair(int index){
+		Info info = pair.infos.get(index);
+		String json = info.json;
+		MessageHeader message = FE.gson.fromJson(json, MessageHeader.class);
+		
+		if(message.message_type == MessageType.Reply){
+			FEReplyMessage replyMessage = (FEReplyMessage) message;
+			if(replyMessage.status){
+				FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
+				if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
+					if(replyMessage.command_type.equals("False")){
+						returnStatus = ReturnStatus.CantLogin;
+						result = "login faild";
+					}
+					result = "login done";
+				}else{
+					result += replyMessage.replyMessage + " ";
+				}
 
-        private FEPair pair;
-        private int id;
-        private String city;
-        private String result;
+			}else{
+				FE.log("Fake Generator is on for packet with sequence Number: " +pair.id + "in Group of : " + pair.group + "with port: "+ info.port);
+				returnStatus = ReturnStatus.FakeGenertor;
+				// TODO rm needs handle this 
+			}
+		}else{
+			generateResult("Message type is not replay something is wrong!", ReturnStatus.ErrorInMessageType);
+		}
+	}
 
-        public ErrorHandler(FEPair pair, int id, String city) {
-            this.pair = pair;
-            this.id = id;
-            this.city = city;
-        }
-
-        public String readResult() {
-            return result;
-        }
-
-        @Override
-        public void run() {
-
-            try {
-
-                pair.semaphore.tryAcquire(2,TimeUnit.MINUTES);
-
-                ArrayList<String> results = pair.entry.get(id);
-
-
-
-                String p0 = results.get(0).split(",")[0];
-
-                System.out.println("Replica 1 has produced " + p0);
-
-                String p1 = results.get(1).split(",")[0];
-
-                System.out.println("Replica 2 has produced " + p1);
-
-                String p2 = "";
-
-                if (results.size() <= 2) {
-                    result = p0;
-                    reportError(2, city);
-                    return;
-                }
-                else {
-                    p2 =  results.get(2).split(",")[0];
-                    System.out.println("Replica 3 has produced " + p2);
-
-                }
-
-                if (pair.method != Protocol.GET_BOOKED_FLIGHT_COUNT) {
-
-                    if (p0.equals(p1)) {
-
-                        if (!p0.equals(p2)) {
-
-                            int id = Integer.valueOf(results.get(2).split(",")[1]);
-
-                            reportError(id, city);
-
-                        }
-
-                        result = p0;
-
-
-                    } else if (p0.equals(p2)) {
-
-                        if (!p0.equals(p1)) {
-
-                            int id = Integer.valueOf(results.get(1).split(",")[1]);
-
-                            reportError(id, city);
-
-                        }
-
-                        result = p0;
-
-                    } else if (p1.equals(p2)) {
-
-                        if (!p1.equals(p0)) {
-
-                            int id = Integer.valueOf(results.get(0).split(",")[1]);
-
-                            reportError(id, city);
-
-                        }
-
-                        result = p1;
-
-                    } else {
-
-                        System.out.println("no bugs");
-                        result = p1;
-                    }
-                }
-                else {
-                    result = p0;
-                }
-
-
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
+	private void generateResult(String msg, ReturnStatus status){
+		result = msg;
+		returnStatus = status;
+		FE.log(result);
+	}
+	
+	public String getResult(){
+		return result;
+	}
 }
