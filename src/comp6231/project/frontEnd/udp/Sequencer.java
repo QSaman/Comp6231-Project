@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
+import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.ReturnStatus;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
-import comp6231.project.frontEnd.udp.FEPair.Info;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;

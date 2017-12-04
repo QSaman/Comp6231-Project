@@ -3,12 +3,13 @@ package comp6231.project.frontEnd.udp;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+import comp6231.project.frontEnd.Info;
 import comp6231.shared.Constants;
 
 public class FEPair {
 	public ConcurrentHashMap<Integer, Info> infos; 
     public Semaphore semaphore;
-    public int index ;
+    private int index ;
     public int id;
     public String group;
     
@@ -19,14 +20,18 @@ public class FEPair {
         semaphore = new Semaphore(-Constants.ACTIVE_SERVERS + 1);
         infos = new ConcurrentHashMap<Integer, Info>();   
     }
-
-    class Info {
-    	public String json;
-    	public int port;
-    	
-    	public Info(String json , int port) {
-    		this.json = json;
-    		this.port = port;
-		}
+    
+    public synchronized void setIndex(int index){
+    	this.index = index;
+    }
+    
+    public synchronized int getIndex(){
+    	return index;
+    }
+    
+    public synchronized int adjustIndex(){
+    	int localIndex = index;
+    	index ++;
+    	return localIndex;
     }
 }

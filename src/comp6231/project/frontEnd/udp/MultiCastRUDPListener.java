@@ -1,14 +1,12 @@
 package comp6231.project.frontEnd.udp;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.io.InputStream;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
+import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
@@ -17,8 +15,7 @@ import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
 	private ReliableServerSocket socket;
-	private final Object sendLock = new Object();
-	
+
 	@Override
 	public void run() {
 		socket = null;
@@ -27,85 +24,70 @@ public class MultiCastRUDPListener implements Runnable{
 
 			while(true){
 				ReliableSocket clientSocket = (ReliableSocket) socket.accept();
-				
-				new Handler().start();
-				
-				byte[] buffer = new byte[Constants.BUFFER_SIZE];
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				socket.receive(request);
 
-				Thread thread = new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						MultiCastRUDPListener.this.handlePacket(request);
-					}
-				});
-				thread.start();
+				new Handler(clientSocket).start();
 			}
 
-		}catch (SocketException e){
-			FE.log("Socket: " + e.getMessage());
 		}catch (IOException e){
-			FE.log("IO: " + e.getMessage());
-		}finally {
-			if(socket != null) socket.close();
+			FE.log("Socket: " + e.getMessage());
 		}
 	}
-	
+
 	class Handler extends Thread{
-		
-	}
-	
-	private void handlePacket(DatagramPacket request) {
-			String json_msg_str = new String(request.getData(),0,request.getLength());
+		private ReliableSocket socket;
+
+		public Handler(ReliableSocket socket) {
+			this.socket = socket;
+		}
+
+		@Override
+		public void run(){
+			try {
+				InputStream in = socket.getInputStream();
+				byte[] buffer = new byte[Constants.BUFFER_SIZE];
+
+				int size = in.read(buffer);
+				handlePacket(buffer, size);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}finally{
+				if(socket !=null){try {
+					socket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}}
+			}
+		}
+
+		private void handlePacket(byte[] buffer, int size) {
+			String json_msg_str = new String(buffer,0,size);
 
 			FE.log("MULTI CAST UDP Socket Received JSON: "+json_msg_str);
-			String result = process(json_msg_str);
-			byte[] data = result.getBytes();
-
-			send(request.getAddress(), request.getPort(), data);
-	}
-	
-	private void send(InetAddress address, int port, byte[] data){
-		DatagramPacket reply = new DatagramPacket(
-				data, 
-				data.length, 
-				address, 
-				port
-		);
-
-		try {
-			synchronized (sendLock) {
-				socket.send(reply);
-			}
-		} catch (IOException e) {
-			FE.log(e.getMessage());
+			process(json_msg_str);
 		}
-	}
-	
-	private String process(String json_msg_str){
-		String result = null;
-		MessageHeader json_msg = FE.gson.fromJson(json_msg_str, MessageHeader.class);
-		
-		if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
-			if(json_msg.message_type == MessageType.Reply){
-				FEReplyMessage replyMessage = (FEReplyMessage) json_msg;
-				result = processFrontEndToserver(replyMessage);
+		private void process(String json_msg_str){
+			MessageHeader json_msg = FE.gson.fromJson(json_msg_str, MessageHeader.class);
+
+			if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
+				if(json_msg.message_type == MessageType.Reply){
+					FEReplyMessage replyMessage = (FEReplyMessage) json_msg;
+					processFrontEndToserver(replyMessage);
+				}{
+					FE.log("MulitCast udp error in message type");
+				}
+			}else{
+				FE.log("Multi cast udp error in protocol type");
 			}
 		}
-		return result;
-	}
-	
-	private String processFrontEndToserver(FEReplyMessage replyMessage){
-		String result = "";
-		if(replyMessage.status){
-			result = replyMessage.replyMessage;
-		}else{
-			result = "Fake Generator is on";
+
+		private void processFrontEndToserver(FEReplyMessage replyMessage){
+			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
+			pair.infos.put(pair.adjustIndex(), new Info(replyMessage.replyMessage, socket.getPort()));
+			pair.semaphore.release();
+			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);	
 		}
-		
-		FE.log(result);
-		return result;	
 	}
+
+
 }
