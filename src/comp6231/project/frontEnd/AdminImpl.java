@@ -74,8 +74,7 @@ public class AdminImpl extends AdminOperationsPOA {
 
 	@Override
 	public String killServer(String campusName) {
-		PortSwitcher.switchServer(campusName);
-		return "Server killed";
+		return PortSwitcher.switchServer(campusName);
 	}
 
 }

@@ -109,8 +109,7 @@ public class StudentImpl extends StudentOperationsPOA {
 
 	@Override
 	public String killServer(String campusName) {
-		PortSwitcher.switchServer(campusName);
-		return "Server killed";
+		return PortSwitcher.switchServer(campusName);
 	}
 
 }
