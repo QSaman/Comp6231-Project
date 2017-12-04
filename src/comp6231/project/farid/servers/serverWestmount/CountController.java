@@ -5,7 +5,11 @@ import java.time.LocalDate;
 
 class CountController implements Serializable {
 
-    private int counter;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3710564899781025220L;
+	private int counter;
     private LocalDate expireDate;
 
     CountController(LocalDate startDate) {

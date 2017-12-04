@@ -1,9 +1,6 @@
 package comp6231.project.farid.servers.serverDorval;
 
 import java.io.Serializable;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -11,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import comp6231.project.farid.sharedPackage.UdpSender;
 import comp6231.shared.Constants;
 
 /**
@@ -18,7 +16,11 @@ import comp6231.shared.Constants;
  */
 public class ReserveManager implements Serializable {
 
-    static Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7011009815471253817L;
+	static Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
     static Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
 
     private int roomNumber;
@@ -55,38 +57,24 @@ public class ReserveManager implements Serializable {
     }
 
     private void resetCounterInOtherServers() throws Exception {
-        DatagramSocket clientSocket3 = new DatagramSocket();
-        InetAddress IPAddress3 = InetAddress.getByName("localhost");
-        byte[] sendData3 = new byte[1024];
-        byte[] receiveData3 = new byte[1024];
 
         String stringToSend3 = "reset-" + studentID;
-        sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,studentID);
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.kklPortListenFaridActive);
-        clientSocket3.send(sendPacket3);
-
-        DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
-        clientSocket3.receive(receivePacket3);
-        String result3 = new String(receivePacket3.getData());
-
-        clientSocket3.close();
-
-        DatagramSocket clientSocket4 = new DatagramSocket();
-        InetAddress IPAddress4 = InetAddress.getByName("localhost");
-        byte[] sendData4 = new byte[1024];
-        byte[] receiveData4 = new byte[1024];
+        byte [] sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,studentID);
+        UdpSender sender = new UdpSender(sendData3, Constants.kklPortListenFaridActive, "");
+        sender.start();
+        
+        sender.join();
+        String result3 = sender.getResult();
+        ServerDorval.dorvalServerLogger.log(result3);
 
         String stringToSend4 = "reset-" + studentID;
-        sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,studentID);
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.wstPortListenFaridActive);
-        clientSocket4.send(sendPacket4);
-
-        DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);
-        clientSocket4.receive(receivePacket4);
-        String result4 = new String(receivePacket4.getData());
-
-        clientSocket4.close();
-
+        byte[] sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,studentID);
+        UdpSender sender2 = new UdpSender(sendData4, Constants.wstPortListenFaridActive, "");
+        sender2.start();
+        
+        sender.join();
+        String result4 = sender.getResult();
+        ServerDorval.dorvalServerLogger.log(result4);
     }
 
     static boolean removeFromReserveList(String studentID, String bookingID) throws Exception {
@@ -142,37 +130,19 @@ public class ReserveManager implements Serializable {
     }
 
     public static LocalDate getBestExpireDateFromServers(String id) throws Exception {
-        DatagramSocket clientSocket3 = new DatagramSocket();
-        InetAddress IPAddress3 = InetAddress.getByName("localhost");
-        byte[] sendData3 = new byte[1024];
-        byte[] receiveData3 = new byte[1024];
 
         String stringToSend3 = "getExpire-" + id;
-        sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,"");
-        DatagramPacket sendPacket3 = new DatagramPacket(sendData3, sendData3.length, IPAddress3, Constants.kklPortListenFaridActive);
-        clientSocket3.send(sendPacket3);
-
-        DatagramPacket receivePacket3 = new DatagramPacket(receiveData3, receiveData3.length);
-        clientSocket3.receive(receivePacket3);
-        String result3 = new String(receivePacket3.getData());
-
-        clientSocket3.close();
-
-        DatagramSocket clientSocket4 = new DatagramSocket();
-        InetAddress IPAddress4 = InetAddress.getByName("localhost");
-        byte[] sendData4 = new byte[1024];
-        byte[] receiveData4 = new byte[1024];
-
-        String stringToSend4 = "getExpire-" + id;
-        sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,"");
-        DatagramPacket sendPacket4 = new DatagramPacket(sendData4, sendData4.length, IPAddress4, Constants.wstPortListenFaridActive);
-        clientSocket4.send(sendPacket4);
-
-        DatagramPacket receivePacket4 = new DatagramPacket(receiveData4, receiveData4.length);
-        clientSocket4.receive(receivePacket4);
-        String result4 = new String(receivePacket4.getData());
-
-        clientSocket4.close();
+        byte [] sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,"");
+        UdpSender sender = new UdpSender(sendData3, Constants.kklPortListenFaridActive, "");
+        UdpSender sender2 = new UdpSender(sendData3, Constants.wstPortListenFaridActive, "");
+        sender.start();
+        sender2.start();
+        
+        sender.join();
+        sender2.join();
+        
+        String result3 = sender.getResult();
+        String result4 = sender2.getResult();
 
         String expireDateString1 = result3.trim();
         LocalDate expireDate1 = (expireDateString1.equals("0") ? LocalDate.now() : LocalDate.of(Integer.parseInt(expireDateString1.substring(0, 4))

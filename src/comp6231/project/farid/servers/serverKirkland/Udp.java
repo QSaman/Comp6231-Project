@@ -102,13 +102,14 @@ public class Udp implements Runnable {
 		if (isFeToServer) {
 
 			// json = json.substring(3);
+			int seqNumber = json_msg.sequence_number;
 			if (json_msg.command_type == CommandType.LoginStudent) {
 
 				FELoginStudentMessage message = (FELoginStudentMessage) json_msg;
 
 				String tempStudentID = message.userId.toUpperCase();
 				packetToSend = ServerKirkland.setStudentID(tempStudentID) ? "True" : "False";
-				replyMessage = new FEReplyMessage(1, CommandType.LoginStudent, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginStudent, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.LoginAdmin) {
 
@@ -116,7 +117,7 @@ public class Udp implements Runnable {
 
 				String tempAdminID = message.userId.toUpperCase();
 				packetToSend = ServerKirkland.setAdminID(tempAdminID) ? "True" : "False";
-				replyMessage = new FEReplyMessage(1, CommandType.LoginAdmin, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginAdmin, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.SignOut) {
 
@@ -124,7 +125,7 @@ public class Udp implements Runnable {
 
 				String tempID = message.userId.toUpperCase();
 				ServerKirkland.signOut(tempID);
-				replyMessage = new FEReplyMessage(1, CommandType.SignOut, "Sign Out Called", true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.SignOut, "Sign Out Called", true);
 
 			} else if (json_msg.command_type == CommandType.Book_Room) {
 
@@ -139,7 +140,7 @@ public class Udp implements Runnable {
 				LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-")+1));
 
 				packetToSend = ServerKirkland.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime, endTime);
-				replyMessage = new FEReplyMessage(1, CommandType.Book_Room, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
 
@@ -149,7 +150,7 @@ public class Udp implements Runnable {
 				String tempBookingID = message.booking_id;
 
 				packetToSend = ServerKirkland.cancelBooking(tempStudentID, tempBookingID);
-				replyMessage = new FEReplyMessage(1, CommandType.Cancel_Book_Room, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Cancel_Book_Room, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.Get_Available_TimeSlots) {
 
@@ -159,7 +160,7 @@ public class Udp implements Runnable {
 				LocalDate date = getLocalDate(message.date);
 
 				packetToSend = ServerKirkland.getAvailableTimeSlot(tempStudentID, date);
-				replyMessage = new FEReplyMessage(1, CommandType.Get_Available_TimeSlots, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Get_Available_TimeSlots, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.Change_Reservation) {
 
@@ -176,7 +177,7 @@ public class Udp implements Runnable {
 
 				packetToSend = ServerKirkland.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
 						startTime, endTime);
-				replyMessage = new FEReplyMessage(1, CommandType.Change_Reservation, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.Create_Room) {
 
@@ -192,7 +193,7 @@ public class Udp implements Runnable {
 				}
 
 				packetToSend = ServerKirkland.createRoom(adminID, roomNumber, date, listOfTimeSlots);
-				replyMessage = new FEReplyMessage(1, CommandType.Create_Room, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Create_Room, packetToSend, true);
 
 			} else if (json_msg.command_type == CommandType.Delete_Room) {
 
@@ -208,7 +209,7 @@ public class Udp implements Runnable {
 				}
 
 				packetToSend = ServerKirkland.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
-				replyMessage = new FEReplyMessage(1, CommandType.Delete_Room, packetToSend, true);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, true);
 			}
 		} else {
 			// legacy code

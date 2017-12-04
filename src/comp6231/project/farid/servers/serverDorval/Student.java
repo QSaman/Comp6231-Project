@@ -1,19 +1,21 @@
 package comp6231.project.farid.servers.serverDorval;
 
 import java.io.Serializable;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+import comp6231.project.farid.sharedPackage.UdpSender;
 import comp6231.shared.Constants;
 
 public class Student implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 9101690391803558602L;
 	private String studentID;
 
 	public boolean setStudentID(String studentID) {
@@ -95,37 +97,19 @@ public class Student implements Serializable {
 
 	private boolean isStudentBookingCounterWithAllServersOK() throws Exception {
 
-		DatagramSocket clientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = new byte[1024];
-		byte[] receiveData = new byte[1024];
-
-		String stringToSend = "getCounter-" + studentID;
-		sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Constants.kklPortListenFaridActive);
-		clientSocket.send(sendPacket);
-
-		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-		clientSocket.receive(receivePacket);
-		String result = new String(receivePacket.getData());
-
-		clientSocket.close();
-
-		DatagramSocket clientSocket2 = new DatagramSocket();
-		InetAddress IPAddress2 = InetAddress.getByName("localhost");
-		byte[] sendData2 = new byte[1024];
-		byte[] receiveData2 = new byte[1024];
-
-		String stringToSend2 = "getCounter-" + studentID;
-		sendData2 = ServerDorval.sendMessageServerToserver(stringToSend2,studentID);
-		DatagramPacket sendPacket2 = new DatagramPacket(sendData2, sendData2.length, IPAddress2, Constants.wstPortListenFaridActive);
-		clientSocket2.send(sendPacket2);
-
-		DatagramPacket receivePacket2 = new DatagramPacket(receiveData2, receiveData2.length);
-		clientSocket2.receive(receivePacket2);
-		String result2 = new String(receivePacket2.getData());
-
-		clientSocket2.close();
+        String stringToSend = "getCounter-" + studentID;
+        byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+        UdpSender sender = new UdpSender(sendData, Constants.kklPortListenFaridActive, "");
+        UdpSender sender2 = new UdpSender(sendData, Constants.wstPortListenFaridActive, "");
+        sender.start();
+        sender2.start();
+        
+        sender.join();
+        sender2.join();
+        
+        String result = sender.getResult();
+        String result2 = sender2.getResult();
+		
 		int total;
 		synchronized (Locker.counterLock) {
 			int counterOnDVL = (ReserveManager.counterDB.containsKey(studentID)
@@ -150,25 +134,15 @@ public class Student implements Serializable {
 				else if (campus == 3)
 					port = Constants.wstPortListenFaridActive;
 
-				DatagramSocket clientSocket = new DatagramSocket();
-				InetAddress IPAddress = InetAddress.getByName("localhost");
-				byte[] sendData = new byte[1024];
-				byte[] receiveData = new byte[1024];
-
-				String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
-						 						+ endTime;
-				// exp. creating a ServerToServerMessage
-				sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
-				
-				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-				clientSocket.send(sendPacket);
-
-				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-				clientSocket.receive(receivePacket);
-				String result = new String(receivePacket.getData());
-
-				clientSocket.close();
-
+		        String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
+ 						+ endTime;
+		        byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+		        UdpSender sender = new UdpSender(sendData, port, "");
+		        sender.start();
+		        
+		        sender.join();
+		        
+		        String result = sender.getResult();
 				return result;
 			}
 
@@ -243,22 +217,17 @@ public class Student implements Serializable {
 	}
 
 	private String getNumberOfAvailableTimesFromOtherServer(int port, LocalDate date) throws Exception {
-		DatagramSocket clientSocket = new DatagramSocket();
-		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = new byte[1024];
-		byte[] receiveData = new byte[1024];
+
 		String sentence = date.toString();
+		byte [] sendData = ServerDorval.sendMessageServerToserver(sentence,studentID);
 
-		sendData = ServerDorval.sendMessageServerToserver(sentence,studentID);
+        UdpSender sender = new UdpSender(sendData, port, "");
 
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-		clientSocket.send(sendPacket);
+        sender.start();
+        
+        sender.join();
 
-		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-		clientSocket.receive(receivePacket);
-		String result = new String(receivePacket.getData());
-
-		clientSocket.close();
+        String result = sender.getResult();
 
 		return result;
 	}
@@ -291,23 +260,17 @@ public class Student implements Serializable {
 				port = Constants.kklPortListenFaridActive;
 			}
 
-			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("localhost");
-			byte[] sendData = new byte[1024];
-			byte[] receiveData = new byte[1024];
-
 			String stringToSend = "cancel-" + studentID + "#" + bookingID;
-			
-			sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
 
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-			clientSocket.send(sendPacket);
+			byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
 
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-			clientSocket.receive(receivePacket);
-			String result = new String(receivePacket.getData());
+	        UdpSender sender = new UdpSender(sendData, port, "");
 
-			clientSocket.close();
+	        sender.start();
+	        
+	        sender.join();
+
+	        String result = sender.getResult();
 
 			return result;
 		}
@@ -361,24 +324,18 @@ public class Student implements Serializable {
 				port = Constants.kklPortListenFaridActive;
 			}
 
-			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("localhost");
-			byte[] sendData = new byte[1024];
-			byte[] receiveData = new byte[1024];
-
 			String stringToSend = "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
 					+ endTime + "&" + bookingID;
 			
-			sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+			byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
 
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-			clientSocket.send(sendPacket);
+	        UdpSender sender = new UdpSender(sendData, port, "");
 
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-			clientSocket.receive(receivePacket);
-			String result = new String(receivePacket.getData());
+	        sender.start();
+	        
+	        sender.join();
 
-			clientSocket.close();
+	        String result = sender.getResult();
 
 			return result;
 		}

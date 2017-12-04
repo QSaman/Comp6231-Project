@@ -7,7 +7,11 @@ import java.util.*;
 
 public class Admin implements Serializable {
 
-    private String adminID;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1645272403502706175L;
+	private String adminID;
 
     public String createRoom(int roomNumber, LocalDate date, LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots) {
 
