@@ -7,8 +7,6 @@ import java.util.logging.SimpleFormatter;
 
 import com.google.gson.Gson;
 
-import comp6231.project.farid.servers.serverDorval.ReserveManager;
-import comp6231.project.farid.servers.serverDorval.SaverLoader;
 import comp6231.project.messageProtocol.StartGson;
 
 public class Server {
@@ -19,23 +17,23 @@ public class Server {
 		if(args[0] == null){
 			return;
 		}
-		
+
 		// save(); //This is for saving the getInstance of Database to the file
 		// load(); //This is for loading and setting the instance of Database from the file
-		
+
 		Information.getInstance().initializeServerInformation(Integer.parseInt(args[0]));
 		initializeLog();
-		
-		gson = StartGson.initGsonMostafa();
+
+		gson = Information.getInstance().isReOne == true ? StartGson.initGsonMostafa() : StartGson.initGsonRE2();
 		log(Information.getInstance().getServerName()+" Started");
-		
+
 		Thread t = new Thread(new UDPlistener());
 		t.start();
 		Thread time = new Thread(new Timer());
 		time.start();
 	}
 
-private static void save() throws Exception {
+	private static void save() throws Exception {
 		try {
 			Database.getInstance().serializeDataOut();
 			System.out.println("Saved");
@@ -43,7 +41,7 @@ private static void save() throws Exception {
 			System.out.println("ERROR IN SERIALIZING");
 		}
 	}
-	
+
 	private static void load() throws Exception{
 		try {
 			Database.serializeDataIn();
@@ -72,10 +70,10 @@ private static void save() throws Exception {
 		} catch (IOException e) {  
 			e.printStackTrace();  
 		}
-		
-//		log.setUseParentHandlers(false);
+
+		//		log.setUseParentHandlers(false);
 	}
-		
+
 	public static void log(String text){
 		log.info("ServerSide->"+"id: "+Information.getInstance().getServerName()+" Message: "+text);
 	}

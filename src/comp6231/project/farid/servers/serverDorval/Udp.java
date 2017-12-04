@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
@@ -54,7 +55,8 @@ public class Udp implements Runnable {
 	class Handler extends Thread{
 
 		private ReliableSocket socket;
-
+		private ProtocolType protocolType;
+		
 		public Handler(ReliableSocket socket) {
 			this.socket = socket;
 		}
@@ -90,14 +92,29 @@ public class Udp implements Runnable {
 
 		private void send(InetAddress address, int port, byte[] data){
 			OutputStream out;
-			try {
-				out = socket.getOutputStream();
-				out.write(data);
-				out.flush();
-				out.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(protocolType == ProtocolType.Server_To_Server){
+				try {
+					out = socket.getOutputStream();
+					out.write(data);
+					out.flush();
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				try {
+					ReliableSocket aSocket = new ReliableSocket();
+					aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
+					out = aSocket.getOutputStream();
+					out.write(data);
+					out.flush();
+					out.close();
+					aSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -108,7 +125,8 @@ public class Udp implements Runnable {
 			FEReplyMessage replyMessage = null;
 
 			if (isFeToServer) {
-
+				
+				protocolType = ProtocolType.Frontend_To_Replica;
 				//json = json.substring(3);
 				int seqNumber = json_msg.sequence_number;
 				if (json_msg.command_type == CommandType.LoginStudent) {
@@ -221,6 +239,7 @@ public class Udp implements Runnable {
 					replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, true);
 				}
 			} else {
+				protocolType  = ProtocolType.Server_To_Server;
 				// legacy code
 				ServerToServerMessage message = (ServerToServerMessage) json_msg;
 				String request = message.legacy;

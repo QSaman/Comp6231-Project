@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
@@ -45,7 +46,8 @@ public class UDPlistener  implements Runnable {
 	class Handler extends Thread{
 
 		ReliableSocket socket;
-
+		private ProtocolType protocolType;
+		
 		public Handler(ReliableSocket socket) {
 			this.socket = socket;
 		}
@@ -72,7 +74,7 @@ public class UDPlistener  implements Runnable {
 
 		private void handlePacket(byte[] buffer, int size) {
 			String json_msg_str = new String(buffer,0,size);
-
+			
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
@@ -83,15 +85,31 @@ public class UDPlistener  implements Runnable {
 
 		private void send(InetAddress address, int port, byte[] data){
 			OutputStream out;
-			try {
-				out = socket.getOutputStream();
-				out.write(data);
-				out.flush();
-				out.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(protocolType == ProtocolType.Server_To_Server){
+				try {
+					out = socket.getOutputStream();
+					out.write(data);
+					out.flush();
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				try {
+					ReliableSocket aSocket = new ReliableSocket();
+					aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
+					out = aSocket.getOutputStream();
+					out.write(data);
+					out.flush();
+					out.close();
+					aSocket.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+
 		}
 
 		private String process(String json_msg_str){
@@ -99,9 +117,11 @@ public class UDPlistener  implements Runnable {
 			MessageHeader json_msg = Server.gson.fromJson(json_msg_str, MessageHeader.class);
 
 			if(json_msg.protocol_type == ProtocolType.Server_To_Server){
+				protocolType = ProtocolType.Server_To_Server;
 				ServerToServerMessage message = (ServerToServerMessage) json_msg;
 				result  = processServerToServer(message.legacy.split(" "));
 			}else{
+				protocolType = ProtocolType.Frontend_To_Replica;
 				if(json_msg.message_type == MessageType.Request){
 					result = processFrontEndToServer(json_msg);
 				}else{
