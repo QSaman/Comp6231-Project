@@ -82,23 +82,6 @@ public class UdpServer extends Thread {
 		}		
 	}
 	
-	class UdpDatagram implements Runnable
-	{
-		public byte[] data;
-		public InetAddress remote_address;
-		public int remote_port;
-		public UdpDatagram(byte[] data, InetAddress remote_address, int remote_port)
-		{
-			this.data = data;
-			this.remote_address = remote_address;
-			this.remote_port = remote_port;
-		}
-		@Override
-		public void run() {
-			UdpServer.this.processRequest(data, remote_address, remote_port);			
-		}
-	}
-	
 	@Override
 	public void run()
 	{
@@ -108,7 +91,13 @@ public class UdpServer extends Thread {
 			DatagramPacket packet = new DatagramPacket(buffer, datagram_send_size);
 			try {
 				socket.receive(packet);
-				Thread thread = new Thread(new UdpDatagram(Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength()), packet.getAddress(), packet.getPort()));
+				Thread thread = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						UdpServer.this.processRequest(Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength()), packet.getAddress(), packet.getPort());
+					}
+				});
 				thread.start();
 				
 			} catch (IOException e) {

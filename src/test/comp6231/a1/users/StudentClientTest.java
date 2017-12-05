@@ -137,7 +137,7 @@ public class StudentClientTest {
 		booking_list_dvl.add(new Student("DVLS1113", booking_id));
 	}
 	
-	@Test
+	//@Test
 	public final void testchangeReservation() throws SecurityException, IOException, NotBoundException, InterruptedException
 	{
 		admin_test.testStartWeek();
@@ -174,7 +174,7 @@ public class StudentClientTest {
 	/**
 	 * Test method for {@link comp6231.a1.users.StudentClient#getAvailableTimeSlot(comp6231.a1.common.DateReservation)}.
 	 */
-	@Test
+	//@Test
 	public final void testGetAvailableTimeSlot() {
 		//fail("Not yet implemented"); // TODO
 	}
@@ -186,7 +186,7 @@ public class StudentClientTest {
 	 * @throws SecurityException 
 	 * @throws InterruptedException 
 	 */
-	@Test
+	//@Test
 	public final void testCancelBooking() throws SecurityException, IOException, NotBoundException, InterruptedException {
 		testBookRoomDVL();
 		
