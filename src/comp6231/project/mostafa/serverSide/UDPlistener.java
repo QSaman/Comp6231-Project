@@ -1,5 +1,6 @@
 package comp6231.project.mostafa.serverSide;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,8 +59,16 @@ public class UDPlistener  implements Runnable {
 				InputStream in = socket.getInputStream();
 				byte[] buffer = new byte[Constants.BUFFER_SIZE];
 
-				int size = in.read(buffer);
-				handlePacket(buffer, size);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				while(true) {
+				  int n = in.read(buffer);
+				  if( n < 0 ) break;
+				  baos.write(buffer,0,n);
+				}
+
+				byte data[] = baos.toByteArray();			    
+				handlePacket(data);
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}finally{
@@ -72,8 +81,8 @@ public class UDPlistener  implements Runnable {
 			}
 		}
 
-		private void handlePacket(byte[] buffer, int size) {
-			String json_msg_str = new String(buffer,0,size);
+		private void handlePacket(byte[] buffer) {
+			String json_msg_str = new String(buffer,0,buffer.length);
 			
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);

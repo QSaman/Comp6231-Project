@@ -1,5 +1,6 @@
 package comp6231.project.farid.servers.serverDorval;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,9 +67,16 @@ public class Udp implements Runnable {
 			try {
 				InputStream in = socket.getInputStream();
 				byte[] buffer = new byte[Constants.BUFFER_SIZE];
+				
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				while(true) {
+				  int n = in.read(buffer);
+				  if( n < 0 ) break;
+				  baos.write(buffer,0,n);
+				}
 
-				int size = in.read(buffer);
-				handlePacket(buffer, size);
+				byte data[] = baos.toByteArray();			    
+				handlePacket(data);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally{
@@ -81,8 +89,8 @@ public class Udp implements Runnable {
 			}
 		}
 
-		private void handlePacket(byte[] buffer, int size) throws Exception {
-			String json = new String(buffer,0,size).trim();
+		private void handlePacket(byte[] buffer) throws Exception {
+			String json = new String(buffer,0,buffer.length).trim();
 
 			String packetToSend = processData(json);
 			byte[] data = packetToSend.getBytes();

@@ -40,7 +40,7 @@ public class Sequencer extends Thread{
 	@Override
 	public void run() {
 		adjustSeqNumber();
-		byte [] m = FE.gson.toJson(args).getBytes();			
+		byte [] m = FE.toJson(args).getBytes();			
 		sendToReplica(m);
 		setTimeOut();
 	}
@@ -127,7 +127,7 @@ public class Sequencer extends Thread{
 	private void handlePair(int index){
 		Info info = pair.infos.get(index);
 		String json = info.json;
-		MessageHeader message = FE.gson.fromJson(json, MessageHeader.class);
+		MessageHeader message = FE.fromJson(json);
 		
 		if(message.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) message;

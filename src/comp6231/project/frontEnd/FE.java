@@ -24,11 +24,13 @@ import comp6231.project.common.corba.users.AdminOperationsHelper;
 import comp6231.project.common.corba.users.StudentOperations;
 import comp6231.project.common.corba.users.StudentOperationsHelper;
 import comp6231.project.frontEnd.udp.MultiCastRUDPListener;
+import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.StartGson;
 
 public class FE {
 	public static Logger log;
-	public static Gson gson;
+	private static Gson gson;
+	private static final Object lock = new Object();
 	
 	public static void main(String[] args) throws ServantNotActive, WrongPolicy, InvalidName, AdapterInactive, org.omg.CosNaming.NamingContextPackage.InvalidName, NotFound, CannotProceed {
 		confing(args);
@@ -107,5 +109,16 @@ public class FE {
         ncRef.rebind(aPath, aHref);
         ncRef.rebind(sPath, sHref);
 	}
-
+	
+	public static MessageHeader fromJson(String json){
+		synchronized (lock) {
+			return FE.gson.fromJson(json, MessageHeader.class);
+		}
+	}
+	
+	public static String toJson(MessageHeader args){
+		synchronized (lock) {
+			return FE.gson.toJson(args);
+		}
+	}
 }
