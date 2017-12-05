@@ -337,9 +337,11 @@ public class Campus implements Serializable {
 	 */
 	private void clearAllDatabases()
 	{
-		db.clear();
-		student_db.clear();
-		System.out.println("revan: " + getName() + " is deleted");
+		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
+		student_db = new HashMap<String, StudentRecord>();
+//		db.clear();
+//		student_db.clear();
+		logger.info("################# Campus " + getName() + " starts a new week! #################");
 	}
 	public void startWeek()
 	{
