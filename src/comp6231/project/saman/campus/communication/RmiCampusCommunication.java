@@ -21,7 +21,6 @@ import comp6231.project.saman.common.users.StudentOperations;
 public class RmiCampusCommunication extends CampusCommunication implements AdminOperations, StudentOperations, CampusOperations {
 	
 	private Registry registry;
-	CampusOperations campus_operations;
 	
 	public RmiCampusCommunication(Registry registry) {
 		this.registry = registry;		
@@ -31,7 +30,7 @@ public class RmiCampusCommunication extends CampusCommunication implements Admin
 	public RemoteInfo getRemoteInfo(String campus_name) {		
 		RemoteInfo info = new RemoteInfo();
 		try {
-			campus_operations = (CampusOperations)registry.lookup(campus_name);
+			CampusOperations campus_operations = (CampusOperations)registry.lookup(campus_name);				
 			info.address = campus_operations.getAddress();
 			info.port = campus_operations.getPort();
 			return info;
