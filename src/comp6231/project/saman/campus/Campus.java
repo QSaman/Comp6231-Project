@@ -197,6 +197,41 @@ public class Campus implements Serializable {
 		});
 		return true;
 	}
+	
+	class DeleteRoomState implements Runnable
+	{
+		int message_id;
+		CampusUser user;
+		TimeSlot val1;
+		HashMap<Integer, ReplicaReplyMessageStatus> res;
+		final Object lock_obj;
+		
+		public DeleteRoomState(int message_id, CampusUser user, TimeSlot val1, HashMap<Integer, ReplicaReplyMessageStatus> res, Object lock_obj) {
+			this.message_id = message_id;
+			this.user = user;
+			this.val1 = val1;
+			this.res = res;
+			this.lock_obj = lock_obj;
+		}
+
+		@Override
+		public void run() {
+			ReplicaRequestRemoveStudentRecord send_msg = 
+					new ReplicaRequestRemoveStudentRecord(message_id, val1.getUsername(), val1.getBookingId()); 
+			ReplicaReplyMessageStatus reply = null;
+			try {
+				reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, user.getCampus());
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			synchronized (lock_obj) {
+				res.put(message_id, reply);												
+			}
+			
+		}
+		
+	}
 
 	//TODO reduce student count if the reservation is deleted
 	public boolean deleteRoom(String user_id, int room_number, DateReservation date, ArrayList<TimeSlot> time_slots) {
@@ -219,6 +254,7 @@ public class Campus implements Serializable {
 				HashMap<Integer, TimeSlot> removed_list = new HashMap<>();	//(message_id, time slot)
 				
 				ArrayList<TimeSlot> new_time_slots = new ArrayList<TimeSlot>();
+				final Object lock_obj = new Object();
 				for (TimeSlot val1 : sub_val)
 				{
 					boolean found = false;
@@ -255,24 +291,7 @@ public class Campus implements Serializable {
 										a_user.getCampus(), val1, val1.getBookingId()));
 								
 								int message_id = MessageProtocol.generateMessageId();								
-								Thread thread = new Thread(new Runnable() {
-									
-									@Override
-									public void run() {
-										ReplicaRequestRemoveStudentRecord send_msg = 
-												new ReplicaRequestRemoveStudentRecord(message_id, val1.getUsername(), val1.getBookingId()); 
-										ReplicaReplyMessageStatus reply = null;
-										try {
-											reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, user.getCampus());
-										} catch (IOException | InterruptedException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}
-										synchronized (res) {
-											res.put(message_id, reply);												
-										}											
-									}
-								});
+								Thread thread = new Thread(new DeleteRoomState(message_id, user, val1, res, lock_obj));
 								removed_list.put(message_id, val1);
 								thread.start();									
 								threads.add(thread);
@@ -337,9 +356,11 @@ public class Campus implements Serializable {
 	 */
 	private void clearAllDatabases()
 	{
-		db.clear();
-		student_db.clear();
-		System.out.println("revan: " + getName() + " is deleted");
+		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
+		student_db = new HashMap<String, StudentRecord>();
+		//db.clear();
+		//student_db.clear();
+		logger.info("################# Campus " + getName() + " starts a new week! #################");
 	}
 	public void startWeek()
 	{
@@ -349,6 +370,33 @@ public class Campus implements Serializable {
 				clearAllDatabases();
 			}
 		}
+	}
+	
+	class StartWeekState implements Runnable
+	{
+		String campus_str;
+		int message_id;
+		String user_id;
+		
+		public StartWeekState(String campus_str, String user_id, int message_id) {
+			this.campus_str = campus_str;
+			this.user_id = user_id;
+			this.message_id = message_id;
+		}
+		@Override
+		public void run() {
+			
+			ReplicaRequestStartWeek send_msg = new ReplicaRequestStartWeek(message_id, user_id);
+			try {								
+				sendMessage(send_msg, campus_str);
+				logger.info("Sent request to " + campus_str + " to start a new week");
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
 	}
 	public boolean startWeek(String user_id) throws IOException, InterruptedException {
 		logger.info(LoggerHelper.format(String.format("recieved a request for starting a new week from user %s", user_id)));
@@ -368,20 +416,9 @@ public class Campus implements Serializable {
 				{
 					if (campus_str.equals(getName()))
 						continue;
-					int message_id = MessageProtocol.generateMessageId();		
-					Thread thread = new Thread(new Runnable() {				
-						@Override
-						public void run() {
-							ReplicaRequestStartWeek send_msg = new ReplicaRequestStartWeek(message_id, user_id);
-							try {
-								logger.info("Sending request to " + campus_str + " to start a new week");
-								sendMessage(send_msg, campus_str);
-							} catch (IOException | InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					});
+					logger.info("Sending a request to campus " + campus_str + " to start a new week from " + getName());
+					int message_id = MessageProtocol.generateMessageId();					
+					Thread thread = new Thread(new StartWeekState(campus_str, user_id, message_id));
 					thread.start();
 					threads.add(thread);
 				}
@@ -443,9 +480,11 @@ public class Campus implements Serializable {
 	
 	private ReplyMessageHeader sendMessage(ReplicaRequestMessageHeader message, String campus_name) throws IOException, InterruptedException
 	{
+		logger.info("Get udp info for campus " + campus_name);
 		CampusCommunication.RemoteInfo remote_info = campus_comm.getRemoteInfo(campus_name);
 		InetAddress address = InetAddress.getByName(remote_info.address);
 		int port = remote_info.port;
+		logger.info("Campus " + campus_name + " address: " + address + ":" + port);
 		ReplyMessageHeader res = json_message.sendJson(message, address, port);
 		return res;
 	}
@@ -671,7 +710,41 @@ public class Campus implements Serializable {
 		}
 		return ret;
 	}	
+	
+	class AvailableTimeSlotState implements Runnable
+	{
+		int message_id;
+		String user_id;
+		DateReservation date;
+		String campus_str;
+		HashMap<Integer, ReplicaReplyAvailableTimeSlots> reply_list;
+		final Object lock_obj;
+		
+		public AvailableTimeSlotState(int message_id, String user_id, DateReservation date, String campus_str, HashMap<Integer, ReplicaReplyAvailableTimeSlots> reply_list, Object lock_obj) {
+			this.message_id = message_id;
+			this.user_id = user_id;
+			this.date = date;
+			this.campus_str = campus_str;
+			this.reply_list = reply_list;
+			this.lock_obj = lock_obj;
+		}
 
+		@Override
+		public void run() {
+			ReplicaRequestAvailableTimeSlots send_msg = new ReplicaRequestAvailableTimeSlots(message_id, user_id, date.toString());
+			ReplicaReplyAvailableTimeSlots reply = null;
+			try {
+				reply = (ReplicaReplyAvailableTimeSlots)sendMessage(send_msg, campus_str);
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			synchronized (lock_obj) {
+				reply_list.put(message_id, reply);
+			}
+			
+		}
+	}
 	public ArrayList<TimeSlotResult> getAvailableTimeSlot(String user_id, DateReservation date) throws IOException, InterruptedException {
 		String log_msg = String.format("received getAvailableTimeSlot(date: %s)", date);
 		logger.info(LoggerHelper.format(log_msg));
@@ -683,29 +756,14 @@ public class Campus implements Serializable {
 		HashMap<Integer, ReplicaReplyAvailableTimeSlots> reply_list = new HashMap<>();
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		String[] campus_names = campus_comm.getAllCampusNames();
+		final Object lock_obj = new Object();
 		for (String campus_str : campus_names)
 		{
 			if (campus_str.equals(getName()))
 				continue;
 			int message_id = MessageProtocol.generateMessageId();
-			byte[] send_msg = MessageProtocol.encodeGetAvailableTimeSlotsMessage(message_id, date);
 			hm.put(message_id, campus_str);						
-			Thread thread = new Thread(new Runnable() {				
-				@Override
-				public void run() {
-					ReplicaRequestAvailableTimeSlots send_msg = new ReplicaRequestAvailableTimeSlots(message_id, user_id, date.toString());
-					ReplicaReplyAvailableTimeSlots reply = null;
-					try {
-						reply = (ReplicaReplyAvailableTimeSlots)sendMessage(send_msg, campus_str);
-					} catch (IOException | InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					synchronized (reply_list) {
-						reply_list.put(message_id, reply);
-					}					
-				}
-			});
+			Thread thread = new Thread(new AvailableTimeSlotState(message_id, user_id, date, campus_str, reply_list, lock_obj));
 			thread.start();
 			threads.add(thread);
 		}

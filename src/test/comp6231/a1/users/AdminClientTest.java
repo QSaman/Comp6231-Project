@@ -242,7 +242,7 @@ public class AdminClientTest {
 			{
 				if (campus_names[i].equals(r.getCampusName()))
 				{
-					assertTrue(r.getTotalAvailableSlots() == number_time_slot[i]);
+					assertTrue(r.getTotalAvailableSlots() + "is not equal to " + number_time_slot[i], r.getTotalAvailableSlots() == number_time_slot[i]);
 					found = true;
 					break;
 				}
