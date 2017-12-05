@@ -1,5 +1,6 @@
 package comp6231.project.frontEnd.udp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,7 +16,7 @@ import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
 	private ReliableServerSocket socket;
-
+	
 	@Override
 	public void run() {
 		socket = null;
@@ -46,8 +47,15 @@ public class MultiCastRUDPListener implements Runnable{
 				InputStream in = socket.getInputStream();
 				byte[] buffer = new byte[Constants.BUFFER_SIZE];
 
-				int size = in.read(buffer);
-				handlePacket(buffer, size);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				while(true) {
+				  int n = in.read(buffer);
+				  if( n < 0 ) break;
+				  baos.write(buffer,0,n);
+				}
+
+				byte data[] = baos.toByteArray();			    
+				handlePacket(data);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}finally{
@@ -60,20 +68,23 @@ public class MultiCastRUDPListener implements Runnable{
 			}
 		}
 
-		private void handlePacket(byte[] buffer, int size) {
-			String json_msg_str = new String(buffer,0,size);
+		private void handlePacket(byte[] buffer) {
+			String json_msg_str = new String(buffer,0,buffer.length);
 
 			FE.log("MULTI CAST UDP Socket Received JSON: "+json_msg_str);
 			process(json_msg_str);
 		}
 		private void process(String json_msg_str){
-			MessageHeader json_msg = FE.gson.fromJson(json_msg_str, MessageHeader.class);
+			FE.log("message of json_msg_str: "+ json_msg_str);
+			MessageHeader json_msg = FE.fromJson(json_msg_str);
+			FE.log("message of json: "+ json_msg);
+
 
 			if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
 				if(json_msg.message_type == MessageType.Reply){
 					FEReplyMessage replyMessage = (FEReplyMessage) json_msg;
-					processFrontEndToserver(replyMessage);
-				}{
+					processFrontEndToserver(replyMessage, json_msg_str);
+				}else{
 					FE.log("MulitCast udp error in message type");
 				}
 			}else{
@@ -81,9 +92,9 @@ public class MultiCastRUDPListener implements Runnable{
 			}
 		}
 
-		private void processFrontEndToserver(FEReplyMessage replyMessage){
+		private void processFrontEndToserver(FEReplyMessage replyMessage, String json){
 			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
-			pair.infos.put(pair.adjustIndex(), new Info(replyMessage.replyMessage, socket.getPort()));
+			pair.infos.put(pair.adjustIndex(), new Info(json, socket.getPort()));
 			pair.semaphore.release();
 			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);	
 		}

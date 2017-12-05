@@ -1,5 +1,6 @@
 package comp6231.project.farid.sharedPackage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 import net.rudp.ReliableSocket;
-
 import comp6231.shared.Constants;
 
 public class UdpSender extends Thread{		
@@ -37,9 +37,16 @@ public class UdpSender extends Thread{
 			
 			byte[] buffer = new byte[Constants.BUFFER_SIZE];
 			InputStream in = aSocket.getInputStream();
-			int size = in.read(buffer);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			while(true) {
+			  int n = in.read(buffer);
+			  if( n < 0 ) break;
+			  baos.write(buffer,0,n);
+			}
+
+			byte data[] = baos.toByteArray();
 			
-			result = new String(buffer, 0 ,size);
+			result = new String(data, 0 ,data.length);
 		}catch (SocketException e){
 			e.getMessage();
 		}catch (IOException e){
