@@ -148,6 +148,7 @@ public class Student implements Serializable {
 
 			return bookRoom(roomNumber, date, startTime, endTime);
 		}
+		ServerDorval.dorvalServerLogger.log("\n!!! No permission to book more rooms.\n");
 		return "\n!!! No permission to book more rooms.\n";
 	}
 

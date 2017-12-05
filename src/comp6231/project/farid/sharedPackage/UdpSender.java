@@ -1,9 +1,9 @@
 package comp6231.project.farid.sharedPackage;
 
-import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
@@ -30,23 +30,26 @@ public class UdpSender extends Thread{
 			aSocket = new ReliableSocket();
 			aSocket.connect(new InetSocketAddress("127.0.0.1", serverPort));
 
-			OutputStream out = aSocket.getOutputStream();
-			out.write(m);
+			OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream()) ;
+			out.write(new String(m,0,m.length));
+			out.write('\u0004');
 			out.flush();
 			out.close();
+
 			
-			byte[] buffer = new byte[Constants.BUFFER_SIZE];
-			InputStream in = aSocket.getInputStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			System.out.println("UDP SOCKET REQUESTED: " + new String(m,0,m.length) + " ServerPort: "+ serverPort);
+			InputStreamReader in = new InputStreamReader(aSocket.getInputStream());
+
+			CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
+			
 			while(true) {
-			  int n = in.read(buffer);
-			  if( n < 0 ) break;
-			  baos.write(buffer,0,n);
+			  int n = in.read();
+			  if( n < 0  || n == '\u0004') break;
+			  writer.write(n);
 			}
 
-			byte data[] = baos.toByteArray();
-			
-			result = new String(data, 0 ,data.length);
+			result = writer.toString();
+			System.out.println("result of udpSender is : " + result);
 		}catch (SocketException e){
 			e.getMessage();
 		}catch (IOException e){

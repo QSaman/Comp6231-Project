@@ -1,9 +1,9 @@
 package comp6231.project.mostafa.serverSide;
 
-import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
@@ -16,7 +16,7 @@ public class UDP extends Thread{
 	private MessageHeader args;
 	private int serverPort;
 	private String udpId;
-	
+
 	public UDP(MessageHeader args, int serverPort, String udpId){
 		this.args = args;
 		this.serverPort = serverPort;
@@ -30,28 +30,30 @@ public class UDP extends Thread{
 		try {
 			aSocket = new ReliableSocket();
 			aSocket.connect(new InetSocketAddress("127.0.0.1", serverPort));
-			byte [] m = Server.gson.toJson(args).getBytes();
+			String json = Server.gson.toJson(args);
 
-			OutputStream out = aSocket.getOutputStream();
-			out.write(m);
+			OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream()) ;
+			out.write(json);
+			out.write('\u0004');
 			out.flush();
 			out.close();
 
-			Server.log("UDP Socket Requested: "+ args);
+			Server.log("UDP Socket Requested: "+ json + " toServerPort of : " + serverPort);
+
+	
+
+			InputStreamReader in = new InputStreamReader(aSocket.getInputStream());
+
+			CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
 			
-			byte[] buffer = new byte[Constants.BUFFER_SIZE];
-			InputStream in = aSocket.getInputStream();
-			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			while(true) {
-			  int n = in.read(buffer);
-			  if( n < 0 ) break;
-			  baos.write(buffer,0,n);
+			  int n = in.read();
+			  if( n < 0  || n == '\u0004') break;
+			  writer.write(n);
 			}
 
-			byte data[] = baos.toByteArray();
-			
-			result = new String(data, 0 ,data.length);
+			result = writer.toString();
+			Server.log("result of udpSender is : " + result);
 		}catch (SocketException e){
 			Server.log("Socket: " + e.getMessage());
 		}catch (IOException e){

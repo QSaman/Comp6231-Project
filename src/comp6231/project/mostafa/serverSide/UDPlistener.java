@@ -1,9 +1,9 @@
 package comp6231.project.mostafa.serverSide;
 
-import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -36,6 +36,7 @@ public class UDPlistener  implements Runnable {
 
 			while(true){
 				ReliableSocket aSocket = (ReliableSocket) socket.accept();
+				Server.log("accpted");
 				new Handler(aSocket).start();
 			}
 
@@ -56,18 +57,17 @@ public class UDPlistener  implements Runnable {
 		@Override
 		public void run(){
 			try {
-				InputStream in = socket.getInputStream();
-				byte[] buffer = new byte[Constants.BUFFER_SIZE];
+				InputStreamReader in = new InputStreamReader(socket.getInputStream());
 
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
+				
 				while(true) {
-				  int n = in.read(buffer);
-				  if( n < 0 ) break;
-				  baos.write(buffer,0,n);
+				  int n = in.read();
+				  if( n < 0  || n == '\u0004') break;
+				  writer.write(n);
 				}
 
-				byte data[] = baos.toByteArray();			    
-				handlePacket(data);
+				handlePacket(writer.toString());
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -81,23 +81,22 @@ public class UDPlistener  implements Runnable {
 			}
 		}
 
-		private void handlePacket(byte[] buffer) {
-			String json_msg_str = new String(buffer,0,buffer.length);
+		private void handlePacket(String json_msg_str) {
 			
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
-			byte[] data = result.getBytes();
 
-			send(socket.getInetAddress(), socket.getPort(), data);
+			send(socket.getInetAddress(), socket.getPort(), result);
 		}
 
-		private void send(InetAddress address, int port, byte[] data){
-			OutputStream out;
+		private void send(InetAddress address, int port, String data){
+			OutputStreamWriter out;
 			if(protocolType == ProtocolType.Server_To_Server){
 				try {
-					out = socket.getOutputStream();
+					out = new OutputStreamWriter(socket.getOutputStream());
 					out.write(data);
+					out.write('\u0004');
 					out.flush();
 					out.close();
 				} catch (IOException e) {
@@ -108,7 +107,7 @@ public class UDPlistener  implements Runnable {
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
 					aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
-					out = aSocket.getOutputStream();
+					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();
 					out.close();

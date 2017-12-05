@@ -1,9 +1,9 @@
 package comp6231.project.farid.servers.serverDorval;
 
-import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.LocalDate;
@@ -65,18 +65,17 @@ public class Udp implements Runnable {
 		@Override
 		public void run(){
 			try {
-				InputStream in = socket.getInputStream();
-				byte[] buffer = new byte[Constants.BUFFER_SIZE];
+				InputStreamReader in = new InputStreamReader(socket.getInputStream());
+
+				CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
 				
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				while(true) {
-				  int n = in.read(buffer);
-				  if( n < 0 ) break;
-				  baos.write(buffer,0,n);
+				  int n = in.read();
+				  if( n < 0  || n == '\u0004') break;
+				  writer.write(n);
 				}
 
-				byte data[] = baos.toByteArray();			    
-				handlePacket(data);
+				handlePacket(writer.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}finally{
@@ -89,21 +88,22 @@ public class Udp implements Runnable {
 			}
 		}
 
-		private void handlePacket(byte[] buffer) throws Exception {
-			String json = new String(buffer,0,buffer.length).trim();
+		private void handlePacket(String json_msg_str) throws Exception {
+			
+			ServerDorval.dorvalServerLogger.log("UDP Socket Received JSON: "+json_msg_str);
+			String result = processData(json_msg_str);
+			ServerDorval.dorvalServerLogger.log("UDP Socket Listener Result: "+result);
 
-			String packetToSend = processData(json);
-			byte[] data = packetToSend.getBytes();
-
-			send(socket.getInetAddress(), socket.getPort(), data);
+			send(socket.getInetAddress(), socket.getPort(), result);
 		}
 
-		private void send(InetAddress address, int port, byte[] data){
-			OutputStream out;
+		private void send(InetAddress address, int port, String data){
+			OutputStreamWriter out;
 			if(protocolType == ProtocolType.Server_To_Server){
 				try {
-					out = socket.getOutputStream();
+					out = new OutputStreamWriter(socket.getOutputStream());
 					out.write(data);
+					out.write('\u0004');
 					out.flush();
 					out.close();
 				} catch (IOException e) {
@@ -114,7 +114,7 @@ public class Udp implements Runnable {
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
 					aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
-					out = aSocket.getOutputStream();
+					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();
 					out.close();
@@ -124,6 +124,7 @@ public class Udp implements Runnable {
 					e.printStackTrace();
 				}
 			}
+
 		}
 
 		private String processData(String json) throws Exception {
@@ -163,6 +164,7 @@ public class Udp implements Runnable {
 
 				} else if (json_msg.command_type == CommandType.Book_Room) {
 
+					ServerDorval.dorvalServerLogger.log("book room entered: " + json_msg);
 					FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json_msg;
 
 					String tempStudentID = message.userId.toUpperCase();
@@ -175,6 +177,7 @@ public class Udp implements Runnable {
 					packetToSend = ServerDorval.bookRoom(tempStudentID, campus, tempRoomNumber,
 							date, startTime,endTime);
 					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true);
+					ServerDorval.dorvalServerLogger.log("book room: " + packetToSend);
 
 				} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
 
