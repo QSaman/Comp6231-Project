@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.farid.sharedPackage.UdpSender;
 import comp6231.shared.Constants;
 
@@ -101,7 +100,7 @@ public class Student implements Serializable {
 	private boolean isStudentBookingCounterWithAllServersOK() throws Exception {
 
         String stringToSend = "getCounter-" + studentID;
-        byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+        byte [] sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID);
         UdpSender sender = new UdpSender(sendData, Constants.dvlPortListenFaridActive, "");
         UdpSender sender2 = new UdpSender(sendData, Constants.wstPortListenFaridActive, "");
         sender.start();
@@ -139,7 +138,7 @@ public class Student implements Serializable {
 
 		        String stringToSend = "book-" + studentID + "@" + roomNumber + "%" + date + "#" + startTime + "*"
  						+ endTime;
-		        byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+		        byte [] sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID);
 		        UdpSender sender = new UdpSender(sendData, port, "");
 		        sender.start();
 		        
@@ -222,7 +221,7 @@ public class Student implements Serializable {
 
 	private String getNumberOfAvailableTimesFromOtherServer(int port, LocalDate date) throws Exception {
 		String sentence = date.toString();
-		byte [] sendData = ServerDorval.sendMessageServerToserver(sentence,studentID);
+		byte [] sendData = ServerKirkland.sendMessageServerToserver(sentence,studentID);
 
         UdpSender sender = new UdpSender(sendData, port, "");
 
@@ -265,7 +264,7 @@ public class Student implements Serializable {
 
 			String stringToSend = "cancel-" + studentID + "#" + bookingID;
 
-			byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+			byte [] sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID);
 
 	        UdpSender sender = new UdpSender(sendData, port, "");
 
@@ -333,7 +332,7 @@ public class Student implements Serializable {
 			String stringToSend = "chan-" + studentID + "@" + roomNumber + "%" + campus + "#" + startTime + "*"
 					+ endTime + "&" + bookingID;
 			
-			byte [] sendData = ServerDorval.sendMessageServerToserver(stringToSend,studentID);
+			byte [] sendData = ServerKirkland.sendMessageServerToserver(stringToSend,studentID);
 
 	        UdpSender sender = new UdpSender(sendData, port, "");
 

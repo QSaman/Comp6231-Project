@@ -1,5 +1,6 @@
 package comp6231.project.mostafa.serverSide;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,9 +41,17 @@ public class UDP extends Thread{
 			
 			byte[] buffer = new byte[Constants.BUFFER_SIZE];
 			InputStream in = aSocket.getInputStream();
-			int size = in.read(buffer);
 			
-			result = new String(buffer, 0 ,size);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			while(true) {
+			  int n = in.read(buffer);
+			  if( n < 0 ) break;
+			  baos.write(buffer,0,n);
+			}
+
+			byte data[] = baos.toByteArray();
+			
+			result = new String(data, 0 ,data.length);
 		}catch (SocketException e){
 			Server.log("Socket: " + e.getMessage());
 		}catch (IOException e){

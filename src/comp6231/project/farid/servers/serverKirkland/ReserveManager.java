@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.farid.sharedPackage.UdpSender;
 import comp6231.shared.Constants;
 
@@ -59,7 +58,7 @@ public class ReserveManager implements Serializable {
 
     private void resetCounterInOtherServers() throws Exception {
         String stringToSend3 = "reset-" + studentID;
-        byte [] sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,studentID);
+        byte [] sendData3 = ServerKirkland.sendMessageServerToserver(stringToSend3,studentID);
         UdpSender sender = new UdpSender(sendData3, Constants.wstPortListenFaridActive, "");
         sender.start();
         
@@ -68,7 +67,7 @@ public class ReserveManager implements Serializable {
         ServerKirkland.kirklandServerLogger.log(result3);
 
         String stringToSend4 = "reset-" + studentID;
-        byte[] sendData4 = ServerDorval.sendMessageServerToserver(stringToSend4,studentID);
+        byte[] sendData4 = ServerKirkland.sendMessageServerToserver(stringToSend4,studentID);
         UdpSender sender2 = new UdpSender(sendData4, Constants.dvlPortListenFaridActive, "");
         sender2.start();
         
@@ -133,7 +132,7 @@ public class ReserveManager implements Serializable {
 
      public static LocalDate getBestExpireDateFromServers(String id) throws Exception{
          String stringToSend3 = "getExpire-" + id;
-         byte [] sendData3 = ServerDorval.sendMessageServerToserver(stringToSend3,"");
+         byte [] sendData3 = ServerKirkland.sendMessageServerToserver(stringToSend3,"");
          UdpSender sender = new UdpSender(sendData3, Constants.dvlPortListenFaridActive, "");
          UdpSender sender2 = new UdpSender(sendData3, Constants.wstPortListenFaridActive, "");
          sender.start();
