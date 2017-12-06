@@ -32,6 +32,21 @@ public class TimeSlotResult implements Serializable {
 		result = prime * result + totalAvailableSlots;
 		return result;
 	}
+	
+	public static String toString(ArrayList<TimeSlotResult> list)
+	{
+		boolean first = true;
+		String ret = "";
+		for (TimeSlotResult tsr : list)
+		{
+			if (first)
+				first = false;
+			else
+				ret += "\n";
+			ret += tsr.toString();
+		}
+		return ret;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
