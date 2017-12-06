@@ -75,6 +75,11 @@ public class Constants {
 	public static final int BUFFER_SIZE = 1024;
 	
 	
+	//Saman
+	public static final int DVL_PORT_LISTEN_SAMAN_ORIGINAL = 7777;
+	public static final int KKL_PORT_LISTEN_SAMAN_ORIGINAL = 7778;
+	public static final int WST_PORT_LISTEN_SAMAN_ORIGINAL = 7779;
+	
 	// RE3
 	public static final int DVL_PORT_LISTEN_FARID_ORIGINAL = 9763;
 	public static final int KKL_PORT_LISTEN_FARID_ORIGINAL = 9867;

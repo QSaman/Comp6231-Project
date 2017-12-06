@@ -97,14 +97,14 @@ public class MultiCastRUDPListener implements Runnable{
 			if(replyMessage.command_type == CommandType.Book_Room) {
 				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
 				
-				if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
-					
-				}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
-					
+				if(replyMessage.campusId.equalsIgnoreCase("Mostafa")) {
+					pair.infos.put(0, new Info(json, socket.getPort()));
+				}else if (replyMessage.campusId.equalsIgnoreCase("Farid")) {
+					pair.infos.put(1, new Info(json, socket.getPort()));
 				}else {
-					
+					pair.infos.put(2, new Info(json, socket.getPort()));
 				}
-				pair.infos.put(pair.adjustIndex(), new Info(replyMessage.bookingId, socket.getPort()));
+				
 				pair.semaphore.release();
 				FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.bookingId);
 			}else {
