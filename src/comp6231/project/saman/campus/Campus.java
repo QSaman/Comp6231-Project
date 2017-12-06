@@ -51,7 +51,7 @@ public class Campus implements Serializable {
 	private JsonMessage json_message;
 	private Gson gson;
 		
-	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws SocketException, RemoteException
+	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws IOException
 	{
 		this.name = name;
 		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();

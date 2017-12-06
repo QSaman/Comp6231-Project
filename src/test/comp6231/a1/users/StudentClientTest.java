@@ -77,6 +77,13 @@ public class StudentClientTest {
 	}
 	
 	@Test
+	public final void testAvialble() throws SecurityException, IOException, NotBoundException
+	{
+		StudentClient client = ClientUserFactory.createStudentClient(new CampusUser("DVLS1111"));
+		client.getAvailableTimeSlot(new DateReservation("19-09-2017"));
+	}
+	
+	@Test
 	public final void testStartWeek() throws RemoteException, NotBoundException, IOException, InterruptedException {
 		admin_test.testStartWeek();
 		admin_test.testCreateRoomDVL();
