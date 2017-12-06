@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Scanner;
 
 import comp6231.project.farid.sharedPackage.UdpSender;
 import comp6231.shared.Constants;
@@ -299,17 +298,15 @@ public class Student implements Serializable {
 								ReserveManager.reserveMap.get(bookingID).getDate(), startTime,
 								endTime);
 						@SuppressWarnings("resource") 
-						Scanner scanner = new Scanner(bookResult);
-						scanner.nextLine();
-						scanner.nextLine();
-						String tempResultOfBook = scanner.nextLine();
+						int index = bookResult.indexOf(Constants.DILIMITER_STRING);
+						String bookingId = "";
 						ReserveManager.counterDB.get(studentID).incrementCounter();
-						if (tempResultOfBook.substring(tempResultOfBook.indexOf("/")).charAt(8) == 's') {
-							resultToSendToStudent.append(
-									ReserveManager.removeFromReserveList(studentID, bookingID)
-											? "\nThe booking number " + bookingID + " canceled successfully."
-											: "\n The booking number " + bookingID + " failed canceling.");
-
+						if (index != -1) {
+							bookingId = bookResult.substring(0, index);
+							resultToSendToStudent.append(ReserveManager.removeFromReserveList(studentID, bookingID)
+									? "\nThe booking number " + bookingID + " canceled successfully."
+									: "\n The booking number " + bookingID + " failed canceling.");
+							resultToSendToStudent.insert(0, bookingId+Constants.DILIMITER_STRING);
 						}
 						resultToSendToStudent.append(bookResult);
 					}

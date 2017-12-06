@@ -1,105 +1,43 @@
-<<<<<<< HEAD
-Dec 05, 2017 10:42:14 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Received JSON: {"userId":"DVLA1000","sequence_number":0,"command_type":"LoginAdmin","message_type":"Request","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:42:15 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-Admin DVLA1000 signed in.
-
-Dec 05, 2017 10:42:15 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: {"replyMessage":"True","status":true,"bookingId":"Null String","campusId":"Null String","sequence_number":0,"command_type":"LoginAdmin","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:43:02 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Received JSON: {"userId":"DVLA1000","roomNumber":100,"date":"2017-01-01","timeSlots":["10:0-11:0"],"sequence_number":1,"command_type":"Create_Room","message_type":"Request","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:43:02 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-%%% STARTED - Result of creating room and time slots: for date 2017-01-01, room number 100. by admin DVLA1000
- Time slot: 10:00 / 11:00 for room number 100 date 2017-01-01 successfully added.
-=== FINISHED - Result of creating room and time slots. for date 2017-01-01, room number 100. By admin DVLA1000
-Dec 05, 2017 10:43:02 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-$$$ CURRENT DATABASE:
-Date:2017-01-01   Room number: 1   Time slots:{08:00=09:00, 09:00=10:00, 10:00=11:00, 11:00=12:00, 12:00=13:00}
-Date:2017-01-01   Room number: 100   Time slots:{10:00=11:00}
-
-Dec 05, 2017 10:43:02 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: {"replyMessage":"\n%%% STARTED - Result of creating room and time slots: for date 2017-01-01, room number 100. by admin DVLA1000\n Time slot: 10:00 / 11:00 for room number 100 date 2017-01-01 successfully added.\n\u003d\u003d\u003d FINISHED - Result of creating room and time slots. for date 2017-01-01, room number 100. By admin DVLA1000","status":true,"bookingId":"Null String","campusId":"Null String","sequence_number":1,"command_type":"Create_Room","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:43:04 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Received JSON: {"userId":"DVLA1000","sequence_number":2,"command_type":"SignOut","message_type":"Request","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:43:04 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-Admin DVLA1000 signed out
-
-Dec 05, 2017 10:43:04 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: {"replyMessage":"Sign Out Called","status":true,"bookingId":"Null String","campusId":"Null String","sequence_number":2,"command_type":"SignOut","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Received JSON: {"userId":"KKLS1000","legacy":"getCounter-KKLS1000","sequence_number":-1,"command_type":"Quantity","message_type":"Quantity","protocol_type":"Server_To_Server"}
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: 0
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Received JSON: {"userId":"KKLS1000","legacy":"book-KKLS1000@100%2017-01-01#10:00*11:00","sequence_number":-1,"command_type":"Quantity","message_type":"Quantity","protocol_type":"Server_To_Server"}
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-Student KKLS1000 signed in.
-
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-%%% REQUEST STARTED - Result of booking room 100 for the date 2017-01-01 and time slot: 10:00 / 11:00, by student KKLS1000
-The room 100 for date 2017-01-01 for time slot 10:00 / 11:00 successfully booked.
-Booking ID is: DVL-xyCn5lCotI4rty505Gz0km15IHz2EuEI
-=== FINISHED - Result of booking room 100 and time slot: 10:00 / 11:00, by student KKLS1000
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-$$$ CURRENT RESERVE LIST:
-ReserveManager{studentID='KKLS1000', bookingID='DVL-xyCn5lCotI4rty505Gz0km15IHz2EuEI', date=2017-01-01, room number=100, timeSlot= 10:00 / 11:00}
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-$$$ CURRENT DATABASE:
-Date:2017-01-01   Room number: 1   Time slots:{08:00=09:00, 09:00=10:00, 10:00=11:00, 11:00=12:00, 12:00=13:00}
-Date:2017-01-01   Room number: 100   Time slots:{}
-
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: 
-Student KKLS1000 signed out.
-
-Dec 05, 2017 10:43:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: 
-%%% REQUEST STARTED - Result of booking room 100 for the date 2017-01-01 and time slot: 10:00 / 11:00, by student KKLS1000
-The room 100 for date 2017-01-01 for time slot 10:00 / 11:00 successfully booked.
-Booking ID is: DVL-xyCn5lCotI4rty505Gz0km15IHz2EuEI
-=== FINISHED - Result of booking room 100 and time slot: 10:00 / 11:00, by student KKLS1000
-=======
-Dec 05, 2017 10:34:15 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:13 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: UDP Socket Received JSON: {"userId":"DVLS1234","sequence_number":0,"command_type":"LoginStudent","message_type":"Request","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:34:15 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:13 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: 
 Student DVLS1234 signed in.
 
-Dec 05, 2017 10:34:15 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:13 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: UDP Socket Listener Result: {"replyMessage":"True","status":true,"bookingId":"Null String","replicaId":"Null String","sequence_number":0,"command_type":"LoginStudent","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: UDP Socket Received JSON: {"userId":"DVLS1234","campusName":"DVL","roomNumber":1,"date":"2017-01-01","timeSlot":"8:00-9:00","sequence_number":1,"command_type":"Book_Room","message_type":"Request","protocol_type":"Frontend_To_Replica"}
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: book room entered: comp6231.project.frontEnd.messages.FEBookRoomRequestMessage@54eb768c
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn*%#$@#!
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: book room entered: comp6231.project.frontEnd.messages.FEBookRoomRequestMessage@5f3f1fac
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD*%#$@#!
 %%% REQUEST STARTED - Result of booking room 1 for the date 2017-01-01 and time slot: 08:00 / 09:00, by student DVLS1234
 The room 1 for date 2017-01-01 for time slot 08:00 / 09:00 successfully booked.
-Booking ID is: DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn
+Booking ID is: DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD
 === FINISHED - Result of booking room 1 and time slot: 08:00 / 09:00, by student DVLS1234
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: 
 $$$ CURRENT RESERVE LIST:
-ReserveManager{studentID='DVLS1234', bookingID='DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn', date=2017-01-01, room number=1, timeSlot= 08:00 / 09:00}
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+ReserveManager{studentID='DVLS1234', bookingID='DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD', date=2017-01-01, room number=1, timeSlot= 08:00 / 09:00}
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: 
 $$$ CURRENT DATABASE:
 Date:2017-01-01   Room number: 1   Time slots:{09:00=10:00, 10:00=11:00, 11:00=12:00, 12:00=13:00}
 
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
 INFO: book room: %#$@#!
 %%% REQUEST STARTED - Result of booking room 1 for the date 2017-01-01 and time slot: 08:00 / 09:00, by student DVLS1234
 The room 1 for date 2017-01-01 for time slot 08:00 / 09:00 successfully booked.
-Booking ID is: DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn
+Booking ID is: DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD
 === FINISHED - Result of booking room 1 and time slot: 08:00 / 09:00, by student DVLS1234
-Dec 05, 2017 10:34:30 PM comp6231.project.farid.servers.serverDorval.MyLogger log
-INFO: UDP Socket Listener Result: {"replyMessage":"%#$@#!\n%%% REQUEST STARTED - Result of booking room 1 for the date 2017-01-01 and time slot: 08:00 / 09:00, by student DVLS1234\nThe room 1 for date 2017-01-01 for time slot 08:00 / 09:00 successfully booked.\nBooking ID is: DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn\n\u003d\u003d\u003d FINISHED - Result of booking room 1 and time slot: 08:00 / 09:00, by student DVLS1234","status":true,"bookingId":"DVL-zn5Fl5Asytpksx5j2Cv34xmACGAFmFCn","replicaId":"Farid","sequence_number":1,"command_type":"Book_Room","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
->>>>>>> 608d20dd2e4ca4cefe1f78a5027e655c9218e91b
+Dec 05, 2017 11:30:24 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: UDP Socket Listener Result: {"replyMessage":"%#$@#!\n%%% REQUEST STARTED - Result of booking room 1 for the date 2017-01-01 and time slot: 08:00 / 09:00, by student DVLS1234\nThe room 1 for date 2017-01-01 for time slot 08:00 / 09:00 successfully booked.\nBooking ID is: DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD\n\u003d\u003d\u003d FINISHED - Result of booking room 1 and time slot: 08:00 / 09:00, by student DVLS1234","status":true,"bookingId":"DVL-HzEmqyAjErzAnBuIqAoqHzpBk1G415uD","replicaId":"Farid","sequence_number":1,"command_type":"Book_Room","message_type":"Reply","protocol_type":"Frontend_To_Replica"}
+Dec 05, 2017 11:35:46 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: UDP Socket Received JSON: {"userId":"DVLS1234","sequence_number":2,"command_type":"SignOut","message_type":"Request","protocol_type":"Frontend_To_Replica"}
+Dec 05, 2017 11:35:46 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: 
+Student DVLS1234 signed out
+
+Dec 05, 2017 11:35:46 PM comp6231.project.farid.servers.serverDorval.MyLogger log
+INFO: UDP Socket Listener Result: {"replyMessage":"Sign Out Called","status":true,"bookingId":"Null String","replicaId":"Null String","sequence_number":2,"command_type":"SignOut","message_type":"Reply","protocol_type":"Frontend_To_Replica"}

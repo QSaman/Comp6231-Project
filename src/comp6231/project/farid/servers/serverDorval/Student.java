@@ -295,16 +295,15 @@ public class Student implements Serializable {
 						String bookResult = bookRoom(campus, roomNumber,
 								ReserveManager.reserveMap.get(bookingID).getDate(), startTime, endTime);
 						@SuppressWarnings("resource")
-						Scanner scanner = new Scanner(bookResult);
-						scanner.nextLine();
-						scanner.nextLine();
-						String tempResultOfBook = scanner.nextLine();
+						int index = bookResult.indexOf(Constants.DILIMITER_STRING);
+						String bookingId = "";
 						ReserveManager.counterDB.get(studentID).incrementCounter();
-						if (tempResultOfBook.substring(tempResultOfBook.indexOf("/")).charAt(8) == 's') {
+						if (index != -1) {
+							bookingId = bookResult.substring(0, index);
 							resultToSendToStudent.append(ReserveManager.removeFromReserveList(studentID, bookingID)
 									? "\nThe booking number " + bookingID + " canceled successfully."
 									: "\n The booking number " + bookingID + " failed canceling.");
-
+							resultToSendToStudent.insert(0, bookingId+Constants.DILIMITER_STRING);
 						}
 						resultToSendToStudent.append(bookResult);
 					}
