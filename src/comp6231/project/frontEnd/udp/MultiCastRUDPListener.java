@@ -10,6 +10,7 @@ import comp6231.project.frontEnd.FE;
 import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.shared.Constants;
@@ -93,10 +94,25 @@ public class MultiCastRUDPListener implements Runnable{
 		}
 
 		private void processFrontEndToserver(FEReplyMessage replyMessage, String json){
-			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
-			pair.infos.put(pair.adjustIndex(), new Info(json, socket.getPort()));
-			pair.semaphore.release();
-			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);	
+			if(replyMessage.command_type == CommandType.Book_Room) {
+				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
+				
+				if(replyMessage.campusId.equalsIgnoreCase("Mostafa")) {
+					
+				}else if (replyMessage.campusId.equalsIgnoreCase("Farid")) {
+					
+				}else {
+					
+				}
+				pair.infos.put(pair.adjustIndex(), new Info(replyMessage.bookingId, socket.getPort()));
+				pair.semaphore.release();
+				FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.bookingId);
+			}else {
+				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
+				pair.infos.put(pair.adjustIndex(), new Info(json, socket.getPort()));
+				pair.semaphore.release();
+				FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);
+			}	
 		}
 	}
 
