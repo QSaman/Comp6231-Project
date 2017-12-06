@@ -3,6 +3,7 @@ package comp6231.project.frontEnd.udp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -61,39 +62,57 @@ public class Sequencer extends Thread{
 		int[] replicaPorts =  new int[3];
 		boolean customSend = false;
 		String [] tokens = null;
+		ArrayList<byte[]> msgs = new ArrayList<>(3); 
 		
 		if(args.command_type == CommandType.Cancel_Book_Room) {
 			customSend = true;
 			FECancelBookingMessage message = (FECancelBookingMessage) args;
-			tokens = message.booking_id.split("!");
 			
+			tokens = message.booking_id.split("!");
+			FE.log(tokens[0] +"!" + tokens[1]+"!"+tokens[2]);
+			
+			message.booking_id = tokens[0];
+			msgs.add(FE.toJson(message).getBytes());
+			FECancelBookingMessage message2 = new FECancelBookingMessage(message.sequence_number, message.user_id, tokens[1]);
+			msgs.add(FE.toJson(message2).getBytes());
+			FECancelBookingMessage message3 = new FECancelBookingMessage(message.sequence_number, message.user_id, tokens[2]);
+			msgs.add(FE.toJson(message3).getBytes());
+
 		}else if(args.command_type == CommandType.Change_Reservation) {
 			customSend = true;
 			FEChangeReservationMessage message = (FEChangeReservationMessage) args;
 			tokens = message.booking_id.split("!");
-		}else {
-			if(group.equals(Constants.DVL_GROUP)){
-				replicaPorts[1] = Constants.dvlPortListenFaridActive;
-				replicaPorts[0] = Constants.dvlPortListenRe1Active;
-				replicaPorts[2] = Constants.dvlPortListenRe2Active;
-			}else if(group.equals(Constants.KKL_GROUP)){
-				replicaPorts[1] = Constants.kklPortListenFaridActive;
-				replicaPorts[0] = Constants.kklPortListenRe1Active;
-				replicaPorts[2] = Constants.kklPortListenRe2Active;
-			}else if(group.equals(Constants.WST_GROUP)){
-				replicaPorts[1] = Constants.wstPortListenFaridActive;
-				replicaPorts[0] = Constants.wstPortListenRe1Active;
-				replicaPorts[2] = Constants.wstPortListenRe2Active;
-			}else{
-				FE.log("group is not valid in sequencer class: " + group);
-				return;
-			}
+			FE.log(tokens[0] +"!" + tokens[1]+"!"+tokens[2]);
+			
+			message.booking_id = tokens[0];
+			msgs.add(FE.toJson(message).getBytes());
+			FEChangeReservationMessage message2 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[1], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
+			msgs.add(FE.toJson(message2).getBytes());
+			FEChangeReservationMessage message3 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[2], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
+			msgs.add(FE.toJson(message3).getBytes());
+		}
+		
+		if(group.equals(Constants.DVL_GROUP)){
+			replicaPorts[1] = Constants.dvlPortListenFaridActive;
+			replicaPorts[0] = Constants.dvlPortListenRe1Active;
+			replicaPorts[2] = Constants.dvlPortListenRe2Active;
+		}else if(group.equals(Constants.KKL_GROUP)){
+			replicaPorts[1] = Constants.kklPortListenFaridActive;
+			replicaPorts[0] = Constants.kklPortListenRe1Active;
+			replicaPorts[2] = Constants.kklPortListenRe2Active;
+		}else if(group.equals(Constants.WST_GROUP)){
+			replicaPorts[1] = Constants.wstPortListenFaridActive;
+			replicaPorts[0] = Constants.wstPortListenRe1Active;
+			replicaPorts[2] = Constants.wstPortListenRe2Active;
+		}else{
+			FE.log("group is not valid in sequencer class: " + group);
+			return;
 		}
 		
 		if(customSend) {
 			for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
 				
-				final String data = tokens[i];
+				final byte[] data = msgs.get(i);
 				final int idxPort = i;
 
 				new Thread(new Runnable() {
@@ -106,7 +125,7 @@ public class Sequencer extends Thread{
 							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
 							
 							OutputStream out = sendToReplica.getOutputStream();
-							out.write(data.getBytes());
+							out.write(data);
 
 							out.flush();
 							out.close();
