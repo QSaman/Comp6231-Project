@@ -68,6 +68,7 @@ public class Sequencer extends Thread{
 			tokens = message.booking_id.split("!");
 			
 		}else if(args.command_type == CommandType.Change_Reservation) {
+			customSend = true;
 			FEChangeReservationMessage message = (FEChangeReservationMessage) args;
 			tokens = message.booking_id.split("!");
 		}else {
