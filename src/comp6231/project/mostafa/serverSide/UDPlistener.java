@@ -145,10 +145,11 @@ public class UDPlistener  implements Runnable {
 			if(json.command_type == CommandType.Create_Room){
 				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().create(message.roomNumber, message.date, message.timeSlots, message.userId);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Create_Room, result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Create_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
 			}else if(json.command_type == CommandType.Book_Room){
 				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().bookRoom(message.campusName, message.roomNumber, message.date, message.timeSlot, message.userId);
+				
 				String bookingId = Constants.NULL_STRING;
 				if(result.contains("booked") && !result.contains("notbooked")){
 					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
@@ -158,29 +159,41 @@ public class UDPlistener  implements Runnable {
 				}else {
 					Server.log(" not booked");
 				}
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, result, true, bookingId, Information.getInstance().isReOne ? "Mostafa" : "Saman");
+				
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId, Information.getInstance().isReOne == true ? "Mostafa" : "Saman");
 			}else if (json.command_type == CommandType.Delete_Room){
 				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().delete(message.roomNumber, message.date, message.timeSlots, message.userId);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Delete_Room, result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Delete_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
 			}else if (json.command_type == CommandType.Cancel_Book_Room){
 				FECancelBookingMessage message = (FECancelBookingMessage) json;
 				String result = ServerImpl.GetInstance().CancelBookingId(message.booking_id, message.user_id);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Cancel_Book_Room, result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Cancel_Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
 			}else if (json.command_type == CommandType.Change_Reservation){
 				FEChangeReservationMessage message = (FEChangeReservationMessage) json;
 				String result = ServerImpl.GetInstance().changeReservation(message.booking_id, message.new_campus_name, message.new_date, message.new_room_number, message.new_time_slot, message.user_id);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Change_Reservation, result, true);
+				
+				String bookingId = Constants.NULL_STRING;
+				if(result.contains("booked") && !result.contains("notbooked")){
+					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
+					int endIndex = result.indexOf("booked") -1;
+					bookingId = result.substring(startIndex,endIndex);
+					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+				}else {
+					Server.log(" not booked");
+				}
+				
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Change_Reservation, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId, Information.getInstance().isReOne == true ? "Mostafa" : "Saman");
 			}else if (json.command_type == CommandType.Get_Available_TimeSlots){
 				FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json;
 				String result = ServerImpl.GetInstance().getAvailableTimeSlot(message.date, message.user_id);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Get_Available_TimeSlots, result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Get_Available_TimeSlots, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
 			}else if (json.command_type == CommandType.LoginStudent){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginStudent, "logined-mostafa", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginStudent, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", true);
 			}else if (json.command_type == CommandType.LoginAdmin){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginAdmin, "logined-mostafa", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginAdmin, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", true);
 			}else if (json.command_type == CommandType.SignOut){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.SignOut, "signOut-mostafa", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.SignOut, Information.getInstance().isReOne == true ? "signOut-mostafa" : "signOut-saman", true);
 			}else{
 				Server.log(" Bad CommandType in udp listener");
 			}
