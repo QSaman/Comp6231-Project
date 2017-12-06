@@ -77,8 +77,7 @@ public class Student implements Serializable {
 						.append(" and time slot: ").append(startTime).append(" / ").append(endTime)
 						.append(", by student ").append(studentID);
 
-				ServerKirkland.kirklandServerLogger.log(resultToSendToStudent.toString().substring(
-						resultToSendToStudent.toString().indexOf(Constants.DILIMITER_STRING+1)));
+				ServerKirkland.kirklandServerLogger.log(resultToSendToStudent.toString());
 				ReserveManager.printCurrentReserveList();
 				ServerKirkland.printCurrentDatabase();
 

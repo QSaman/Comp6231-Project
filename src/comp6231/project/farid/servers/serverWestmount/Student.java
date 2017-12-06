@@ -75,8 +75,7 @@ public class Student implements Serializable {
 						.append(" and time slot: ").append(startTime).append(" / ").append(endTime)
 						.append(", by student ").append(studentID);
 
-				ServerWestmount.westmountServerLogger.log(resultToSendToStudent.toString().substring(
-						resultToSendToStudent.toString().indexOf(Constants.DILIMITER_STRING+1)));
+				ServerWestmount.westmountServerLogger.log(resultToSendToStudent.toString());
 				ReserveManager.printCurrentReserveList();
 				ServerWestmount.printCurrentDatabase();
 
