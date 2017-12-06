@@ -5,6 +5,16 @@ public class Constants {
 	public static final String NULL_STRING = "Null String";
 	public static final String DILIMITER_STRING = "*%#$@#!";
 	
+	// RE1 = mostafa RE2 = saman RE3 = farid
+	// Replica managers
+	public static final String RM_RE1 = "rm_re1";
+	public static final String RM_RE2 = "rm_re2";
+	public static final String RM_RE3 = "rm_re3";
+	
+	public static final int RM_PORT_LISTEN_RE1 = 2973;
+	public static final int RM_PORT_LISTEN_RE2 = 2974;
+	public static final int RM_PORT_LISTEN_RE3 = 2975;
+	
 	//RE1
 	public static final int KKL_PORT_LISTEN_RE1_ORIGINAL = 2900;
 	public static final int DVL_PORT_LISTEN_RE1_ORIGINAL = 2901;

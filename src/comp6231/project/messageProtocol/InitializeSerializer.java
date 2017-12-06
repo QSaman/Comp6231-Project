@@ -90,12 +90,18 @@ public class InitializeSerializer {
 		ds.addClass(CommandType.SignOut, MessageType.Reply, ProtocolType.Frontend_To_Replica, FEReplyMessage.class);
 	}
 	
+	public static void initializeReplicaManagerMessage(MessageHeaderDeserializer ds) 
+	{
+		
+	}
+	
 	public static void initializeAll(MessageHeaderDeserializer ds)
 	{
 		initializeSamanReplica(ds);
 		initializeMostafaReplica(ds);
 		initializeFaridReplica(ds);
 		initializeFrontendTOReplica(ds);
+		initializeReplicaManagerMessage(ds);
 	}
 	/**
 	 * 

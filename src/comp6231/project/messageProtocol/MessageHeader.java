@@ -20,6 +20,8 @@ public class MessageHeader {
 		SignOut,
 		S_Remove_Student_Record,
 		S_Start_Week,
+		Kill,
+		Fake_Generator,
 		
 		Quantity
 	}
@@ -35,7 +37,8 @@ public class MessageHeader {
 	public enum ProtocolType
 	{
 		Frontend_To_Replica,
-		Server_To_Server
+		Server_To_Server,
+		ReplicaManager_Message
 	}
 	
 	public int sequence_number;
