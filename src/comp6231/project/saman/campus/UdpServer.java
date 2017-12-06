@@ -3,10 +3,18 @@
  */
 package comp6231.project.saman.campus;
 
+import java.io.BufferedReader;
+import java.io.CharArrayWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -32,6 +40,9 @@ import comp6231.project.saman.campus.message_protocol.saman_replica.ReplyMessage
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
 import comp6231.project.saman.common.TimeSlotResult;
+import comp6231.shared.Constants;
+import net.rudp.ReliableServerSocket;
+import net.rudp.ReliableSocket;
 
 
 /**
@@ -40,17 +51,20 @@ import comp6231.project.saman.common.TimeSlotResult;
  */
 public class UdpServer extends Thread {
 	private Campus campus;
-	private DatagramSocket socket;	//https://stackoverflow.com/questions/6265731/do-java-sockets-support-full-duplex
-	private final Object write_socket_lock = new Object();
+	//private DatagramSocket socket;	//https://stackoverflow.com/questions/6265731/do-java-sockets-support-full-duplex
+	private ReliableServerSocket server_socket;
+	//private final Object write_socket_lock = new Object();
 	public final static int datagram_send_size = 256;
 	JsonMessage json_message;
 	Gson gson;
 	
-	public UdpServer(Campus campus, Gson gson) throws SocketException, RemoteException
+	public UdpServer(Campus campus, Gson gson) throws IOException
 	{
 		this.gson = gson;
 		this.campus = campus;
-		socket = new DatagramSocket(this.campus.getPort());		
+		//socket = new DatagramSocket(this.campus.getPort());
+		server_socket = new ReliableServerSocket(this.campus.getPort());
+		//System.setProperty("sun.net.maxDatagramSockets", "10000");
 	}
 	
 	public void setJsonMessage(JsonMessage json_message)
@@ -167,49 +181,167 @@ public class UdpServer extends Thread {
 		}
 		return reply;
 	}
-		
-	private void processRequest(byte[] message, InetAddress address, int port)
+	
+	private void processRequest(ReliableSocket socket)
 	{
-		String json_msg_str = new String(message);
-		System.out.println(json_msg_str);
-		MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
-		if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+		InetSocketAddress remote_inet = (InetSocketAddress)socket.getRemoteSocketAddress();
+		String remote_address = remote_inet.getAddress().getHostAddress();
+		System.out.println("remote address: " + remote_address);
+		int remote_port = socket.getPort();
+		try {
+			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			
+			CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
+			
+			while(true) {
+				  int n = in.read();
+				  if( n < 0  || n == '\u0004') break;
+				  writer.write(n);
+				}
+			
+			  String json_msg_str = writer.toString();
+			  System.out.println(json_msg_str);
+			  
+				MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
+				if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+				{
+					if (json_msg.message_type == MessageType.Request)
+					{
+						ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
+						ReplyMessageHeader reply = tmp.handleRequest(campus);
+						String reply_msg = gson.toJson(reply);
+						out.write(reply_msg);
+						out.write('\u0004');
+						out.flush();
+						out.close();
+					}
+					else if (json_msg.message_type == MessageType.Reply)
+					{
+						//json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
+					}
+				}
+				else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
+				{
+					if (json_msg.message_type == MessageType.Request)
+					{
+						FEReplyMessage reply = handleFERequests(json_msg);
+						String reply_msg = gson.toJson(reply);
+						sendDatagramToFE(reply_msg, "127.0.0.1", Constants.FE_PORT_LISTEN);
+					}
+					else if (json_msg.message_type == MessageType.Reply)
+					{
+						System.out.println("Reply messages are not supported for frontend to server");
+					}
+				}
+			  
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
 		{
-			if (json_msg.message_type == MessageType.Request)
+			if (socket != null)
 			{
-				ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
-				ReplyMessageHeader reply = tmp.handleRequest(campus);
-				String reply_msg = gson.toJson(reply);
 				try {
-					sendDatagram(reply_msg.getBytes(), address, port);
+					socket.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			else if (json_msg.message_type == MessageType.Reply)
-				json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
-		}
-		else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
-		{
-			if (json_msg.message_type == MessageType.Request)
-			{
-				FEReplyMessage reply = handleFERequests(json_msg);
-			}
-			else if (json_msg.message_type == MessageType.Reply)
-			{
-				System.out.println("Reply messages are not supported for frontend to server");
-			}
 		}
 	}
+		
+//	private void processRequest(byte[] message, InetAddress address, int port)
+//	{
+//		String json_msg_str = new String(message);
+//		System.out.println(json_msg_str);
+//		MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
+//		if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+//		{
+//			if (json_msg.message_type == MessageType.Request)
+//			{
+//				ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
+//				ReplyMessageHeader reply = tmp.handleRequest(campus);
+//				String reply_msg = gson.toJson(reply);
+//				try {
+//					sendDatagram(reply_msg.getBytes(), address, port);
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//			else if (json_msg.message_type == MessageType.Reply)
+//				json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
+//		}
+//		else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
+//		{
+//			if (json_msg.message_type == MessageType.Request)
+//			{
+//				FEReplyMessage reply = handleFERequests(json_msg);
+//			}
+//			else if (json_msg.message_type == MessageType.Reply)
+//			{
+//				System.out.println("Reply messages are not supported for frontend to server");
+//			}
+//		}
+//	}
 	
-	public void sendDatagram(byte[] message, InetAddress address, int port) throws IOException
+	public ReliableSocket sendDatagramToServer(String message, String address, int port) throws IOException
 	{
 		//System.out.println("Send message to " + address + ":" + port);
-		DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
-		synchronized (write_socket_lock) {
-			socket.send(packet);
-		}		
+		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
+		OutputStreamWriter out = null;
+		//synchronized (write_socket_lock) {
+			//socket.send(packet);
+			
+			ReliableSocket aSocket = new ReliableSocket();
+			try
+			{
+				aSocket.connect(new InetSocketAddress(address, port));
+				out = new OutputStreamWriter(aSocket.getOutputStream());
+				out.write(message);
+				out.write('\u0004');
+				out.flush();
+				out.close();
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+				aSocket.close();
+			}
+			return aSocket;
+	}
+	
+	public void sendDatagramToFE(String message, String address, int port) throws IOException
+	{
+		//System.out.println("Send message to " + address + ":" + port);
+		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
+		OutputStreamWriter out = null;
+		//synchronized (write_socket_lock) {
+			//socket.send(packet);
+			
+			ReliableSocket aSocket = new ReliableSocket();
+			try
+			{
+				aSocket.connect(new InetSocketAddress(address, port));
+				out = new OutputStreamWriter(aSocket.getOutputStream());
+				out.write(message);
+				out.flush();
+				out.close();
+				aSocket.close();
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+				if (aSocket != null)
+					aSocket.close();
+			}
+		//}		
 	}
 	
 	@Override
@@ -217,15 +349,18 @@ public class UdpServer extends Thread {
 	{
 		while (true)
 		{
-			byte[] buffer = new byte[datagram_send_size];
-			DatagramPacket packet = new DatagramPacket(buffer, datagram_send_size);
+			
+			//byte[] buffer = new byte[datagram_send_size];
+			//DatagramPacket packet = new DatagramPacket(buffer, datagram_send_size);
 			try {
-				socket.receive(packet);
+				ReliableSocket active_socket = (ReliableSocket)server_socket.accept();
+				//socket.receive(packet);
 				Thread thread = new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
-						UdpServer.this.processRequest(Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength()), packet.getAddress(), packet.getPort());
+						//UdpServer.this.processRequest(Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength()), packet.getAddress(), packet.getPort());
+						UdpServer.this.processRequest(active_socket);
 					}
 				});
 				thread.start();
