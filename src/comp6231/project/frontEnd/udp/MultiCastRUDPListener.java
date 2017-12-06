@@ -97,9 +97,9 @@ public class MultiCastRUDPListener implements Runnable{
 			if(replyMessage.command_type == CommandType.Book_Room) {
 				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
 				
-				if(replyMessage.campusId.equalsIgnoreCase("Mostafa")) {
+				if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
 					
-				}else if (replyMessage.campusId.equalsIgnoreCase("Farid")) {
+				}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
 					
 				}else {
 					

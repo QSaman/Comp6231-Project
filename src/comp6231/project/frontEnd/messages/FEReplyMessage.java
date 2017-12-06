@@ -8,14 +8,14 @@ public class FEReplyMessage extends MessageHeader{
 	// this is for fault generator
 	public boolean status;
 	public String bookingId;
-	public String campusId;
+	public String replicaId;
 	
 	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean status) {
 		super(sequenceNumber, commandType, MessageType.Reply, ProtocolType.Frontend_To_Replica);
 		this.replyMessage = replyMessage;
 		this.status = status;
 		this.bookingId = Constants.NULL_STRING;
-		this.campusId = Constants.NULL_STRING;
+		this.replicaId = Constants.NULL_STRING;
 	}
 	
 	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean status, String bookingId , String campusId) {
@@ -23,6 +23,6 @@ public class FEReplyMessage extends MessageHeader{
 		this.replyMessage = replyMessage;
 		this.status = status;
 		this.bookingId = bookingId; 
-		this.campusId = campusId;
+		this.replicaId = campusId;
 	}
 }

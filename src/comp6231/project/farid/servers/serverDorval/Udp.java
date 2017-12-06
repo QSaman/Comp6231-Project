@@ -82,7 +82,6 @@ public class Udp implements Runnable {
 				if(socket !=null){try {
 					socket.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}}
 			}
@@ -107,7 +106,6 @@ public class Udp implements Runnable {
 					out.flush();
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}else{
@@ -120,7 +118,6 @@ public class Udp implements Runnable {
 					out.close();
 					aSocket.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -176,7 +173,9 @@ public class Udp implements Runnable {
 					LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-")+1));
 					packetToSend = ServerDorval.bookRoom(tempStudentID, campus, tempRoomNumber,
 							date, startTime,endTime);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true);
+					String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
+					packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING)+1);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true, bookingId, "Farid" );
 					ServerDorval.dorvalServerLogger.log("book room: " + packetToSend);
 
 				} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
