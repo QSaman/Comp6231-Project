@@ -216,8 +216,9 @@ public class Udp implements Runnable {
 
 					packetToSend = ServerKirkland.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
 							startTime, endTime);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend, true);
-
+					String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
+					packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING)+1);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend, true, bookingId,"Farid");
 				} else if (json_msg.command_type == CommandType.Create_Room) {
 
 					FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json_msg;
