@@ -31,6 +31,7 @@ public class Server {
 		t.start();
 		Thread time = new Thread(new Timer());
 		time.start();
+		Database.getInstance().addTestCase();
 	}
 
 	private static void save() throws Exception {

@@ -115,16 +115,27 @@ public class Client {
 							int campusKill;
 							while (true) {
 								System.out.println("\nWhich server do you want to kill?\n");
-								System.out.println("1- Dorval");
-								System.out.println("2- Kirkland");
-								System.out.println("3- Westmount");
+								System.out.println("1- Dorval-Farid");
+								System.out.println("2- Kirkland-Farid");
+								System.out.println("3- Westmount-Farid");
+								System.out.println("4- Dorval-Saman");
+								System.out.println("5- Kirkland-Saman");
+								System.out.println("6- Westmount-Saman");
+								System.out.println("7- Dorval-Mostafa");
+								System.out.println("8- Kirkland-Mostafa");
+								System.out.println("9- Westmount-Mostafa");
 								campusKill = InputManager.getNumber("number of choice");
-								if (campusKill == 1 || campusKill == 2 || campusKill == 3)
+								if (campusKill == 1 || campusKill == 2 || campusKill == 3
+										|| campusKill == 4 || campusKill == 5 || campusKill == 6
+										|| campusKill == 7 || campusKill == 8 || campusKill == 9)
 									break;
 								else
 									System.out.println("Wrong campus number. try again!");
 							}
-							String killServerString = studentOperations.killServer(campusKill==1?"DVL":campusKill==2?"KKL":"WST");
+							String killServerString = studentOperations.killServer(
+									campusKill==1?"FDVL":campusKill==2?"FKKL":campusKill==3?"FWST":
+										campusKill==4?"SDVL":campusKill==5?"SKKL":campusKill==6?"SWST":
+											campusKill==7?"MDVL":campusKill==8?"MKKL":"MWST");
 							System.out.println(killServerString);
 							logger.log(killServerString);
 							break;
@@ -200,16 +211,27 @@ public class Client {
 							int campusKill;
 							while (true) {
 								System.out.println("\nWhich server do you want to kill?\n");
-								System.out.println("1- Dorval");
-								System.out.println("2- Kirkland");
-								System.out.println("3- Westmount");
+								System.out.println("1- Dorval-Farid");
+								System.out.println("2- Kirkland-Farid");
+								System.out.println("3- Westmount-Farid");
+								System.out.println("4- Dorval-Saman");
+								System.out.println("5- Kirkland-Saman");
+								System.out.println("6- Westmount-Saman");
+								System.out.println("7- Dorval-Mostafa");
+								System.out.println("8- Kirkland-Mostafa");
+								System.out.println("9- Westmount-Mostafa");
 								campusKill = InputManager.getNumber("number of choice");
-								if (campusKill == 1 || campusKill == 2 || campusKill == 3)
+								if (campusKill == 1 || campusKill == 2 || campusKill == 3
+										|| campusKill == 4 || campusKill == 5 || campusKill == 6
+										|| campusKill == 7 || campusKill == 8 || campusKill == 9)
 									break;
 								else
 									System.out.println("Wrong campus number. try again!");
 							}
-							String killServerString = studentOperations.killServer(campusKill==1?"DVL":campusKill==2?"KKL":"WST");
+							String killServerString = studentOperations.killServer(
+									campusKill==1?"FDVL":campusKill==2?"FKKL":campusKill==3?"FWST":
+										campusKill==4?"SDVL":campusKill==5?"SKKL":campusKill==6?"SWST":
+											campusKill==7?"MDVL":campusKill==8?"MKKL":"MWST");
 							System.out.println(killServerString);
 							logger.log(killServerString);
 							break;

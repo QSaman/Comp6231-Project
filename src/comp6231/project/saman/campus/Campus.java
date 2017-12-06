@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import comp6231.project.messageProtocol.InitializeSerializer;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeaderDeserializer;
+import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.saman.campus.message_protocol.saman_replica.*;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.LoggerHelper;
@@ -69,9 +70,10 @@ public class Campus implements Serializable {
 	
 	private void initGson()
 	{
-		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
-		InitializeSerializer.initializeSamanReplica(ds);
-		gson = new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
+//		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
+//		InitializeSerializer.initializeSamanReplica(ds);
+//		gson = new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
+		gson = StartGson.initGsonSaman();
 	}
 	
 	public void starServer() throws RemoteException
