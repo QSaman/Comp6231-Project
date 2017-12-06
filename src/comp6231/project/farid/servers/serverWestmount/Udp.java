@@ -33,7 +33,7 @@ import comp6231.shared.Constants;
 public class Udp implements Runnable {
 	private ReliableServerSocket serverSocket;
 	String udp_name;
-
+	//udp name
 	Udp(String args[]) {
 		udp_name = args[0];
 	}
