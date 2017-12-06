@@ -10,6 +10,8 @@ import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
 import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.ReturnStatus;
+import comp6231.project.frontEnd.messages.FECancelBookingMessage;
+import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
@@ -57,51 +59,93 @@ public class Sequencer extends Thread{
 	public void sendToReplica(byte[] sendBuffer) {
 
 		int[] replicaPorts =  new int[3];
-
-
-		if(group.equals(Constants.DVL_GROUP)){
-			replicaPorts[0] = Constants.dvlPortListenFaridActive;
-			replicaPorts[1] = Constants.dvlPortListenRe1Active;
-			replicaPorts[2] = Constants.dvlPortListenRe2Active;
-		}else if(group.equals(Constants.KKL_GROUP)){
-			replicaPorts[0] = Constants.kklPortListenFaridActive;
-			replicaPorts[1] = Constants.kklPortListenRe1Active;
-			replicaPorts[2] = Constants.kklPortListenRe2Active;
-		}else if(group.equals(Constants.WST_GROUP)){
-			replicaPorts[0] = Constants.wstPortListenFaridActive;
-			replicaPorts[1] = Constants.wstPortListenRe1Active;
-			replicaPorts[2] = Constants.wstPortListenRe2Active;
-		}else{
-			FE.log("group is not valid in sequencer class: " + group);
-			return;
+		boolean customSend = false;
+		String [] tokens = null;
+		
+		if(args.command_type == CommandType.Cancel_Book_Room) {
+			customSend = true;
+			FECancelBookingMessage message = (FECancelBookingMessage) args;
+			tokens = message.booking_id.split("!");
+			
+		}else if(args.command_type == CommandType.Change_Reservation) {
+			FEChangeReservationMessage message = (FEChangeReservationMessage) args;
+			tokens = message.booking_id.split("!");
+		}else {
+			if(group.equals(Constants.DVL_GROUP)){
+				replicaPorts[1] = Constants.dvlPortListenFaridActive;
+				replicaPorts[0] = Constants.dvlPortListenRe1Active;
+				replicaPorts[2] = Constants.dvlPortListenRe2Active;
+			}else if(group.equals(Constants.KKL_GROUP)){
+				replicaPorts[1] = Constants.kklPortListenFaridActive;
+				replicaPorts[0] = Constants.kklPortListenRe1Active;
+				replicaPorts[2] = Constants.kklPortListenRe2Active;
+			}else if(group.equals(Constants.WST_GROUP)){
+				replicaPorts[1] = Constants.wstPortListenFaridActive;
+				replicaPorts[0] = Constants.wstPortListenRe1Active;
+				replicaPorts[2] = Constants.wstPortListenRe2Active;
+			}else{
+				FE.log("group is not valid in sequencer class: " + group);
+				return;
+			}
 		}
+		
+		if(customSend) {
+			for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
+				
+				final String data = tokens[i];
+				final int idxPort = i;
 
-		for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
 
-			final int idxPort = i;
+						try {
+							ReliableSocket sendToReplica = new ReliableSocket();
 
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
+							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+							
+							OutputStream out = sendToReplica.getOutputStream();
+							out.write(data.getBytes());
 
-					try {
-						ReliableSocket sendToReplica = new ReliableSocket();
+							out.flush();
+							out.close();
+							sendToReplica.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 
-						sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
-						
-						OutputStream out = sendToReplica.getOutputStream();
-						out.write(sendBuffer);
-
-						out.flush();
-						out.close();
-						sendToReplica.close();
-					} catch (IOException e) {
-						e.printStackTrace();
 					}
+				}).start();
+			}
+		}else {
+			for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
 
-				}
-			}).start();
+				final int idxPort = i;
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+						try {
+							ReliableSocket sendToReplica = new ReliableSocket();
+
+							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+							
+							OutputStream out = sendToReplica.getOutputStream();
+							out.write(sendBuffer);
+
+							out.flush();
+							out.close();
+							sendToReplica.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
+				}).start();
+			}
 		}
+
 	}
 	
 	public void setTimeOut(){
@@ -140,9 +184,9 @@ public class Sequencer extends Thread{
 					}
 					result = "login done";
 				}else if(replyMessage.command_type == CommandType.Book_Room){
-					result += replyMessage.bookingId + ",";
+					result += replyMessage.bookingId + "!";
 				}else if(replyMessage.command_type == CommandType.Change_Reservation) {
-					result += replyMessage.bookingId + ",";
+					result += replyMessage.bookingId + "!";
 				}else{
 					result += replyMessage.replyMessage + "\n";
 				}
