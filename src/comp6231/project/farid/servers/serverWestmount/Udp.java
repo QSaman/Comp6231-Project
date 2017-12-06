@@ -176,7 +176,9 @@ public class Udp  implements Runnable {
 					LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-")+1));
 
 					packetToSend = ServerWestmount.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime, endTime);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true);
+					String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
+					packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING)+1);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true,bookingId,"Farid");
 
 				} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
 

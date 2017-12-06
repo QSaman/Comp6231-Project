@@ -3,6 +3,7 @@ package comp6231.shared;
 public class Constants {
 	
 	public static final String NULL_STRING = "Null String";
+	public static final String DILIMITER_STRING = "*%#$@#!";
 	
 	//RE1
 	public static final int KKL_PORT_LISTEN_RE1_ORIGINAL = 2900;

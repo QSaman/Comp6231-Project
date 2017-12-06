@@ -52,7 +52,9 @@ public class Student implements Serializable {
 							resultToSendToStudent.append("\nThe room ").append(roomNumber).append(" for date ")
 									.append(date).append(" for time slot ").append(startTime).append(" / ")
 									.append(endTime).append(" successfully booked.").append("\nBooking ID is: ")
-									.append(newBookingID);// .append("\n Number of booking
+									.append(newBookingID); 
+							resultToSendToStudent.insert(0, newBookingID+Constants.DILIMITER_STRING);
+															// .append("\n Number of booking
 															// ").append(ReserveManager.counterDB.get(studentID).getCounter()).append("
 															// booking. Can book ").append(3 -
 															// ReserveManager.counterDB.get(studentID).getCounter()).append("
@@ -88,7 +90,8 @@ public class Student implements Serializable {
 			}
 		}
 
-		ServerDorval.dorvalServerLogger.log(resultToSendToStudent.toString());
+		ServerDorval.dorvalServerLogger.log(resultToSendToStudent.toString().substring(
+				resultToSendToStudent.toString().indexOf(Constants.DILIMITER_STRING+1)));
 		ReserveManager.printCurrentReserveList();
 		ServerDorval.printCurrentDatabase();
 
