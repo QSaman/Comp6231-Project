@@ -36,7 +36,6 @@ public class UDPlistener  implements Runnable {
 
 			while(true){
 				ReliableSocket aSocket = (ReliableSocket) socket.accept();
-				Server.log("accpted");
 				new Handler(aSocket).start();
 			}
 
@@ -150,7 +149,16 @@ public class UDPlistener  implements Runnable {
 			}else if(json.command_type == CommandType.Book_Room){
 				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().bookRoom(message.campusName, message.roomNumber, message.date, message.timeSlot, message.userId);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, result, true);
+				String bookingId = Constants.NULL_STRING;
+				if(result.contains("booked") && !result.contains("notbooked")){
+					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
+					int endIndex = result.indexOf("booked") -1;
+					bookingId = result.substring(startIndex,endIndex);
+					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+				}else {
+					Server.log(" not booked");
+				}
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, result, true, bookingId, Information.getInstance().isReOne ? "Mostafa" : "Saman");
 			}else if (json.command_type == CommandType.Delete_Room){
 				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().delete(message.roomNumber, message.date, message.timeSlots, message.userId);
