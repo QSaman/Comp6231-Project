@@ -112,13 +112,13 @@ public class FE {
 	
 	public static MessageHeader fromJson(String json){
 		synchronized (lock) {
-			return FE.gson.fromJson(json, MessageHeader.class);
+			return gson.fromJson(json, MessageHeader.class);
 		}
 	}
 	
 	public static String toJson(MessageHeader args){
 		synchronized (lock) {
-			return FE.gson.toJson(args);
+			return gson.toJson(args);
 		}
 	}
 }

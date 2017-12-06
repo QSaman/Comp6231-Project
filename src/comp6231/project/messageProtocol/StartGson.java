@@ -42,4 +42,10 @@ public class StartGson {
 		InitializeSerializer.initializeAll(ds);
 		return new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
 	}
+	
+	public static Gson initReplicaManager() {
+		MessageHeaderDeserializer ds = new MessageHeaderDeserializer();		
+		InitializeSerializer.initializeReplicaManagerMessage(ds);
+		return new GsonBuilder().registerTypeAdapter(MessageHeader.class, ds).create();
+	}
 }
