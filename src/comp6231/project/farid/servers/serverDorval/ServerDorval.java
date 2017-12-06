@@ -80,7 +80,7 @@ public class ServerDorval {
 		Thread udpThread = new Thread(new Udp(args));
 		udpThread.start();
 		
-//		addTestCase();
+		addTestCase();
 //		bookTestCase();
 //		save();
 //		load();		

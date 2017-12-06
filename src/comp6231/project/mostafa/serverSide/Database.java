@@ -49,7 +49,21 @@ public class Database implements Serializable {
 		roomRecords = new HashMap<String, HashMap<Integer, HashMap<Integer, RoomRecord>>>();
 		bookingCount = new HashMap<String, Integer>();
 		bookingIds = new HashMap<String, RoomRecord>();
-		copyDatabase = new CopyDatabase();
+		copyDatabase = new CopyDatabase();		
+	}
+	
+	void addTestCase(){
+		addToDatabase("2017-01-01", 1, Information.getInstance().convertTimeToSec("08:00"), 
+				Information.getInstance().convertTimeToSec("09:00"));
+		addToDatabase("2017-01-01", 1, Information.getInstance().convertTimeToSec("09:00"), 
+				Information.getInstance().convertTimeToSec("10:00"));
+		addToDatabase("2017-01-01", 1, Information.getInstance().convertTimeToSec("10:00"), 
+				Information.getInstance().convertTimeToSec("11:00"));
+		addToDatabase("2017-01-01", 1, Information.getInstance().convertTimeToSec("11:00"), 
+				Information.getInstance().convertTimeToSec("12:00"));
+		addToDatabase("2017-01-01", 1, Information.getInstance().convertTimeToSec("12:00"), 
+				Information.getInstance().convertTimeToSec("13:00"));
+		Server.log("test case addded");
 	}
 
 	public static Database getInstance() {
