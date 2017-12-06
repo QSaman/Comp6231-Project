@@ -132,7 +132,8 @@ public class Client {
 								else
 									System.out.println("Wrong campus number. try again!");
 							}
-							String killServerString = studentOperations.killServer(
+							String killServerString = "==> Killed and switched.";
+							adminOperations.killServer(
 									campusKill==1?"FDVL":campusKill==2?"FKKL":campusKill==3?"FWST":
 										campusKill==4?"SDVL":campusKill==5?"SKKL":campusKill==6?"SWST":
 											campusKill==7?"MDVL":campusKill==8?"MKKL":"MWST");
@@ -228,7 +229,8 @@ public class Client {
 								else
 									System.out.println("Wrong campus number. try again!");
 							}
-							String killServerString = studentOperations.killServer(
+							String killServerString = "==> Killed and switched.";
+							studentOperations.killServer(
 									campusKill==1?"FDVL":campusKill==2?"FKKL":campusKill==3?"FWST":
 										campusKill==4?"SDVL":campusKill==5?"SKKL":campusKill==6?"SWST":
 											campusKill==7?"MDVL":campusKill==8?"MKKL":"MWST");
