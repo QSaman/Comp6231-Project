@@ -134,13 +134,17 @@ public class Sequencer extends Thread{
 			if(replyMessage.status){
 				FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
 				if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
-					if(replyMessage.command_type.equals("False")){
+					if(replyMessage.replyMessage.equals("False")){
 						returnStatus = ReturnStatus.CantLogin;
 						result = "login faild";
 					}
 					result = "login done";
+				}else if(replyMessage.command_type == CommandType.Book_Room){
+					result += replyMessage.bookingId + ",";
+				}else if(replyMessage.command_type == CommandType.Change_Reservation) {
+					result += replyMessage.bookingId + ",";
 				}else{
-					result += replyMessage.replyMessage + " ";
+					result += replyMessage.replyMessage + "\n";
 				}
 
 			}else{
