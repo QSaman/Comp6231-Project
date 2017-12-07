@@ -88,8 +88,14 @@ public class UDPlistener  implements Runnable {
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
-
+			
 			if(!result.equals(Constants.ONE_WAY)) {
+				try {
+					Server.save();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				send(socket.getInetAddress(), socket.getPort(), result);
 			}
 		}
@@ -157,6 +163,12 @@ public class UDPlistener  implements Runnable {
 			if(json.command_type == CommandType.Kill) {
 				RMKillMessage message = (RMKillMessage) json;
 				PortSwitcher.switchServer(message.portSwitcherArg);
+				try {
+					Server.load();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Server.log("Server Switched");
 			}else if (json.command_type == CommandType.Fake_Generator) {
 				RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json;

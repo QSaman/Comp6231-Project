@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import com.google.gson.Gson;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import comp6231.project.messageProtocol.StartGson;
 
@@ -37,21 +36,21 @@ public class Server {
 		Database.getInstance().addTestCase();
 	}
 
-	private static void save() throws Exception {
+	public static void save() throws Exception {
 		try {
 			Database.getInstance().serializeDataOut();
-			System.out.println("Saved");
+			log("Saved");
 		} catch (IOException e) {
 			System.out.println("ERROR IN SERIALIZING");
 		}
 	}
 
-	private static void load() throws Exception{
+	public static void load() throws Exception{
 		try {
 			Database.serializeDataIn();
-			System.out.println("Loaded");
+			log("Loaded");
 		} catch (ClassNotFoundException|IOException e) {
-			System.out.println("ERROR IN LOADING");
+			log("ERROR IN LOADING");
 		}
 	}
 	private static void initializeLog(){
