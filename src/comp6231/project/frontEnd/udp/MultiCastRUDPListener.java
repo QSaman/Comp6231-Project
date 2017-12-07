@@ -10,14 +10,13 @@ import comp6231.project.frontEnd.FE;
 import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
 	private ReliableServerSocket socket;
-	
+
 	@Override
 	public void run() {
 		socket = null;
@@ -50,9 +49,9 @@ public class MultiCastRUDPListener implements Runnable{
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				while(true) {
-				  int n = in.read(buffer);
-				  if( n < 0 ) break;
-				  baos.write(buffer,0,n);
+					int n = in.read(buffer);
+					if( n < 0 ) break;
+					baos.write(buffer,0,n);
 				}
 
 				byte data[] = baos.toByteArray();			    
@@ -94,25 +93,19 @@ public class MultiCastRUDPListener implements Runnable{
 		}
 
 		private void processFrontEndToserver(FEReplyMessage replyMessage, String json){
-			if(replyMessage.command_type == CommandType.Book_Room) {
-				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
-				
-				if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
-					pair.infos.put(0, new Info(json, socket.getPort()));
-				}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
-					pair.infos.put(1, new Info(json, socket.getPort()));
-				}else {
-					pair.infos.put(2, new Info(json, socket.getPort()));
-				}
-				
-				pair.semaphore.release();
-				FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.bookingId);
+
+			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
+
+			if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
+				pair.infos.put(1, new Info(json, socket.getPort()));
+			}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
+				pair.infos.put(0, new Info(json, socket.getPort()));
 			}else {
-				FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
-				pair.infos.put(pair.adjustIndex(), new Info(json, socket.getPort()));
-				pair.semaphore.release();
-				FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);
-			}	
+				pair.infos.put(2, new Info(json, socket.getPort()));
+			}
+
+			pair.semaphore.release();
+			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.bookingId);
 		}
 	}
 

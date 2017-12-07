@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class RoomRecord implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4648254605778420904L;
 	private static int idGenerator = 00000;
 	private static final Object idGeneratorLock = new Object();
 	private static final Object bookedStudentIdLock = new Object();
