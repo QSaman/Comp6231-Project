@@ -51,7 +51,7 @@ public class ErrorHandler implements Runnable{
 	private void send(String json, int port) {
 		try {
 			ReliableSocket socket = new ReliableSocket();
-			socket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, port));
+			socket.connect(new InetSocketAddress(findRMAdrr(replicaId), port));
 			OutputStream out = socket.getOutputStream();
 			out.write(json.getBytes());
 			out.flush();
@@ -103,6 +103,18 @@ public class ErrorHandler implements Runnable{
 			return Constants.RM_PORT_LISTEN_RE2;
 		}else {
 			return -1;
+		}
+	}
+	
+	private String findRMAdrr(String replicaId) {
+		if(replicaId.contains("Farid")) {
+			return Constants.FE_CLIENT_IP;
+		}else if(replicaId.contains("Mostafa")) {
+			return Constants.MOSTAFA_IP;
+		}else if(replicaId.contains("Saman")) {
+			return Constants.FARID_IP;
+		}else {
+			return Constants.NULL_STRING;
 		}
 	}
 }
