@@ -18,6 +18,8 @@ import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 public class ServerWestmount {
 
 	public static Gson gson;
+	private static boolean isFakeGeneratorOff = true;
+	private static final Object fakeGeneratorLock = new Object();
 	static Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
 	static MyLogger westmountServerLogger;
@@ -26,9 +28,9 @@ public class ServerWestmount {
 	static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
 	private static DatagramSocket serverSocket;
 
-	private static void save() throws Exception {
-		setStudentID("DVLS1234");
-		bookRoom("DVLS1234", 1, 1, LocalDate.of(2017, 1, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+	public static void save() throws Exception {
+//		setStudentID("DVLS1234");
+//		bookRoom("DVLS1234", 1, 1, LocalDate.of(2017, 1, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
 		SaverLoader saverLoader = new SaverLoader();
 		saverLoader.copyServerToObject();
 		saverLoader.printCurrentDatabase();
@@ -40,7 +42,7 @@ public class ServerWestmount {
 		}
 	}
 	
-	private static void load() throws Exception{
+	public static void load() throws Exception{
 		SaverLoader saverLoader = null;
 		try {
 			saverLoader = SaverLoader.serializeDataIn();
@@ -161,6 +163,24 @@ public class ServerWestmount {
 				admins.remove(ID);
 			}
 			ServerWestmount.westmountServerLogger.log("\nAdmin " + ID + " signed out\n");
+		}
+	}
+
+	/**
+	 * @return the isFakeGeneratorOff
+	 */
+	public static boolean isFakeGeneratorOff() {
+		synchronized (fakeGeneratorLock) {
+			return isFakeGeneratorOff;	
+		}
+	}
+
+	/**
+	 * @param isFakeGeneratorOff the isFakeGeneratorOff to set
+	 */
+	public static void setFakeGeneratorOff(boolean isFakeGeneratorOff) {
+		synchronized (fakeGeneratorLock) {
+			ServerWestmount.isFakeGeneratorOff = isFakeGeneratorOff;
 		}
 	}
 }

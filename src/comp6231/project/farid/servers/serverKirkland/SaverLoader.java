@@ -32,6 +32,11 @@ public class SaverLoader implements Serializable {
     private Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
 
     void copyObjectToServer(){
+    	ServerKirkland.dataBase.clear();
+		ServerKirkland.students.clear();
+		ServerKirkland.admins.clear();
+		ReserveManager.reserveMap.clear();
+		ReserveManager.counterDB.clear();
 		copyDataBase(dataBase, ServerKirkland.dataBase);
 		copyMap(students, ServerKirkland.students);
 		copyMap(admins, ServerKirkland.admins);

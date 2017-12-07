@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
+import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -28,12 +29,15 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
+import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 
 public class Udp implements Runnable {
 	private ReliableServerSocket serverSocket;
 	String udp_name;
-	//udp name
+
+	// udp name
 	Udp(String args[]) {
 		udp_name = args[0];
 	}
@@ -98,8 +102,11 @@ public class Udp implements Runnable {
 			ServerKirkland.kirklandServerLogger.log("UDP Socket Received JSON: " + json_msg_str);
 			String result = processData(json_msg_str);
 			ServerKirkland.kirklandServerLogger.log("UDP Socket Listener Result: " + result);
-
-			send(socket.getInetAddress(), socket.getPort(), result);
+			if(protocolType != ProtocolType.ReplicaManager_Message) {
+				//save here
+				ServerKirkland.save();
+				send(socket.getInetAddress(), socket.getPort(), result);
+			}
 		}
 
 		private void send(InetAddress address, int port, String data) {
@@ -135,11 +142,12 @@ public class Udp implements Runnable {
 		private String processData(String json) throws Exception {
 			String packetToSend = null;
 			MessageHeader json_msg = ServerKirkland.gson.fromJson(json, MessageHeader.class);
-			boolean isFeToServer = json_msg.protocol_type == ProtocolType.Frontend_To_Replica ? true : false;
+			boolean isFeToServer = false;
+			boolean isReplicaManagerMessage = false;
 			FEReplyMessage replyMessage = null;
 
-			if (isFeToServer) {
-
+			if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica) {
+				isFeToServer = true;
 				// json = json.substring(3);
 				protocolType = ProtocolType.Frontend_To_Replica;
 				int seqNumber = json_msg.sequence_number;
@@ -149,7 +157,7 @@ public class Udp implements Runnable {
 
 					String tempStudentID = message.userId.toUpperCase();
 					packetToSend = ServerKirkland.setStudentID(tempStudentID) ? "True" : "False";
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginStudent, packetToSend, true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginStudent, packetToSend, true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.LoginAdmin) {
 
@@ -157,7 +165,7 @@ public class Udp implements Runnable {
 
 					String tempAdminID = message.userId.toUpperCase();
 					packetToSend = ServerKirkland.setAdminID(tempAdminID) ? "True" : "False";
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginAdmin, packetToSend, true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginAdmin, packetToSend, true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.SignOut) {
 
@@ -165,7 +173,7 @@ public class Udp implements Runnable {
 
 					String tempID = message.userId.toUpperCase();
 					ServerKirkland.signOut(tempID);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.SignOut, "Sign Out Called", true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.SignOut, "Sign Out Called", true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.Book_Room) {
 
@@ -187,7 +195,7 @@ public class Udp implements Runnable {
 						replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true,
 								bookingId, "Farid");
 					} else {
-						replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true);
+						replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true, "Farid");
 					}
 
 				} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
@@ -198,7 +206,7 @@ public class Udp implements Runnable {
 					String tempBookingID = message.booking_id;
 
 					packetToSend = ServerKirkland.cancelBooking(tempStudentID, tempBookingID);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Cancel_Book_Room, packetToSend, true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Cancel_Book_Room, packetToSend, true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.Get_Available_TimeSlots) {
 
@@ -209,7 +217,7 @@ public class Udp implements Runnable {
 
 					packetToSend = ServerKirkland.getAvailableTimeSlot(tempStudentID, date);
 					replyMessage = new FEReplyMessage(seqNumber, CommandType.Get_Available_TimeSlots, packetToSend,
-							true);
+							true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.Change_Reservation) {
 
@@ -235,7 +243,7 @@ public class Udp implements Runnable {
 								bookingId, "Farid");
 					} else {
 						replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend,
-								true);
+								true, "Farid");
 
 					}
 				} else if (json_msg.command_type == CommandType.Create_Room) {
@@ -252,7 +260,7 @@ public class Udp implements Runnable {
 					}
 
 					packetToSend = ServerKirkland.createRoom(adminID, roomNumber, date, listOfTimeSlots);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Create_Room, packetToSend, true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Create_Room, packetToSend, true, "Farid");
 
 				} else if (json_msg.command_type == CommandType.Delete_Room) {
 
@@ -268,9 +276,9 @@ public class Udp implements Runnable {
 					}
 
 					packetToSend = ServerKirkland.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, true);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, true, "Farid");
 				}
-			} else {
+			} else if(json_msg.protocol_type == ProtocolType.Server_To_Server) {
 				// legacy code
 				protocolType = ProtocolType.Server_To_Server;
 				ServerToServerMessage message = (ServerToServerMessage) json_msg;
@@ -367,11 +375,38 @@ public class Udp implements Runnable {
 
 					tempStudent.signOut();
 				}
+			}else if(json_msg.protocol_type == ProtocolType.ReplicaManager_Message){
+				protocolType  = ProtocolType.ReplicaManager_Message;
+				isReplicaManagerMessage = true;
+				if(json_msg.command_type == CommandType.Kill) {
+					RMKillMessage message = (RMKillMessage) json_msg;
+					PortSwitcher.switchServer(message.portSwitcherArg);
+					try {
+						// load here
+						ServerKirkland.load();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					ServerKirkland.kirklandServerLogger.log("Server Switched");
+				}else if(json_msg.command_type == CommandType.Fake_Generator) {
+					RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json_msg;
+					ServerKirkland.setFakeGeneratorOff(message.turnOff);
+					ServerKirkland.kirklandServerLogger.log(" isFakeGeneratorOn : " + !ServerKirkland.isFakeGeneratorOff());
+				}else {
+					ServerKirkland.kirklandServerLogger.log(" command type is wrong for rm request");
+				}
+			}else {
+				ServerKirkland.kirklandServerLogger.log(" Protocol type is incorecct");
 			}
+			
 			if (isFeToServer) {
 				return ServerKirkland.gson.toJson(replyMessage);
+			}else if(isReplicaManagerMessage) {
+				return Constants.ONE_WAY;
+			}else {
+				return packetToSend;
 			}
-			return packetToSend;
 		}
 
 		LocalTime getLocalTime(String string) {
