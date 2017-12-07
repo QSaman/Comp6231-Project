@@ -91,6 +91,10 @@ public class Constants {
 	public static final int KKL_PORT_LISTEN_SAMAN_ORIGINAL = 7778;
 	public static final int WST_PORT_LISTEN_SAMAN_ORIGINAL = 7779;
 	
+	public static final int DVL_PORT_LISTEN_SAMAN_BACKUP = 6667;
+	public static final int KKL_PORT_LISTEN_SAMAN_BACKUP = 6668;
+	public static final int WST_PORT_LISTEN_SAMAN_BACKUP = 6669;
+	
 	// RE3
 	public static final int DVL_PORT_LISTEN_FARID_ORIGINAL = 9763;
 	public static final int KKL_PORT_LISTEN_FARID_ORIGINAL = 9867;

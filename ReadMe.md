@@ -17,6 +17,8 @@ ServerDorval: dvl_org
 ServerKirkland: kkl_org
 ServerWestmount: wst_org
 
+You can run all servers in Saman Replica by running this class: comp6231.project.saman.campus.Bootstrap with no argument
+
 FE: orbd -ORBInitialPort 1050 -ORBInitialHost localhost
 Client-project: orbd -ORBInitialPort 1050 -ORBInitialHost localhost 
 ```
