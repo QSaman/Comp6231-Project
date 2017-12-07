@@ -81,4 +81,10 @@ public class AdminImpl extends AdminOperationsPOA {
 		new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(campusName), message))).start();
 	}
 
+	@Override
+	public void fakeGenerate(String replicaName, String campusName) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
