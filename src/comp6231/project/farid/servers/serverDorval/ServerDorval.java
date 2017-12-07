@@ -13,9 +13,13 @@ import com.google.gson.Gson;
 
 import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
+import comp6231.project.mostafa.serverSide.Server;
 
 public class ServerDorval {
 	public static Gson gson;
+	private static boolean isFakeGeneratorOff = true;
+	private static final Object fakeGeneratorLock = new Object();
+	
 	// The main database of the server
 	static Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
@@ -173,6 +177,24 @@ public class ServerDorval {
 				admins.remove(ID);
 			}
 			ServerDorval.dorvalServerLogger.log("\nAdmin " + ID + " signed out\n");
+		}
+	}
+	
+	/**
+	 * @return the isFakeGeneratorOff
+	 */
+	public static boolean isFakeGeneratorOff() {
+		synchronized (fakeGeneratorLock) {
+			return isFakeGeneratorOff;	
+		}
+	}
+
+	/**
+	 * @param isFakeGeneratorOff the isFakeGeneratorOff to set
+	 */
+	public static void setFakeGeneratorOff(boolean isFakeGeneratorOff) {
+		synchronized (fakeGeneratorLock) {
+			ServerDorval.isFakeGeneratorOff = isFakeGeneratorOff;
 		}
 	}
 }

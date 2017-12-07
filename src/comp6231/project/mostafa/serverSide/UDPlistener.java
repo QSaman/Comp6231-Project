@@ -89,7 +89,7 @@ public class UDPlistener  implements Runnable {
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
 			
-			if(!result.equals(Constants.ONE_WAY)) {
+			if(protocolType != ProtocolType.ReplicaManager_Message) {
 				try {
 					Server.save();
 				} catch (Exception e) {
