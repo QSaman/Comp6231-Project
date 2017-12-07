@@ -1,5 +1,26 @@
 # Fall 2017 Project
 
+# How to configure in Eclipse
+
+```
+orbd -ORBInitialPort 1050 -ORBInitialHost localhost
+
+DVL-Mostafa: 2963
+KKL-Mostafa: 2962
+WST-Mostafa: 2961
+
+KKL-RE2: 2967
+DVL-RE2: 2968
+WST-RE2: 2969
+
+ServerDorval: dvl_org
+ServerKirkland: kkl_org
+ServerWestmount: wst_org
+
+FE: orbd -ORBInitialPort 1050 -ORBInitialHost localhost
+Client-project: orbd -ORBInitialPort 1050 -ORBInitialHost localhost 
+```
+
 # UDP MESSAGE STANDARD
 ** REQUIRED KEY : "Method","SequenceNumber"
 

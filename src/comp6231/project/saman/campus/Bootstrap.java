@@ -9,12 +9,17 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import comp6231.project.saman.campus.CampusCommunication.RemoteInfo;
+import comp6231.project.saman.campus.communication.ProjectCampusCommunication;
 import comp6231.project.saman.campus.communication.RmiCampusCommunication;
 import comp6231.project.saman.campus.communication.corba.CorbaCampusCommunication;
+import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.LoggerHelper;
+import comp6231.project.saman.common.TimeSlot;
 
 /**
  * @author saman
@@ -27,10 +32,11 @@ public class Bootstrap {
 	public enum CommunicationType
 	{
 		RMI,
-		CORBA
+		CORBA,
+		PROJECT
 	}
 			
-	public final static CommunicationType com_type = CommunicationType.CORBA;
+	public final static CommunicationType com_type = CommunicationType.PROJECT;
 	public final static String corba_port = "1050";
 	private static String[] campus_names = {"DVL", "KKL", "WST"};
 	private static int[] ports = {7777, 7778, 7779};
@@ -42,18 +48,21 @@ public class Bootstrap {
 		
 	public static synchronized void initRmiServers() throws SecurityException, IOException
 	{
-		if (init || com_type != CommunicationType.RMI)
+		if (init || (com_type != CommunicationType.RMI && com_type != CommunicationType.PROJECT))
 			return;
 		init = true;
 		if (!different_processes)
 		{
-			try {
-				LocateRegistry.createRegistry(1099);
-			} catch (RemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if (com_type == CommunicationType.RMI)
+			{
+				try {
+					LocateRegistry.createRegistry(1099);
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Java RMI registry created.");
 			}
-			System.out.println("Java RMI registry created.");
 			initServers(campus_names, ports);
 		}
 	}
@@ -74,10 +83,28 @@ public class Bootstrap {
 			case CORBA:
 				comm = new CorbaCampusCommunication();
 				break;
+			case PROJECT:
+				ProjectCampusCommunication tmp = new ProjectCampusCommunication();
+				tmp.campus_names = Bootstrap.campus_names;
+				HashMap<String, RemoteInfo> hm = new HashMap<>();
+				for (int ii = 0; ii < campus_names.length; ++ii)
+				{
+					RemoteInfo ri = tmp.new RemoteInfo();
+					ri.address = "127.0.0.1";
+					ri.port = ports[ii];
+					hm.put(campus_names[ii], ri);
+				}
+				tmp.campus_remote_info = hm;
+				comm = tmp;
+				break;
 			default:
 				return;
 			}
 			Campus campus = new Campus(campus_name, "127.0.0.1", port, logger, comm);
+			HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db = new HashMap<>();
+			HashMap<String, StudentRecord> student_db = new HashMap<>();
+			campus.setDB(db);
+			campus.setStudentDB(student_db);
 			campus.starServer();
 			campuses.add(campus);
 		}		
@@ -108,6 +135,9 @@ public class Bootstrap {
 			case CORBA:
 				initServers(campus_names, ports);
 				CorbaCampusCommunication.run();
+				break;
+			case PROJECT:
+				initServers(campus_names, ports);
 				break;
 			}
 					

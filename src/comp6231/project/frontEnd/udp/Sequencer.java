@@ -95,15 +95,18 @@ public class Sequencer extends Thread{
 		if(group.equals(Constants.DVL_GROUP)){
 			replicaPorts[1] = Constants.dvlPortListenFaridActive;
 			replicaPorts[0] = Constants.dvlPortListenRe1Active;
-			replicaPorts[2] = Constants.dvlPortListenRe2Active;
+			//replicaPorts[2] = Constants.dvlPortListenRe2Active;
+			replicaPorts[2] = Constants.DVL_PORT_LISTEN_SAMAN_ORIGINAL;
 		}else if(group.equals(Constants.KKL_GROUP)){
 			replicaPorts[1] = Constants.kklPortListenFaridActive;
 			replicaPorts[0] = Constants.kklPortListenRe1Active;
-			replicaPorts[2] = Constants.kklPortListenRe2Active;
+			//replicaPorts[2] = Constants.kklPortListenRe2Active;
+			replicaPorts[2] = Constants.KKL_PORT_LISTEN_SAMAN_ORIGINAL;
 		}else if(group.equals(Constants.WST_GROUP)){
 			replicaPorts[1] = Constants.wstPortListenFaridActive;
 			replicaPorts[0] = Constants.wstPortListenRe1Active;
-			replicaPorts[2] = Constants.wstPortListenRe2Active;
+			//replicaPorts[2] = Constants.wstPortListenRe2Active;
+			replicaPorts[2] = Constants.WST_PORT_LISTEN_SAMAN_ORIGINAL;
 		}else{
 			FE.log("group is not valid in sequencer class: " + group);
 			return;
