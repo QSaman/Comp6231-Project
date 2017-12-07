@@ -17,6 +17,8 @@ import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
+import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyAvailableTimeSlots;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyBookRoom;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaReplyMessageStatus;
@@ -92,7 +94,8 @@ public class InitializeSerializer {
 	
 	public static void initializeReplicaManagerMessage(MessageHeaderDeserializer ds) 
 	{
-		
+		ds.addClass(CommandType.Fake_Generator, MessageType.Request, ProtocolType.ReplicaManager_Message, RMFakeGeneratorMessage.class);
+		ds.addClass(CommandType.Kill, MessageType.Request, ProtocolType.ReplicaManager_Message, RMKillMessage.class);
 	}
 	
 	public static void initializeAll(MessageHeaderDeserializer ds)

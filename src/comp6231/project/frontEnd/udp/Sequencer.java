@@ -65,7 +65,7 @@ public class Sequencer extends Thread{
 
 		int[] replicaPorts =  new int[3];
 		boolean customSend = false;
-		String [] tokens = null;
+		String [] tokens = new String[3];
 		ArrayList<byte[]> msgs = new ArrayList<>(3); 
 		
 		if(args.command_type == CommandType.Cancel_Book_Room) {

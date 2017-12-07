@@ -83,8 +83,7 @@ public class AdminImpl extends AdminOperationsPOA {
 
 	@Override
 	public void fakeGenerate(String replicaName, String campusName) {
-		// TODO Auto-generated method stub
-		
+		new Thread(new ErrorHandler(replicaName, campusName)).start();
 	}
 
 }
