@@ -103,7 +103,17 @@ public class RMListener implements Runnable {
 		private void send(String data, int port) {
 			try {
 				ReliableSocket aSocket = new ReliableSocket();
-				aSocket.connect(new InetSocketAddress("127.0.0.1", port));
+				String adress ="";
+				
+				if(RMInformation.getInstance().getRmCode().equals("FARID")) {
+					adress = Constants.FARID_IP;
+				}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
+					adress = Constants.MOSTAFA_IP;
+				}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
+					adress = Constants.SAMAN_IP;
+				}
+				
+				aSocket.connect(new InetSocketAddress(adress, port));
 				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
 				out.write(data);
 				out.flush();
@@ -145,7 +155,17 @@ public class RMListener implements Runnable {
 						try {
 							ReliableSocket sendToReplica = new ReliableSocket();
 
-							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+							String adress ="";
+							
+							if(RMInformation.getInstance().getRmCode().equals("FARID")) {
+								adress = Constants.FARID_IP;
+							}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
+								adress = Constants.MOSTAFA_IP;
+							}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
+								adress = Constants.SAMAN_IP;
+							}
+							
+							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
 
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(data.getBytes());

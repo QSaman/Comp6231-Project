@@ -51,7 +51,7 @@ public class ErrorHandler implements Runnable{
 	private void send(String json, int port) {
 		try {
 			ReliableSocket socket = new ReliableSocket();
-			socket.connect(new InetSocketAddress("127.0.0.1", port));
+			socket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, port));
 			OutputStream out = socket.getOutputStream();
 			out.write(json.getBytes());
 			out.flush();

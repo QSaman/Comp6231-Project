@@ -123,7 +123,7 @@ public class Udp implements Runnable {
 			} else {
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
+					aSocket.connect(new InetSocketAddress(Constants.FARID_IP, Constants.FE_PORT_LISTEN));
 					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();

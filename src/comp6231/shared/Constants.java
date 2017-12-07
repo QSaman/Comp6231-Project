@@ -6,6 +6,13 @@ public class Constants {
 	public static final String DILIMITER_STRING = "*%#$@#!";
 	public static final String ONE_WAY = "ONE WAY MESSAGE";
 	
+	//IP CONFIG
+	public static final String LOCAL_IP = "127.0.0.1";
+	public static final String FE_CLIENT_IP = "192.168.2.11";
+	public static final String FARID_IP =  "192.168.2.28";
+	public static final String SAMAN_IP = "192.168.2.19";
+	public static final String MOSTAFA_IP = "192.168.2.36";
+	
 	// RE1 = mostafa RE2 = saman RE3 = farid
 	// Replica managers
 	public static final String RM_FARID = "rm_farid";
@@ -41,16 +48,22 @@ public class Constants {
 	//2906
 	//2907
 	//2908
-	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 7778;
-	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 7777;
-	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 7779;
+	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 2906;
+	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 2907;
+	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 2908;
+//	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 7778;
+//	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 7777;
+//	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 7779;
 	
 	//2909
 	//2910
 	//2911
-	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 6668;
-	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 6667;
-	public static final int WST_PORT_LISTEN_RE2_BACKUP = 6669;
+	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 2909;
+	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 2910;
+	public static final int WST_PORT_LISTEN_RE2_BACKUP = 2911;
+//	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 6668;
+//	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 6667;
+//	public static final int WST_PORT_LISTEN_RE2_BACKUP = 6669;
 	
 	public static final int KKL_PORT_RE2_ORIGINAL = 2967;
 	public static final int DVL_PORT_RE2_ORIGINAL = 2968;

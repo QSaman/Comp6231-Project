@@ -145,7 +145,7 @@ public class Sequencer extends Thread{
 						try {
 							ReliableSocket sendToReplica = new ReliableSocket();
 
-							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+							sendToReplica.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, replicaPorts[idxPort]));
 							
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(data);
@@ -172,7 +172,7 @@ public class Sequencer extends Thread{
 						try {
 							ReliableSocket sendToReplica = new ReliableSocket();
 
-							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+							sendToReplica.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, replicaPorts[idxPort]));
 							
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(sendBuffer);
