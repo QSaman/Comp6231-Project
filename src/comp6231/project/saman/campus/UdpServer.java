@@ -113,7 +113,7 @@ public class UdpServer extends Thread {
 				e.printStackTrace();
 				reply_msg = "Cannot cancel booked time slot!" + e.getMessage();
 			}
-			reply = new FEReplyMessage(cancel_booking_req.sequence_number, cancel_booking_req.command_type, reply_msg, true);
+			reply = new FEReplyMessage(cancel_booking_req.sequence_number, cancel_booking_req.command_type, reply_msg, !campus.isFakeResult(), "Saman");
 			break;
 		case Change_Reservation:
 			FEChangeReservationMessage change_res_req = (FEChangeReservationMessage)json_msg;
@@ -142,7 +142,7 @@ public class UdpServer extends Thread {
 				reply_msg = "Create room is done successfully";
 			else
 				reply_msg = "Error in creating room";
-			reply = new FEReplyMessage(create_room_req.sequence_number, create_room_req.command_type, reply_msg, true);							
+			reply = new FEReplyMessage(create_room_req.sequence_number, create_room_req.command_type, reply_msg, !campus.isFakeResult(), "Saman");							
 			break;
 		case Delete_Room:
 			FEDeleteRoomRequestMessage del_room_req = (FEDeleteRoomRequestMessage)json_msg;
@@ -153,7 +153,7 @@ public class UdpServer extends Thread {
 				reply_msg = "Deleting room is done successfully!";
 			else
 				reply_msg = "There is a problem in deleting room";
-			reply = new FEReplyMessage(del_room_req.sequence_number, del_room_req.command_type, reply_msg, true);
+			reply = new FEReplyMessage(del_room_req.sequence_number, del_room_req.command_type, reply_msg, !campus.isFakeResult(), "Saman");
 			break;
 		case Get_Available_TimeSlots:
 			FEGetAvailableTimeSlotMessage avail_req = (FEGetAvailableTimeSlotMessage)json_msg;
@@ -166,29 +166,29 @@ public class UdpServer extends Thread {
 				reply_msg = "There is a problem in getting available time slots: " + e.getMessage();
 			}
 			//reply = new FEReplyMessage(sequenceNumber, commandType, replyMessage, status);
-			reply = new FEReplyMessage(avail_req.sequence_number, avail_req.command_type, reply_msg, true);
+			reply = new FEReplyMessage(avail_req.sequence_number, avail_req.command_type, reply_msg, !campus.isFakeResult(), "Saman");
 			break;
 		case LoginAdmin:
 			//reply = new FEReplyMessage(sequenceNumber, commandType, replyMessage, status);
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman admin login", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman admin login", !campus.isFakeResult(), "Saman");
 			break;
 		case LoginStudent:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman student login", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman student login", !campus.isFakeResult(), "Saman");
 			break;
 		case Quantity:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman quanitty", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman quanitty", !campus.isFakeResult(), "Saman");
 			break;
 		case S_Remove_Student_Record:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Remove student record", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Remove student record", !campus.isFakeResult(), "Saman");
 			break;
 		case S_Start_Week:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman start week", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman start week", !campus.isFakeResult(), "Saman");
 			break;
 		case SignOut:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman signout", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman signout", !campus.isFakeResult(), "Saman");
 			break;
 		default:
-			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Unknown command", true);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Unknown command", !campus.isFakeResult(), "Saman");
 			break;
 		}
 		return reply;
