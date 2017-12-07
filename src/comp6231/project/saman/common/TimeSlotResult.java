@@ -33,6 +33,12 @@ public class TimeSlotResult implements Serializable {
 		return result;
 	}
 	
+	@Override
+	public String toString()
+	{
+		return campusName + ": " + totalAvailableSlots;
+	}
+	
 	public static String toString(ArrayList<TimeSlotResult> list)
 	{
 		boolean first = true;

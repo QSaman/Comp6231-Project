@@ -54,18 +54,28 @@ public class Campus implements Serializable {
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws IOException
 	{
 		this.name = name;
-		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
-		student_db = new HashMap<String, StudentRecord>();
+		//db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
+		//student_db = new HashMap<String, StudentRecord>();
 		this.address = address;
 		this.port = port;
 		this.logger = logger;
 		initGson();
-		udp_server = new UdpServer(this, gson);
+		udp_server = new UdpServer(this, gson, logger);
 		json_message = new JsonMessage(udp_server, gson);
 		udp_server.setJsonMessage(json_message);		
 		this.campus_comm = campus_comm;
 		udp_server.start();
 		this.campus_comm.setCampus(this);
+	}
+	
+	public void setDB(HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db)
+	{
+		this.db = db;
+	}
+	
+	public void setStudentDB(HashMap<String, StudentRecord> student_db)
+	{
+		this.student_db = student_db;
 	}
 	
 	private void initGson()
@@ -181,7 +191,10 @@ public class Campus implements Serializable {
 							break;
 						}
 					if (!conflict)
-						sub_val.add(time_slot);						
+					{
+						sub_val.add(time_slot);
+						logger.info("Create time slot: " + time_slot.toString());
+					}
 				}
 			}
 			
@@ -232,6 +245,7 @@ public class Campus implements Serializable {
 						}					
 					if (found)	//We need to delete val1 from time slot list
 					{
+						logger.info("I'm going to delete time slot " + val1.toString());
 						if (val1.isBooked())
 						{
 							CampusUser user = new CampusUser(val1.getUsername());
@@ -339,10 +353,10 @@ public class Campus implements Serializable {
 	 */
 	private void clearAllDatabases()
 	{
-		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
-		student_db = new HashMap<String, StudentRecord>();
-//		db.clear();
-//		student_db.clear();
+//		db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
+//		student_db = new HashMap<String, StudentRecord>();
+		db.clear();
+		student_db.clear();
 		logger.info("################# Campus " + getName() + " starts a new week! #################");
 	}
 	public void startWeek()

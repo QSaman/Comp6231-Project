@@ -20,6 +20,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
@@ -38,6 +39,7 @@ import comp6231.project.saman.campus.message_protocol.saman_replica.JsonMessage;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaRequestMessageHeader;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplyMessageHeader;
 import comp6231.project.saman.common.DateReservation;
+import comp6231.project.saman.common.DateReservation.DateType;
 import comp6231.project.saman.common.TimeSlot;
 import comp6231.project.saman.common.TimeSlotResult;
 import comp6231.shared.Constants;
@@ -57,11 +59,13 @@ public class UdpServer extends Thread {
 	public final static int datagram_send_size = 256;
 	JsonMessage json_message;
 	Gson gson;
+	private Logger logger;
 	
-	public UdpServer(Campus campus, Gson gson) throws IOException
+	public UdpServer(Campus campus, Gson gson, Logger logger) throws IOException
 	{
 		this.gson = gson;
 		this.campus = campus;
+		this.logger = logger;
 		//socket = new DatagramSocket(this.campus.getPort());
 		server_socket = new ReliableServerSocket(this.campus.getPort());
 		//System.setProperty("sun.net.maxDatagramSockets", "10000");
@@ -82,7 +86,7 @@ public class UdpServer extends Thread {
 		case Book_Room:
 			FEBookRoomRequestMessage book_room_req = (FEBookRoomRequestMessage)json_msg;
 			try {						
-				booking_id = campus.bookRoom(book_room_req.userId, book_room_req.campusName, book_room_req.roomNumber, new DateReservation(book_room_req.date), 
+				booking_id = campus.bookRoom(book_room_req.userId, book_room_req.campusName, book_room_req.roomNumber, new DateReservation(book_room_req.date, DateType.FEToReplia), 
 						new TimeSlot(book_room_req.timeSlot));
 				if (booking_id.isEmpty())
 					reply_msg = "Booking operation wasn't successful";
@@ -115,7 +119,7 @@ public class UdpServer extends Thread {
 			FEChangeReservationMessage change_res_req = (FEChangeReservationMessage)json_msg;
 			try {
 				booking_id = campus.changeReservation(change_res_req.user_id, change_res_req.booking_id, change_res_req.new_campus_name, 
-						change_res_req.new_room_number, new DateReservation(change_res_req.new_date), new TimeSlot(change_res_req.new_time_slot));
+						change_res_req.new_room_number, new DateReservation(change_res_req.new_date, DateType.FEToReplia), new TimeSlot(change_res_req.new_time_slot));
 				if (booking_id.isEmpty())
 					reply_msg = "Cannot change reservation";
 				else
@@ -132,7 +136,7 @@ public class UdpServer extends Thread {
 		case Create_Room:
 			FECreateRoomRequestMessage create_room_req = (FECreateRoomRequestMessage)json_msg;
 			//campus.createRoom(user_id, room_number, date, time_slots)
-			boolean_res = campus.createRoom(create_room_req.userId, create_room_req.roomNumber, new DateReservation(create_room_req.date), 
+			boolean_res = campus.createRoom(create_room_req.userId, create_room_req.roomNumber, new DateReservation(create_room_req.date, DateType.FEToReplia), 
 					TimeSlot.toTimeSlot(create_room_req.timeSlots));
 			if (boolean_res)
 				reply_msg = "Create room is done successfully";
@@ -143,7 +147,7 @@ public class UdpServer extends Thread {
 		case Delete_Room:
 			FEDeleteRoomRequestMessage del_room_req = (FEDeleteRoomRequestMessage)json_msg;
 			//campus.deleteRoom(user_id, room_number, date, time_slots)
-			boolean_res = campus.deleteRoom(del_room_req.userId, del_room_req.roomNumber, new DateReservation(del_room_req.date), 
+			boolean_res = campus.deleteRoom(del_room_req.userId, del_room_req.roomNumber, new DateReservation(del_room_req.date, DateType.FEToReplia), 
 					TimeSlot.toTimeSlot(del_room_req.timeSlots));
 			if (boolean_res)
 				reply_msg = "Deleting room is done successfully!";
@@ -154,7 +158,7 @@ public class UdpServer extends Thread {
 		case Get_Available_TimeSlots:
 			FEGetAvailableTimeSlotMessage avail_req = (FEGetAvailableTimeSlotMessage)json_msg;
 			try {
-				ArrayList<TimeSlotResult> all = campus.getAvailableTimeSlot(avail_req.user_id, new DateReservation(avail_req.date));
+				ArrayList<TimeSlotResult> all = campus.getAvailableTimeSlot(avail_req.user_id, new DateReservation(avail_req.date, DateType.FEToReplia));
 				reply_msg = TimeSlotResult.toString(all);
 			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -165,18 +169,26 @@ public class UdpServer extends Thread {
 			reply = new FEReplyMessage(avail_req.sequence_number, avail_req.command_type, reply_msg, true);
 			break;
 		case LoginAdmin:
+			//reply = new FEReplyMessage(sequenceNumber, commandType, replyMessage, status);
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman admin login", true);
 			break;
 		case LoginStudent:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman student login", true);
 			break;
 		case Quantity:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman quanitty", true);
 			break;
 		case S_Remove_Student_Record:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Remove student record", true);
 			break;
 		case S_Start_Week:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman start week", true);
 			break;
 		case SignOut:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman signout", true);
 			break;
 		default:
+			reply = new FEReplyMessage(json_msg.sequence_number, json_msg.command_type, "Saman Unknown command", true);
 			break;
 		}
 		return reply;
@@ -184,10 +196,6 @@ public class UdpServer extends Thread {
 	
 	private void processRequest(ReliableSocket socket)
 	{
-		InetSocketAddress remote_inet = (InetSocketAddress)socket.getRemoteSocketAddress();
-		String remote_address = remote_inet.getAddress().getHostAddress();
-		System.out.println("remote address: " + remote_address);
-		int remote_port = socket.getPort();
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -227,6 +235,7 @@ public class UdpServer extends Thread {
 					{
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
+						logger.info("I'm trying to send this message as reply to FE: " + reply_msg);
 						sendDatagramToFE(reply_msg, "127.0.0.1", Constants.FE_PORT_LISTEN);
 					}
 					else if (json_msg.message_type == MessageType.Reply)

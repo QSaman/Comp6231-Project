@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CopyDatabase implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1270262232854735326L;
+
 	private HashMap<String, HashMap<Integer, HashMap<Integer, RoomRecord>>> roomRecords;
 
 	private HashMap<String, Integer> bookingCount;
