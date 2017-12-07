@@ -96,9 +96,9 @@ public class MultiCastRUDPListener implements Runnable{
 			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
 
 			synchronized (lock) {
-				if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
+				if(replyMessage.replicaId.contains("Mostafa")) {
 					pair.infos.put(1, new Info(json, socket.getPort()));
-				}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
+				}else if (replyMessage.replicaId.contains("Farid")) {
 					pair.infos.put(0, new Info(json, socket.getPort()));
 				}else {
 					pair.infos.put(2, new Info(json, socket.getPort()));

@@ -64,27 +64,27 @@ public class ErrorHandler implements Runnable{
 	
 	private int findServerPort(String replicaId,String group) {
 		if(group.equals(Constants.DVL_GROUP)) {
-			if(replicaId.equals("Farid")) {
+			if(replicaId.contains("Farid")) {
 				return Constants.dvlPortListenFaridActive;
-			}else if(replicaId.equals("Mostafa")){
+			}else if(replicaId.contains("Mostafa")){
 				return Constants.dvlPortListenRe1Active;
-			}else if(replicaId.equals("Saman")){
+			}else if(replicaId.contains("Saman")){
 				return Constants.dvlPortListenRe2Active;
 			}
 		}else if (group.equals(Constants.KKL_GROUP)) {
-			if(replicaId.equals("Farid")) {
+			if(replicaId.contains("Farid")) {
 				return Constants.kklPortListenFaridActive;
-			}else if(replicaId.equals("Mostafa")){
+			}else if(replicaId.contains("Mostafa")){
 				return Constants.kklPortListenRe1Active;
-			}else if(replicaId.equals("Saman")){
+			}else if(replicaId.contains("Saman")){
 				return Constants.kklPortListenRe2Active;
 			}
 		}else if (group.equals(Constants.WST_GROUP)) {
-			if(replicaId.equals("Farid")) {
+			if(replicaId.contains("Farid")) {
 				return Constants.wstPortListenFaridActive;
-			}else if(replicaId.equals("Mostafa")){
+			}else if(replicaId.contains("Mostafa")){
 				return Constants.wstPortListenRe1Active;
-			}else if(replicaId.equals("Saman")){
+			}else if(replicaId.contains("Saman")){
 				return Constants.wstPortListenRe2Active;
 			}
 		}else {
@@ -95,9 +95,9 @@ public class ErrorHandler implements Runnable{
 	}
 	
 	private int findRMPort(String replicaId) {
-		if(replicaId.equals("Farid")) {
+		if(replicaId.contains("Farid")) {
 			return Constants.RM_PORT_LISTEN_Farid;
-		}else if(replicaId.equals("Mostafa")) {
+		}else if(replicaId.contains("Mostafa")) {
 			return Constants.RM_PORT_LISTEN_RE1;
 		}else if(replicaId.contains("Saman")) {
 			return Constants.RM_PORT_LISTEN_RE2;
