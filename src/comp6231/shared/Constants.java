@@ -21,7 +21,7 @@ public class Constants {
 	public static final int DVL_PORT_LISTEN_RE1_ORIGINAL = 2901;
 	public static final int WST_PORT_LISTEN_RE1_ORIGINAL = 2902;
 	
-	public static final int KKL_PORT_LISTEN_RE1_BACKUP = 2903;
+	public static final int KKL_PORT_LISTEN_RE1_BACKUP = 2803;
 	public static final int DVL_PORT_LISTEN_RE1_BACKUP = 2904;
 	public static final int WST_PORT_LISTEN_RE1_BACKUP = 2905;
 	

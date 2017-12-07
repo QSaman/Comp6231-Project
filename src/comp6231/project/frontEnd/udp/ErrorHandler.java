@@ -21,10 +21,12 @@ public class ErrorHandler implements Runnable{
 	private int portTosend;
 	private MessageHeader messageHeader;
 	private messageStatus status;
+	private boolean turnOff;
 	
-	public ErrorHandler(String replicaId, String group) {
+	public ErrorHandler(String replicaId, String group, boolean turnOff) {
 		this.replicaId = replicaId;
 		this.group = group;
+		this.turnOff = turnOff;
 		status = messageStatus.E_Fake_Generator;
 	}
 	
@@ -37,7 +39,7 @@ public class ErrorHandler implements Runnable{
 	@Override
 	public void run() {
 		if(status == messageStatus.E_Fake_Generator) {
-			RMFakeGeneratorMessage message = new RMFakeGeneratorMessage(-1, true, findServerPort(replicaId, group));
+			RMFakeGeneratorMessage message = new RMFakeGeneratorMessage(-1, turnOff, findServerPort(replicaId, group));
 			String json = FE.toJson(message);
 			send(json, findRMPort(replicaId));
 		}else if(status == messageStatus.E_Kill) {

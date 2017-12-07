@@ -181,21 +181,21 @@ public class Information {
 			serverCode = "DVL";
 			UDPListenPort = Constants.DVL_PORT_LISTEN_RE1_BACKUP;
 			isReOne = true;
-			replicaId = "Mostafa";
+			replicaId = "Mostafa-BackUP";
 			break;
 		case Constants.KKL_PORT_RE1_BACKUP:
 			serverName = "KKLServer_RE1_Backup";
 			serverCode = "KKL";
 			UDPListenPort = Constants.KKL_PORT_LISTEN_RE1_BACKUP;
 			isReOne = true;
-			replicaId = "Mostafa";
+			replicaId = "Mostafa-BackUP";
 			break;
 		case Constants.WST_PORT_RE1_BACKUP:
 			serverName = "WSTServer_RE1_Backup";
 			serverCode = "WST";
 			UDPListenPort = Constants.WST_PORT_LISTEN_RE1_BACKUP;
 			isReOne = true;
-			replicaId = "Mostafa";
+			replicaId = "Mostafa-BackUP";
 			break;
 		case Constants.DVL_PORT_RE2_ORIGINAL:
 			serverName = "DVLServer_RE2_Original";
@@ -223,21 +223,21 @@ public class Information {
 			serverCode = "DVL";
 			UDPListenPort = Constants.DVL_PORT_LISTEN_RE2_BACKUP;
 			isReOne = false;
-			replicaId = "Saman";
+			replicaId = "Saman-BackUP";
 			break;
 		case Constants.KKL_PORT_RE2_BACKUP:
 			serverName = "KKLServer_RE2_Backup";
 			serverCode = "KKL";
 			UDPListenPort = Constants.KKL_PORT_LISTEN_RE2_BACKUP;
 			isReOne = false;
-			replicaId = "Saman";
+			replicaId = "Saman-BackUP";
 			break;
 		case Constants.WST_PORT_RE2_BACKUP:
 			serverName = "WSTServer_RE2_Backup";
 			serverCode = "WST";
 			UDPListenPort = Constants.WST_PORT_LISTEN_RE2_BACKUP;
 			isReOne = false;
-			replicaId = "Saman";
+			replicaId = "Saman-BackUP";
 			break;
 		default:
 			break;
