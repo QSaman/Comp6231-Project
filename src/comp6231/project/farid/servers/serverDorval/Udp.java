@@ -101,6 +101,8 @@ public class Udp implements Runnable {
 			ServerDorval.dorvalServerLogger.log("UDP Socket Listener Result: " + result);
 
 			if(protocolType != ProtocolType.ReplicaManager_Message) {
+				//save here
+				ServerDorval.save();
 				send(socket.getInetAddress(), socket.getPort(), result);
 			}
 		}
@@ -378,6 +380,7 @@ public class Udp implements Runnable {
 					PortSwitcher.switchServer(message.portSwitcherArg);
 					try {
 						// load here
+						ServerDorval.load();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

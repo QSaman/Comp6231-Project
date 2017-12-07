@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 
 import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
-import comp6231.project.mostafa.serverSide.Server;
 
 public class ServerDorval {
 	public static Gson gson;
@@ -30,7 +29,7 @@ public class ServerDorval {
 	// admins will be used by server to know which admins have already signed in
 	static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
 
-	private static void save() throws Exception {
+	public static void save() throws Exception {
 		
 		SaverLoader saverLoader = new SaverLoader();
 		saverLoader.copyServerToObject();
@@ -44,7 +43,7 @@ public class ServerDorval {
 		}
 	}
 	
-	private static void load() throws Exception{
+	public static void load() throws Exception{
 		SaverLoader saverLoader = null;
 		try {
 			saverLoader = SaverLoader.serializeDataIn();
