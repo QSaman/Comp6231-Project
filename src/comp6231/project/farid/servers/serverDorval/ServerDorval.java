@@ -15,6 +15,7 @@ import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 
 public class ServerDorval {
+	//
 	public static Gson gson;
 	private static boolean isFakeGeneratorOff = true;
 	private static final Object fakeGeneratorLock = new Object();
