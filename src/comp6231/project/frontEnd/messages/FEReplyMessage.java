@@ -6,23 +6,23 @@ import comp6231.shared.Constants;
 public class FEReplyMessage extends MessageHeader{
 	public String replyMessage;
 	// this is for fault generator
-	public boolean status;
+	public boolean isFakeGeneratorOff;
 	public String bookingId;
 	public String replicaId;
 	
-	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean status) {
+	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean isFakeGeneratorOff, String replicaId) {
 		super(sequenceNumber, commandType, MessageType.Reply, ProtocolType.Frontend_To_Replica);
 		this.replyMessage = replyMessage;
-		this.status = status;
+		this.isFakeGeneratorOff = isFakeGeneratorOff;
 		this.bookingId = Constants.NULL_STRING;
-		this.replicaId = Constants.NULL_STRING;
+		this.replicaId = replicaId;
 	}
 	
-	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean status, String bookingId , String campusId) {
+	public FEReplyMessage(int sequenceNumber, CommandType commandType, String replyMessage, boolean status, String bookingId , String replicaId) {
 		super(sequenceNumber, commandType, MessageType.Reply, ProtocolType.Frontend_To_Replica);
 		this.replyMessage = replyMessage;
-		this.status = status;
+		this.isFakeGeneratorOff = status;
 		this.bookingId = bookingId; 
-		this.replicaId = campusId;
+		this.replicaId = replicaId;
 	}
 }

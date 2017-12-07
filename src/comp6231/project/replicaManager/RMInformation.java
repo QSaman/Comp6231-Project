@@ -28,18 +28,18 @@ public class RMInformation {
 	}
 	
 	private void setRM(String name) {
-		if(name.equals(Constants.RM_RE1)) {
+		if(name.equals(Constants.RM_FARID)) {
+			rmName = Constants.RM_FARID;
+			rmCode = "FARID";
+			UDPListenPort = Constants.RM_PORT_LISTEN_Farid;
+		}else if (name.equals(Constants.RM_RE1)) {
 			rmName = Constants.RM_RE1;
-			rmCode = "DVL";
+			rmCode = "RE1";
 			UDPListenPort = Constants.RM_PORT_LISTEN_RE1;
-		}else if (name.equals(Constants.RM_RE2)) {
+		}else if(name.equals(Constants.RM_RE2)) {
 			rmName = Constants.RM_RE2;
-			rmCode = "KKL";
+			rmCode = "RE2";
 			UDPListenPort = Constants.RM_PORT_LISTEN_RE2;
-		}else if(name.equals(Constants.RM_RE3)) {
-			rmName = Constants.RM_RE3;
-			rmCode = "WST";
-			UDPListenPort = Constants.RM_PORT_LISTEN_RE3;
 		}else {
 			System.out.println("THIS RM CONFIG IS WRONG !!!! ");
 			System.exit(1);

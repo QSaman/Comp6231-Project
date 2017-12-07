@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
+import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -18,6 +19,8 @@ import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.mostafa.serverSide.Database;
 import comp6231.project.mostafa.serverSide.Information;
+import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
@@ -86,7 +89,9 @@ public class UDPlistener  implements Runnable {
 			String result = process(json_msg_str);
 			Server.log("UDP Socket Listener Result: "+result);
 
-			send(socket.getInetAddress(), socket.getPort(), result);
+			if(!result.equals(Constants.ONE_WAY)) {
+				send(socket.getInetAddress(), socket.getPort(), result);
+			}
 		}
 
 		private void send(InetAddress address, int port, String data){
@@ -127,10 +132,18 @@ public class UDPlistener  implements Runnable {
 				protocolType = ProtocolType.Server_To_Server;
 				ServerToServerMessage message = (ServerToServerMessage) json_msg;
 				result  = processServerToServer(message.legacy.split(" "));
-			}else{
+			}else if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
 				protocolType = ProtocolType.Frontend_To_Replica;
 				if(json_msg.message_type == MessageType.Request){
 					result = processFrontEndToServer(json_msg);
+				}else{
+					Server.log("message type is reply");
+				}
+			}else if(json_msg.protocol_type == ProtocolType.ReplicaManager_Message) {
+				protocolType = ProtocolType.ReplicaManager_Message;
+				if(json_msg.message_type == MessageType.Request){
+					processReplicaManager(json_msg);
+					result = Constants.ONE_WAY;
 				}else{
 					Server.log("message type is reply");
 				}
@@ -139,13 +152,28 @@ public class UDPlistener  implements Runnable {
 			return result;
 		}
 
+		
+		private void processReplicaManager(MessageHeader json) {
+			if(json.command_type == CommandType.Kill) {
+				RMKillMessage message = (RMKillMessage) json;
+				PortSwitcher.switchServer(message.portSwitcherArg);
+				Server.log("Server Switched");
+			}else if (json.command_type == CommandType.Fake_Generator) {
+				RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json;
+				Server.setFakeGeneratorOff(message.turnOff);
+				Server.log(" isFakeGeneratorOn : " + !Server.isFakeGeneratorOff());
+			}else {
+				Server.log(" process replica has wrong Command Type");
+			}
+		}
+		
 		private String processFrontEndToServer(MessageHeader json){
 
 			FEReplyMessage replyMessage = null;
 			if(json.command_type == CommandType.Create_Room){
 				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().create(message.roomNumber, message.date, message.timeSlots, message.userId);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Create_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Create_Room, Information.getInstance().replicaId+": "+result, Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if(json.command_type == CommandType.Book_Room){
 				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().bookRoom(message.campusName, message.roomNumber, message.date, message.timeSlot, message.userId);
@@ -160,15 +188,15 @@ public class UDPlistener  implements Runnable {
 					Server.log(" not booked");
 				}
 				
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId, Information.getInstance().isReOne == true ? "Mostafa" : "Saman");
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId,  Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Delete_Room){
 				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().delete(message.roomNumber, message.date, message.timeSlots, message.userId);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Delete_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Delete_Room, Information.getInstance().replicaId+": "+result, Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Cancel_Book_Room){
 				FECancelBookingMessage message = (FECancelBookingMessage) json;
 				String result = ServerImpl.GetInstance().CancelBookingId(message.booking_id, message.user_id);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Cancel_Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Cancel_Book_Room, Information.getInstance().replicaId+": "+result, Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Change_Reservation){
 				FEChangeReservationMessage message = (FEChangeReservationMessage) json;
 				String result = ServerImpl.GetInstance().changeReservation(message.booking_id, message.new_campus_name, message.new_date, message.new_room_number, message.new_time_slot, message.user_id);
@@ -183,17 +211,17 @@ public class UDPlistener  implements Runnable {
 					Server.log(" not booked");
 				}
 				
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Change_Reservation, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId, Information.getInstance().isReOne == true ? "Mostafa" : "Saman");
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Change_Reservation, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId,  Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Get_Available_TimeSlots){
 				FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json;
 				String result = ServerImpl.GetInstance().getAvailableTimeSlot(message.date, message.user_id);
-				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Get_Available_TimeSlots, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true);
+				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Get_Available_TimeSlots, Information.getInstance().replicaId+": "+result, Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.LoginStudent){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginStudent, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginStudent, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.LoginAdmin){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginAdmin, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.LoginAdmin, Information.getInstance().isReOne == true ? "logined-mostafa" : "logined-saman", Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.SignOut){
-				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.SignOut, Information.getInstance().isReOne == true ? "signOut-mostafa" : "signOut-saman", true);
+				replyMessage = new FEReplyMessage(json.sequence_number, CommandType.SignOut, Information.getInstance().isReOne == true ? "signOut-mostafa" : "signOut-saman", Server.isFakeGeneratorOff(), Information.getInstance().replicaId);
 			}else{
 				Server.log(" Bad CommandType in udp listener");
 			}

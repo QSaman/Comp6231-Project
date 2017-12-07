@@ -3,12 +3,15 @@ package comp6231.project.replicaManager;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 
+import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
+import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
 import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 import net.rudp.ReliableServerSocket;
@@ -76,15 +79,18 @@ public class RMListener implements Runnable {
 			ReplicaManager.log("UDP Socket Received JSON: "+json_msg_str);
 			process(json_msg_str);
 		}
-		
+
 		private void process(String json_msg_str){
 			MessageHeader json_msg = ReplicaManager.fromJson(json_msg_str);
 
 			if(json_msg.protocol_type == ProtocolType.ReplicaManager_Message){
 				if(json_msg.command_type == CommandType.Kill) {
 					RMKillMessage message  = (RMKillMessage) json_msg;
+					PortSwitcher.switchServer(message.portSwitcherArg);
+					sendToAll(json_msg_str);
 				}else if (json_msg.command_type == CommandType.Fake_Generator) {
-					
+					RMFakeGeneratorMessage message = (RMFakeGeneratorMessage) json_msg;
+					send(json_msg_str, message.port );
 				}else {
 					ReplicaManager.log("CommandType is incorrect");
 				}
@@ -94,10 +100,10 @@ public class RMListener implements Runnable {
 
 		}
 
-		private void send(String data){
+		private void send(String data, int port) {
 			try {
 				ReliableSocket aSocket = new ReliableSocket();
-				aSocket.connect(new InetSocketAddress("127.0.0.1", Constants.FE_PORT_LISTEN));
+				aSocket.connect(new InetSocketAddress("127.0.0.1", port));
 				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
 				out.write(data);
 				out.flush();
@@ -106,6 +112,53 @@ public class RMListener implements Runnable {
 
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+		}
+
+		private void sendToAll(String data){
+
+			int[] replicaPorts =  new int[3];
+			if(RMInformation.getInstance().getRmName().equals(Constants.RM_FARID)) {
+				replicaPorts[0] = Constants.kklPortListenFaridActive;
+				replicaPorts[1] = Constants.dvlPortListenFaridActive;
+				replicaPorts [2] = Constants.wstPortListenFaridActive;
+			}else if (RMInformation.getInstance().getRmName().equals(Constants.RM_RE1)) {
+				replicaPorts[0] = Constants.kklPortListenRe1Active;
+				replicaPorts[1] = Constants.dvlPortListenRe1Active;
+				replicaPorts [2] = Constants.wstPortListenRe1Active;
+			}else if (RMInformation.getInstance().getRmName().equals(Constants.RM_RE2)) {
+				replicaPorts[0] = Constants.kklPortListenRe2Active;
+				replicaPorts[1] = Constants.dvlPortListenRe2Active;
+				replicaPorts [2] = Constants.wstPortListenRe2Active;
+			}else {
+				ReplicaManager.log("Wrong Replica name ");
+			}
+
+			for(int i=0;i < 3; ++i) {
+
+				final int idxPort = i;
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+						try {
+							ReliableSocket sendToReplica = new ReliableSocket();
+
+							sendToReplica.connect(new InetSocketAddress("127.0.0.1", replicaPorts[idxPort]));
+
+							OutputStream out = sendToReplica.getOutputStream();
+							out.write(data.getBytes());
+
+							out.flush();
+							out.close();
+							sendToReplica.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
+				}).start();
 			}
 		}
 	}

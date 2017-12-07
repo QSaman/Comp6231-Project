@@ -6,13 +6,16 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import com.google.gson.Gson;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import comp6231.project.messageProtocol.StartGson;
 
 public class Server {
 	public static Logger log;
 	public static Gson gson;
-
+	private static boolean isFakeGeneratorOff = true;
+	private static final Object fakeGeneratorLock = new Object();
+	
 	public static void main(String[] args) throws Exception{
 		if(args[0] == null){
 			return;
@@ -78,4 +81,24 @@ public class Server {
 	public static void log(String text){
 		log.info("ServerSide->"+"id: "+Information.getInstance().getServerName()+" Message: "+text);
 	}
+
+	/**
+	 * @return the isFakeGeneratorOff
+	 */
+	public static boolean isFakeGeneratorOff() {
+		synchronized (fakeGeneratorLock) {
+			return isFakeGeneratorOff;	
+		}
+	}
+
+	/**
+	 * @param isFakeGeneratorOff the isFakeGeneratorOff to set
+	 */
+	public static void setFakeGeneratorOff(boolean isFakeGeneratorOff) {
+		synchronized (fakeGeneratorLock) {
+			Server.isFakeGeneratorOff = isFakeGeneratorOff;
+		}
+	}
+	
+	
 }

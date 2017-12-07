@@ -195,7 +195,7 @@ public class Sequencer extends Thread{
 		
 		if(message.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) message;
-			if(replyMessage.status){
+			if(replyMessage.isFakeGeneratorOff){
 				FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
 				if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
 					if(replyMessage.replyMessage.equals("False")){
