@@ -218,7 +218,8 @@ public class Campus implements Serializable {
 			}
 		};
 		traverseDb(room_number, date, db_ops);
-		
+		if (fake_result)
+			return !db_ops._operation_status;
 		return db_ops._operation_status;
 	}
 
@@ -365,6 +366,8 @@ public class Campus implements Serializable {
 		};
 		
 		traverseDb(room_number, date, ops);
+		if (fake_result)
+			return !ops._operation_status;
 		return ops._operation_status;
 	}
 	
@@ -594,6 +597,13 @@ public class Campus implements Serializable {
 				return "";
 			}
 		}
+		if (fake_result)
+		{
+			if (new_booking_id.isEmpty())
+				new_booking_id = "fake_booking_id";
+			else
+				new_booking_id = "";
+		}
 		return new_booking_id;
 	}
 	
@@ -685,7 +695,14 @@ public class Campus implements Serializable {
 			}
 		};
 		
-		traverseStudentDb(ops, user, campus_name);			
+		traverseStudentDb(ops, user, campus_name);
+		if (fake_result)
+		{
+			if (ops._booking_id.isEmpty())
+				ops._booking_id = "fake_booking_id";
+			else
+				ops._booking_id = "";
+		}
 		return ops._booking_id;
 	}
 	
@@ -707,6 +724,8 @@ public class Campus implements Serializable {
 						++ret;
 			}
 		}
+		if (fake_result)
+			++ret;
 		return ret;
 	}	
 
@@ -824,6 +843,8 @@ public class Campus implements Serializable {
 			}
 		};
 		traverseStudentDb(ops, user, big.getCampusName());
+		if (fake_result)
+			return !ops._status;
 		return ops._status;		
 	}
 
