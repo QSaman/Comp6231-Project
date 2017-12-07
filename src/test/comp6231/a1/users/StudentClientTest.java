@@ -86,18 +86,18 @@ public class StudentClientTest {
 	@Test
 	public final void testStartWeek() throws RemoteException, NotBoundException, IOException, InterruptedException {
 		admin_test.testStartWeek();
-		admin_test.testCreateRoomDVL();
-		admin_test.testCreateRoomKKL();
-		admin_test.testCreateRoomWST();
+		admin_test.createRoomDVL();
+		admin_test.createRoomKKL();
+		admin_test.createRoomWST();
 		StudentClient client = ClientUserFactory.createStudentClient(new CampusUser("DVLS1111"));
 		String booking_id = client.bookRoom("WST", 779, new DateReservation("19-09-2017"), new TimeSlot(18, 0, 19, 0));
 		assertFalse(booking_id.isEmpty());
 		booking_id = client.bookRoom("WST", 779, new DateReservation("19-09-2017"), new TimeSlot(18, 0, 19, 0));
 		assertTrue(booking_id.isEmpty());
 		admin_test.testStartWeek();
-		admin_test.testCreateRoomDVL();
-		admin_test.testCreateRoomKKL();
-		admin_test.testCreateRoomWST();
+		admin_test.createRoomDVL();
+		admin_test.createRoomKKL();
+		admin_test.createRoomWST();
 		booking_id = client.bookRoom("WST", 779, new DateReservation("19-09-2017"), new TimeSlot(18, 0, 19, 0));
 		assertFalse(booking_id.isEmpty());
 		
@@ -113,9 +113,9 @@ public class StudentClientTest {
 	@Test
 	public final void testBookRoomDVL() throws RemoteException, NotBoundException, IOException, InterruptedException {
 		admin_test.testStartWeek();
-		admin_test.testCreateRoomDVL();
-		admin_test.testCreateRoomKKL();
-		admin_test.testCreateRoomWST();
+		admin_test.createRoomDVL();
+		admin_test.createRoomKKL();
+		admin_test.createRoomWST();
 		
 		StudentClient client = ClientUserFactory.createStudentClient(new CampusUser("DVLS1111"));
 		booking_list_dvl = new ArrayList<Student>();
@@ -148,9 +148,9 @@ public class StudentClientTest {
 	public final void testchangeReservation() throws SecurityException, IOException, NotBoundException, InterruptedException
 	{
 		admin_test.testStartWeek();
-		admin_test.testCreateRoomDVL();
-		admin_test.testCreateRoomKKL();
-		admin_test.testCreateRoomWST();
+		admin_test.createRoomDVL();
+		admin_test.createRoomKKL();
+		admin_test.createRoomWST();
 		
 		StudentClient client = ClientUserFactory.createStudentClient(new CampusUser("DVLS1111"));
 		booking_list_dvl = new ArrayList<Student>();

@@ -69,8 +69,7 @@ public class AdminClientTest {
 	 * @throws IOException 
 	 * @throws SecurityException 
 	 */
-	@Test
-	public final void testCreateRoomDVL() throws SecurityException, IOException, NotBoundException {
+	public final void createRoomDVL() throws SecurityException, IOException, NotBoundException {
 		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
 		ArrayList<TimeSlot> time_slots = new ArrayList<TimeSlot>();
 		time_slots.add(new TimeSlot(7, 1, 8, 15));
@@ -79,7 +78,39 @@ public class AdminClientTest {
 		int room_number = 777;
 		boolean res = dvla1111.createRoom(room_number, date, time_slots);
 		assertTrue(res);
+		time_slots.clear();
 		time_slots.add(new TimeSlot(11, 0, 14, 55));
+		res = dvla1111.createRoom(room_number, date, time_slots);
+		assertTrue(res);
+	}
+	
+	@Test
+	public final void testCreateRoomDVL() throws SecurityException, IOException, NotBoundException {
+		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
+		dvla1111.startWeek();
+		createRoomDVL();
+	}
+	
+	@Test
+	public final void testCreateRoomDVL2() throws SecurityException, IOException, NotBoundException {
+		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
+		dvla1111.startWeek();
+		ArrayList<TimeSlot> time_slots = new ArrayList<TimeSlot>();
+		time_slots.add(new TimeSlot(7, 1, 8, 15));
+		time_slots.add(new TimeSlot(9, 15, 10, 15));
+		DateReservation date = new DateReservation("17-09-2017");
+		int room_number = 777;
+		boolean res = dvla1111.createRoom(room_number, date, time_slots);
+		assertTrue(res);
+		time_slots.add(new TimeSlot(11, 0, 14, 55));
+		res = dvla1111.createRoom(room_number, date, time_slots);
+		assertFalse("There are duplicate time slots!", res);
+		time_slots.clear();
+		time_slots.add(new TimeSlot("8:10-8:30"));
+		res = dvla1111.createRoom(room_number, date, time_slots);
+		assertFalse("Threre is conflict between time slots", res);
+		time_slots.clear();
+		time_slots.add(new TimeSlot("8:30 - 8:35"));
 		res = dvla1111.createRoom(room_number, date, time_slots);
 		assertTrue(res);
 	}
@@ -90,8 +121,7 @@ public class AdminClientTest {
 	 * @throws IOException
 	 * @throws NotBoundException
 	 */
-	@Test
-	public final void testCreateRoomKKL() throws SecurityException, IOException, NotBoundException {
+	public final void createRoomKKL() throws SecurityException, IOException, NotBoundException {
 		AdminClient kkla1111 = ClientUserFactory.createAdminClient(new CampusUser("KKLA1111"));
 		ArrayList<TimeSlot> time_slots = new ArrayList<TimeSlot>();
 		time_slots.add(new TimeSlot(8, 0, 10, 0));
@@ -105,7 +135,13 @@ public class AdminClientTest {
 	}
 	
 	@Test
-	public final void testCreateRoomWST() throws SecurityException, IOException, NotBoundException {
+	public final void testCreateRoomKKL() throws SecurityException, IOException, NotBoundException {
+		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
+		dvla1111.startWeek();
+		createRoomKKL();		
+	}
+	
+	public final void createRoomWST() throws SecurityException, IOException, NotBoundException {
 		AdminClient wsta1111 = ClientUserFactory.createAdminClient(new CampusUser("WSTA1111"));
 		ArrayList<TimeSlot> time_slots = new ArrayList<TimeSlot>();
 		time_slots.add(new TimeSlot(14, 0, 15, 0));
@@ -118,6 +154,13 @@ public class AdminClientTest {
 		int room_number = 779;
 		boolean res = wsta1111.createRoom(room_number, date, time_slots);
 		assertTrue(res);		
+	}
+	
+	@Test
+	public final void testCreateRoomWST() throws SecurityException, IOException, NotBoundException {
+		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
+		dvla1111.startWeek();
+		createRoomWST();
 	}
 	
 	private class ThreadParameters
@@ -262,7 +305,7 @@ public class AdminClientTest {
 	public final void testDeleteRoomDVL() throws SecurityException, IOException, NotBoundException, InterruptedException {
 		AdminClient dvla1111 = ClientUserFactory.createAdminClient(new CampusUser("DVLA1111"));
 		dvla1111.startWeek();
-		testCreateRoomDVL();
+		createRoomDVL();
 		
 		DateReservation date = new DateReservation("17-09-2017");
 		int room_number = 777;
@@ -270,6 +313,10 @@ public class AdminClientTest {
 		time_slots.add(new TimeSlot(7, 1, 8, 15));
 		boolean res = dvla1111.deleteRoom(room_number, date, time_slots);
 		assertTrue(res);
+		time_slots.clear();
+		time_slots.add(new TimeSlot("23:00-23:15"));
+		res = dvla1111.deleteRoom(room_number, date, time_slots);
+		assertFalse("This time slot shouldn't be in database", res);
 	}
 
 	/**
