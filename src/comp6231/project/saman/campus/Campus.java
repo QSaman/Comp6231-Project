@@ -37,7 +37,16 @@ public class Campus implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String name;	
+	
+	public enum CampusType
+	{
+		Main,
+		Backup
+	}
+	
+	private CampusType campus_type;
+	private String name;
+
 	private HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db;
 	private final Object date_db_lock = new Object();
 	private final Object room_db_lock = new Object();
@@ -51,9 +60,10 @@ public class Campus implements Serializable {
 	private JsonMessage json_message;
 	private Gson gson;
 		
-	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm) throws IOException
+	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm, CampusType campus_type) throws IOException
 	{
 		this.name = name;
+		this.campus_type = campus_type;
 		//db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
 		//student_db = new HashMap<String, StudentRecord>();
 		this.address = address;
@@ -87,9 +97,9 @@ public class Campus implements Serializable {
 	}
 	
 	public void starServer() throws RemoteException
-	{
+	{		
 		campus_comm.startServer();
-		logger.info(LoggerHelper.format(getName() + " bound"));
+		logger.info(LoggerHelper.format(getName() + " - " + campus_type + " bound"));
 	}
 	
 	public String getCampusName() {
@@ -819,4 +829,12 @@ public class Campus implements Serializable {
 	public String getAddress() {
 		return address;
 	}
+
+	/**
+	 * @return the campus_type
+	 */
+	public CampusType getCampusType() {
+		return campus_type;
+	}
+	
 }

@@ -44,8 +44,10 @@ public class ProjectCampusCommunication extends CampusCommunication {
 	 */
 	@Override
 	public void startServer() {
-		// TODO Auto-generated method stub
-
+		RemoteInfo ri = new RemoteInfo();
+		ri.address = campus.getAddress();
+		ri.port = campus.getPort();
+		campus_remote_info.put(campus.getCampusName(), ri);
 	}
 
 }
