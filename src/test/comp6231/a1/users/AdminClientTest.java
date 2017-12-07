@@ -313,6 +313,10 @@ public class AdminClientTest {
 		time_slots.add(new TimeSlot(7, 1, 8, 15));
 		boolean res = dvla1111.deleteRoom(room_number, date, time_slots);
 		assertTrue(res);
+		time_slots.clear();
+		time_slots.add(new TimeSlot("23:00-23:15"));
+		res = dvla1111.deleteRoom(room_number, date, time_slots);
+		assertFalse("This time slot shouldn't be in database", res);
 	}
 
 	/**

@@ -243,6 +243,7 @@ public class Campus implements Serializable {
 				HashMap<Integer, TimeSlot> removed_list = new HashMap<>();	//(message_id, time slot)
 				
 				ArrayList<TimeSlot> new_time_slots = new ArrayList<TimeSlot>();
+				HashMap<TimeSlot, Boolean> del_list = new HashMap<>();
 				for (TimeSlot val1 : sub_val)
 				{
 					boolean found = false;
@@ -250,6 +251,7 @@ public class Campus implements Serializable {
 						if (val1.equals(val2))
 						{
 							found = true;
+							del_list.put(val2, true);
 							break;
 						}					
 					if (found)	//We need to delete val1 from time slot list
@@ -306,8 +308,9 @@ public class Campus implements Serializable {
 					}
 					else	//We shouldn't delete val1
 					{
-						logger.warning(String.format("I couldn't find %s in time slot database", val1));
+						//logger.warning(String.format("I couldn't find %s in time slot database", val1));
 						new_time_slots.add(val1);
+						//_operation_status = false;
 					}
 				}
 				//Since we use sub_val as a lock object (see create room method), we couldn't simply use val.put(room_number, new_time_slots)
@@ -332,6 +335,14 @@ public class Campus implements Serializable {
 						CampusUser a_user = new CampusUser(ts.getUsername());
 						logger.severe(String.format("%s campus cannot delete booking id %s from student %s records",
 								a_user.getCampus(), ts.getBookingId(), ts.getUsername()));
+						_operation_status = false;
+					}
+				}
+				for (TimeSlot ts : time_slots)
+				{
+					if (del_list.get(ts) == null)
+					{
+						logger.warning("Time slot " + ts.toString() + " is not in database");
 						_operation_status = false;
 					}
 				}

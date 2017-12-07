@@ -37,7 +37,7 @@ public class Bootstrap {
 		PROJECT
 	}
 			
-	public final static CommunicationType com_type = CommunicationType.RMI;
+	public final static CommunicationType com_type = CommunicationType.PROJECT;
 	public final static String corba_port = "1050";
 	private static String[] campus_names = {"DVL", "KKL", "WST"};
 	private static int[] ports = {7777, 7778, 7779};
