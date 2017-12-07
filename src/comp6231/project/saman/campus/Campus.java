@@ -6,20 +6,14 @@ package comp6231.project.saman.campus;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import comp6231.project.messageProtocol.InitializeSerializer;
-import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeaderDeserializer;
 import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.saman.campus.message_protocol.saman_replica.*;
 import comp6231.project.saman.common.DateReservation;
@@ -59,11 +53,13 @@ public class Campus implements Serializable {
 	private CampusCommunication campus_comm;
 	private JsonMessage json_message;
 	private Gson gson;
+	private boolean fake_result;
 		
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm, CampusType campus_type) throws IOException
 	{
 		this.name = name;
 		this.campus_type = campus_type;
+		this.fake_result = false;
 		//db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
 		//student_db = new HashMap<String, StudentRecord>();
 		this.address = address;
@@ -186,7 +182,7 @@ public class Campus implements Serializable {
 			logger.warning(LoggerHelper.format(String.format("%s is not authorized to createRoom in %s", user_id, getName())));
 			return false;
 		}
-		traverseDb(room_number, date, new DbOperations(db) {
+		DbOperations db_ops = new DbOperations(db) {
 			
 			@Override
 			public void onSubValue(ArrayList<TimeSlot> sub_val) {
@@ -198,6 +194,7 @@ public class Campus implements Serializable {
 						{
 							logger.warning(LoggerHelper.format(String.format("There is a conflict between %s and %s", cur, time_slot)));
 							conflict = true;
+							_operation_status = false;
 							break;
 						}
 					if (!conflict)
@@ -219,8 +216,11 @@ public class Campus implements Serializable {
 			public ArrayList<TimeSlot> onNullSubValue(HashMap<Integer, ArrayList<TimeSlot>> val) {				
 				return time_slots;
 			}
-		});
-		return true;
+		};
+		traverseDb(room_number, date, db_ops);
+		if (fake_result)
+			return !db_ops._operation_status;
+		return db_ops._operation_status;
 	}
 
 	//TODO reduce student count if the reservation is deleted
@@ -244,6 +244,7 @@ public class Campus implements Serializable {
 				HashMap<Integer, TimeSlot> removed_list = new HashMap<>();	//(message_id, time slot)
 				
 				ArrayList<TimeSlot> new_time_slots = new ArrayList<TimeSlot>();
+				HashMap<TimeSlot, Boolean> del_list = new HashMap<>();
 				for (TimeSlot val1 : sub_val)
 				{
 					boolean found = false;
@@ -251,6 +252,7 @@ public class Campus implements Serializable {
 						if (val1.equals(val2))
 						{
 							found = true;
+							del_list.put(val2, true);
 							break;
 						}					
 					if (found)	//We need to delete val1 from time slot list
@@ -307,8 +309,9 @@ public class Campus implements Serializable {
 					}
 					else	//We shouldn't delete val1
 					{
-						logger.warning(String.format("I couldn't find %s in time slot database", val1));
+						//logger.warning(String.format("I couldn't find %s in time slot database", val1));
 						new_time_slots.add(val1);
+						//_operation_status = false;
 					}
 				}
 				//Since we use sub_val as a lock object (see create room method), we couldn't simply use val.put(room_number, new_time_slots)
@@ -336,6 +339,14 @@ public class Campus implements Serializable {
 						_operation_status = false;
 					}
 				}
+				for (TimeSlot ts : time_slots)
+				{
+					if (del_list.get(ts) == null)
+					{
+						logger.warning("Time slot " + ts.toString() + " is not in database");
+						_operation_status = false;
+					}
+				}
 			}
 			
 			@Override
@@ -355,6 +366,8 @@ public class Campus implements Serializable {
 		};
 		
 		traverseDb(room_number, date, ops);
+		if (fake_result)
+			return !ops._operation_status;
 		return ops._operation_status;
 	}
 	
@@ -584,6 +597,13 @@ public class Campus implements Serializable {
 				return "";
 			}
 		}
+		if (fake_result)
+		{
+			if (new_booking_id.isEmpty())
+				new_booking_id = "fake_booking_id";
+			else
+				new_booking_id = "";
+		}
 		return new_booking_id;
 	}
 	
@@ -675,7 +695,14 @@ public class Campus implements Serializable {
 			}
 		};
 		
-		traverseStudentDb(ops, user, campus_name);			
+		traverseStudentDb(ops, user, campus_name);
+		if (fake_result)
+		{
+			if (ops._booking_id.isEmpty())
+				ops._booking_id = "fake_booking_id";
+			else
+				ops._booking_id = "";
+		}
 		return ops._booking_id;
 	}
 	
@@ -697,6 +724,8 @@ public class Campus implements Serializable {
 						++ret;
 			}
 		}
+		if (fake_result)
+			++ret;
 		return ret;
 	}	
 
@@ -814,6 +843,8 @@ public class Campus implements Serializable {
 			}
 		};
 		traverseStudentDb(ops, user, big.getCampusName());
+		if (fake_result)
+			return !ops._status;
 		return ops._status;		
 	}
 
@@ -835,6 +866,20 @@ public class Campus implements Serializable {
 	 */
 	public CampusType getCampusType() {
 		return campus_type;
+	}
+
+	/**
+	 * @return the fake_result
+	 */
+	public boolean isFakeResult() {
+		return fake_result;
+	}
+
+	/**
+	 * @param fake_result the fake_result to set
+	 */
+	public void setFakeResult(boolean fake_result) {
+		this.fake_result = fake_result;
 	}
 	
 }
