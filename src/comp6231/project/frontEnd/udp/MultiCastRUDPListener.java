@@ -16,7 +16,8 @@ import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
 	private ReliableServerSocket socket;
-
+	private static final Object lock = new Object();
+	
 	@Override
 	public void run() {
 		socket = null;
@@ -77,8 +78,6 @@ public class MultiCastRUDPListener implements Runnable{
 		private void process(String json_msg_str){
 			FE.log("message of json_msg_str: "+ json_msg_str);
 			MessageHeader json_msg = FE.fromJson(json_msg_str);
-			FE.log("message of json: "+ json_msg);
-
 
 			if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
 				if(json_msg.message_type == MessageType.Reply){
@@ -96,16 +95,18 @@ public class MultiCastRUDPListener implements Runnable{
 
 			FEPair pair = Sequencer.holdBack.get(replyMessage.sequence_number);
 
-			if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
-				pair.infos.put(1, new Info(json, socket.getPort()));
-			}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
-				pair.infos.put(0, new Info(json, socket.getPort()));
-			}else {
-				pair.infos.put(2, new Info(json, socket.getPort()));
+			synchronized (lock) {
+				if(replyMessage.replicaId.equalsIgnoreCase("Mostafa")) {
+					pair.infos.put(1, new Info(json, socket.getPort()));
+				}else if (replyMessage.replicaId.equalsIgnoreCase("Farid")) {
+					pair.infos.put(0, new Info(json, socket.getPort()));
+				}else {
+					pair.infos.put(2, new Info(json, socket.getPort()));
+				}
 			}
 
 			pair.semaphore.release();
-			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.bookingId);
+			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage + " with booking id: " +replyMessage.bookingId);
 		}
 	}
 
