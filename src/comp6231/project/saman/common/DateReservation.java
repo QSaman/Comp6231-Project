@@ -22,14 +22,41 @@ public class DateReservation implements /*Comparable<DateReservation>,*/ Seriali
 	private int month;
 	private int day;
 	
+	public enum DateType
+	{
+		ServerToServer,
+		FEToReplia
+	}
+	
+	private DateType date_type;
+	
+	public DateReservation(String date, DateType date_type)
+	{
+		tokenizeDate(date, date_type);
+	}
+	
 	public DateReservation(String date) {
+		tokenizeDate(date, DateType.ServerToServer);
+	}
+	
+	private void tokenizeDate(String date, DateType date_type)
+	{
+		this.date_type = date_type;
 		String[] tokens = date.split("-");
 		if (tokens.length != 3)
 			throw new IllegalArgumentException("Invalid date string");
 		int[] tmp = new int[3];
 		for (int i = 0; i < 3; ++i)
 			tmp[i] = Integer.parseInt(tokens[i].trim());
-		setDate(tmp[2], tmp[1], tmp[0]);
+		switch (date_type)
+		{
+		case ServerToServer:
+			setDate(tmp[2], tmp[1], tmp[0]);
+			break;
+		case FEToReplia:
+			setDate(tmp[0], tmp[1], tmp[2]);
+			break;
+		}		
 	}
 	
 	public DateReservation(CorbaDateReservation date_reservation) {
@@ -112,6 +139,14 @@ public class DateReservation implements /*Comparable<DateReservation>,*/ Seriali
 	public String toString()
 	{
 		return day + "-" + month + "-" + year;
+//		switch (date_type) {
+//		case FEToReplia:
+//			return year + "-" + month + "-" + day;
+//		case ServerToServer:
+//			return day + "-" + month + "-" + year;
+//		default:
+//			return year + "-" + month + "-" + day;
+//		}
 	}
 
 	public int getYear() {
