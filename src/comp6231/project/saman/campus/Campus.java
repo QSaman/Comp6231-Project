@@ -6,20 +6,14 @@ package comp6231.project.saman.campus;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-import comp6231.project.messageProtocol.InitializeSerializer;
-import comp6231.project.messageProtocol.MessageHeader;
-import comp6231.project.messageProtocol.MessageHeaderDeserializer;
 import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.saman.campus.message_protocol.saman_replica.*;
 import comp6231.project.saman.common.DateReservation;
@@ -59,11 +53,13 @@ public class Campus implements Serializable {
 	private CampusCommunication campus_comm;
 	private JsonMessage json_message;
 	private Gson gson;
+	private boolean fake_result;
 		
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm, CampusType campus_type) throws IOException
 	{
 		this.name = name;
 		this.campus_type = campus_type;
+		this.fake_result = false;
 		//db = new HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>();
 		//student_db = new HashMap<String, StudentRecord>();
 		this.address = address;
@@ -186,7 +182,7 @@ public class Campus implements Serializable {
 			logger.warning(LoggerHelper.format(String.format("%s is not authorized to createRoom in %s", user_id, getName())));
 			return false;
 		}
-		traverseDb(room_number, date, new DbOperations(db) {
+		DbOperations db_ops = new DbOperations(db) {
 			
 			@Override
 			public void onSubValue(ArrayList<TimeSlot> sub_val) {
@@ -198,6 +194,7 @@ public class Campus implements Serializable {
 						{
 							logger.warning(LoggerHelper.format(String.format("There is a conflict between %s and %s", cur, time_slot)));
 							conflict = true;
+							_operation_status = false;
 							break;
 						}
 					if (!conflict)
@@ -219,8 +216,10 @@ public class Campus implements Serializable {
 			public ArrayList<TimeSlot> onNullSubValue(HashMap<Integer, ArrayList<TimeSlot>> val) {				
 				return time_slots;
 			}
-		});
-		return true;
+		};
+		traverseDb(room_number, date, db_ops);
+		
+		return db_ops._operation_status;
 	}
 
 	//TODO reduce student count if the reservation is deleted
@@ -835,6 +834,20 @@ public class Campus implements Serializable {
 	 */
 	public CampusType getCampusType() {
 		return campus_type;
+	}
+
+	/**
+	 * @return the fake_result
+	 */
+	public boolean isFakeResult() {
+		return fake_result;
+	}
+
+	/**
+	 * @param fake_result the fake_result to set
+	 */
+	public void setFakeResult(boolean fake_result) {
+		this.fake_result = fake_result;
 	}
 	
 }
