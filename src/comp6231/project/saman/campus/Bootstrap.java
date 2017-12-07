@@ -132,10 +132,27 @@ public class Bootstrap {
 //				backup_campus.starServer();
 			campuses.add(campus);
 			campuses.add(backup_campus);
+			
+			// test case
+			addTestValueToDataBase(campus);
+			addTestValueToDataBase(backup_campus);
 		}		
 		
 	}
-
+	
+	private static void addTestValueToDataBase(Campus campus) 
+	{
+		ArrayList<TimeSlot> time_slots = new ArrayList<>();
+		time_slots.add(new TimeSlot("8:00 - 9:00"));
+		time_slots.add(new TimeSlot("9:00 - 10:00"));
+		time_slots.add(new TimeSlot("11:00 - 12:00"));
+		time_slots.add(new TimeSlot("10:00 - 11:00"));
+		time_slots.add(new TimeSlot("12:00 - 13:00"));
+		campus.createRoom("DVLA1234", 1, new DateReservation("01-01-2017"), time_slots);
+		campus.createRoom("KKLA1234", 1, new DateReservation("01-01-2017"), time_slots);
+		campus.createRoom("WSTA1234", 1, new DateReservation("01-01-2017"), time_slots);
+	}
+	
 	/**
 	 * @param args
 	 * @throws IOException 
@@ -177,5 +194,8 @@ public class Bootstrap {
 			initServers(campus_names, ports);
 		}			
 	}
-
+	
+	private static void testCase() {
+		
+	}
 }
