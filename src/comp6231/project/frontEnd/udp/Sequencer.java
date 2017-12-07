@@ -35,7 +35,7 @@ public class Sequencer extends Thread{
 	private String group;
 	private String result;
 	public ReturnStatus returnStatus;
-	
+
 	public Sequencer(MessageHeader args, String group){
 		this.args = args;
 		this.group = group;
@@ -190,7 +190,7 @@ public class Sequencer extends Thread{
 		}
 
 	}
-	
+		
 	public void setTimeOut(){
 		try {
 			if(pair.semaphore.tryAcquire(2,TimeUnit.MINUTES)){
@@ -224,7 +224,7 @@ public class Sequencer extends Thread{
 			if(!replyMessage.isFakeGeneratorOff){
 				FE.log("Fake Generator is on for packet with sequence Number: " +pair.id + "in Group of : " + pair.group + "with port: "+ info.port);
 				returnStatus = ReturnStatus.FakeGenertor;
-				// TODO rm needs handle this 
+				new Thread(new ErrorHandler(replyMessage.replicaId, pair.group)).start();
 			}
 			
 			// handle return message 

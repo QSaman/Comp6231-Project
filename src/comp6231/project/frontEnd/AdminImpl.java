@@ -5,7 +5,9 @@ import comp6231.project.frontEnd.messages.FECreateRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FEDeleteRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FELoginAdminMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
+import comp6231.project.frontEnd.udp.ErrorHandler;
 import comp6231.project.frontEnd.udp.Sequencer;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 
 public class AdminImpl extends AdminOperationsPOA {
 
@@ -75,6 +77,8 @@ public class AdminImpl extends AdminOperationsPOA {
 	@Override
 	public void killServer(String campusName) {
 		PortSwitcher.switchServer(campusName);
+		RMKillMessage message = new RMKillMessage(-1, campusName);
+		new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(campusName), message))).start();
 	}
 
 }

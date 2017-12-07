@@ -7,7 +7,9 @@ import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
 import comp6231.project.frontEnd.messages.FEGetAvailableTimeSlotMessage;
 import comp6231.project.frontEnd.messages.FELoginStudentMessage;
 import comp6231.project.frontEnd.messages.FESignOutMessage;
+import comp6231.project.frontEnd.udp.ErrorHandler;
 import comp6231.project.frontEnd.udp.Sequencer;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 
 public class StudentImpl extends StudentOperationsPOA {
 
@@ -110,6 +112,8 @@ public class StudentImpl extends StudentOperationsPOA {
 	@Override
 	public void killServer(String campusName) {
 		PortSwitcher.switchServer(campusName);
+		RMKillMessage message = new RMKillMessage(-1, campusName);
+		new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(campusName), message))).start();
 	}
 
 }

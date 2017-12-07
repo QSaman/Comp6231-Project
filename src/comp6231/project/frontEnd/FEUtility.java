@@ -32,4 +32,16 @@ public class FEUtility {
 			return Constants.NULL_STRING;
 		}
 	}
+	
+	public int findRMPort(String campusName) {
+		if(campusName.startsWith("F")) {
+			return Constants.RM_PORT_LISTEN_Farid;
+		}else if(campusName.startsWith("M")){
+			return Constants.RM_PORT_LISTEN_RE1;
+		}else if(campusName.startsWith("S")) {
+			return Constants.RM_PORT_LISTEN_RE2;
+		}else {
+			return -1;
+		}
+	}
 }
