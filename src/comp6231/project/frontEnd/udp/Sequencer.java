@@ -24,8 +24,10 @@ public class Sequencer extends Thread{
 	// key : seqNumber
 	// value : FEPair
 	public static ConcurrentHashMap<Integer, FEPair> holdBack = new ConcurrentHashMap<Integer, FEPair>();
+	private static ConcurrentHashMap<String, ArrayList<String>> b_id = new ConcurrentHashMap<String, ArrayList<String>>();
 	public FEPair pair;
 	
+	private String b_id_main_key;
 	private static int sequenceNumber = 0;
 	private static final Object lock = new Object();
 
@@ -33,11 +35,12 @@ public class Sequencer extends Thread{
 	private String group;
 	private String result;
 	public ReturnStatus returnStatus;
-
+	
 	public Sequencer(MessageHeader args, String group){
 		this.args = args;
 		this.group = group;
 		result = "";
+		b_id_main_key ="";
 	}
 
 	@Override
@@ -57,6 +60,7 @@ public class Sequencer extends Thread{
 		}
 	}
 
+	@SuppressWarnings("null")
 	public void sendToReplica(byte[] sendBuffer) {
 
 		int[] replicaPorts =  new int[3];
@@ -68,8 +72,17 @@ public class Sequencer extends Thread{
 			customSend = true;
 			FECancelBookingMessage message = (FECancelBookingMessage) args;
 			
-			tokens = message.booking_id.split("!");
-			FE.log(tokens[0] +"!" + tokens[1]+"!"+tokens[2]);
+			if(b_id.containsKey(message.booking_id)) {
+				tokens[0] = message.booking_id;
+				tokens[1] = b_id.get(message.booking_id).get(0);
+				tokens[2] = b_id.get(message.booking_id).get(1);
+				FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
+			}else {
+				for(int i = 0; i< Constants.ACTIVE_SERVERS; ++i) {
+					tokens[i] = message.booking_id;
+					FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
+				}
+			}
 			
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
@@ -81,8 +94,18 @@ public class Sequencer extends Thread{
 		}else if(args.command_type == CommandType.Change_Reservation) {
 			customSend = true;
 			FEChangeReservationMessage message = (FEChangeReservationMessage) args;
-			tokens = message.booking_id.split("!");
-			FE.log(tokens[0] +"!" + tokens[1]+"!"+tokens[2]);
+			
+			if(b_id.containsKey(message.booking_id)) {
+				tokens[0] = message.booking_id;
+				tokens[1] = b_id.get(message.booking_id).get(0);
+				tokens[2] = b_id.get(message.booking_id).get(1);
+				FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
+			}else {
+				for(int i = 0; i< Constants.ACTIVE_SERVERS; ++i) {
+					tokens[i] = message.booking_id;
+					FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
+				}
+			}
 			
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
@@ -93,20 +116,17 @@ public class Sequencer extends Thread{
 		}
 		
 		if(group.equals(Constants.DVL_GROUP)){
-			replicaPorts[1] = Constants.dvlPortListenFaridActive;
-			replicaPorts[0] = Constants.dvlPortListenRe1Active;
-			//replicaPorts[2] = Constants.dvlPortListenRe2Active;
-			replicaPorts[2] = Constants.DVL_PORT_LISTEN_SAMAN_ORIGINAL;
+			replicaPorts[0] = Constants.dvlPortListenFaridActive;
+			replicaPorts[1] = Constants.dvlPortListenRe1Active;
+			replicaPorts[2] = Constants.dvlPortListenRe2Active;
 		}else if(group.equals(Constants.KKL_GROUP)){
-			replicaPorts[1] = Constants.kklPortListenFaridActive;
-			replicaPorts[0] = Constants.kklPortListenRe1Active;
-			//replicaPorts[2] = Constants.kklPortListenRe2Active;
-			replicaPorts[2] = Constants.KKL_PORT_LISTEN_SAMAN_ORIGINAL;
+			replicaPorts[0] = Constants.kklPortListenFaridActive;
+			replicaPorts[1] = Constants.kklPortListenRe1Active;
+			replicaPorts[2] = Constants.kklPortListenRe2Active;
 		}else if(group.equals(Constants.WST_GROUP)){
-			replicaPorts[1] = Constants.wstPortListenFaridActive;
-			replicaPorts[0] = Constants.wstPortListenRe1Active;
-			//replicaPorts[2] = Constants.wstPortListenRe2Active;
-			replicaPorts[2] = Constants.WST_PORT_LISTEN_SAMAN_ORIGINAL;
+			replicaPorts[0] = Constants.wstPortListenFaridActive;
+			replicaPorts[1] = Constants.wstPortListenRe1Active;
+			replicaPorts[2] = Constants.wstPortListenRe2Active;
 		}else{
 			FE.log("group is not valid in sequencer class: " + group);
 			return;
@@ -170,7 +190,7 @@ public class Sequencer extends Thread{
 		}
 
 	}
-		
+	
 	public void setTimeOut(){
 		try {
 			if(pair.semaphore.tryAcquire(2,TimeUnit.MINUTES)){
@@ -198,27 +218,56 @@ public class Sequencer extends Thread{
 		
 		if(message.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) message;
-			if(replyMessage.status){
-				FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
-				if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
-					if(replyMessage.replyMessage.equals("False")){
-						returnStatus = ReturnStatus.CantLogin;
-						result = "login faild";
-					}
-					result = "login done";
-				}else if(replyMessage.command_type == CommandType.Book_Room){
-					result += replyMessage.bookingId + "!";
-				}else if(replyMessage.command_type == CommandType.Change_Reservation) {
-					result += replyMessage.bookingId + "!";
-				}else{
-					result += replyMessage.replyMessage + "\n";
-				}
-
-			}else{
+			FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
+			
+			// handle wrong results
+			if(!replyMessage.isFakeGeneratorOff){
 				FE.log("Fake Generator is on for packet with sequence Number: " +pair.id + "in Group of : " + pair.group + "with port: "+ info.port);
 				returnStatus = ReturnStatus.FakeGenertor;
-				new Thread(new ErrorHandler(replyMessage.replicaId, pair.group)).start();
+				new Thread(new ErrorHandler(replyMessage.replicaId, pair.group));
 			}
+			
+			// handle return message 
+			if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
+				if(replyMessage.replyMessage.equals("False")){
+					returnStatus = ReturnStatus.CantLogin;
+					result = "login faild";
+				}
+				result = "login done";
+			}else{
+				// return only Farid results
+				if(index == 0) {
+					result = replyMessage.replyMessage;
+				}
+			}
+			
+			// handle global booking id
+			if(replyMessage.command_type == CommandType.Book_Room || replyMessage.command_type == CommandType.Change_Reservation){
+				if(!replyMessage.bookingId.equals(Constants.NULL_STRING)) {
+					switch (index) {
+					case 0:
+						b_id_main_key = replyMessage.bookingId;
+						b_id.put(b_id_main_key, new ArrayList<String>());
+						break;
+					case 1:
+						if(b_id.containsKey(b_id_main_key)) {
+							b_id.get(b_id_main_key).add(replyMessage.bookingId);
+						}else {
+							FE.log("global booking key is not exist");
+						}
+						break;
+					case 2:
+						if(b_id.containsKey(b_id_main_key)) {
+							b_id.get(b_id_main_key).add(replyMessage.bookingId);
+						}else {
+							FE.log("global booking key is not exist");
+						}
+					default:
+						break;
+					}	
+				}
+			}
+
 		}else{
 			generateResult("Message type is not replay something is wrong!", ReturnStatus.ErrorInMessageType);
 		}
