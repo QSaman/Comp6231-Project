@@ -29,7 +29,7 @@ public class UDP extends Thread{
 		ReliableSocket aSocket = null;
 		try {
 			aSocket = new ReliableSocket();
-			aSocket.connect(new InetSocketAddress(Constants.MOSTAFA_IP, serverPort));
+			aSocket.connect(new InetSocketAddress(Information.getInstance().isReOne == true ?Constants.MOSTAFA_IP : Constants.SAMAN_IP, serverPort));
 			String json = Server.gson.toJson(args);
 
 			OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream()) ;

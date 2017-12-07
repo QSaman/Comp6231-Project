@@ -49,7 +49,7 @@ public class Udp implements Runnable {
 		try {
 			serverSocket = new ReliableServerSocket(
 					udp_name.equals("kkl_org") ? Constants.KKL_PORT_LISTEN_FARID_ORIGINAL
-							: Constants.KKL_PORT_LISTEN_FARID_BACKUP);
+							: Constants.KKL_PORT_LISTEN_FARID_BACKUP, 0 , InetAddress.getByName(Constants.FARID_IP));
 			System.out.println("Server Socket KKL: " + serverSocket.getLocalPort());
 			while (true) {
 				ReliableSocket aSocket = (ReliableSocket) serverSocket.accept();
@@ -126,7 +126,7 @@ public class Udp implements Runnable {
 			} else {
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress(Constants.FARID_IP, Constants.FE_PORT_LISTEN));
+					aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
 					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();
