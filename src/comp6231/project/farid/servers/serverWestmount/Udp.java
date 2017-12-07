@@ -48,7 +48,7 @@ public class Udp implements Runnable {
 		try {
 			serverSocket = new ReliableServerSocket(
 					udp_name.equals("wst_org") ? Constants.WST_PORT_LISTEN_FARID_ORIGINAL
-							: Constants.WST_PORT_LISTEN_FARID_BACKUP);
+							: Constants.WST_PORT_LISTEN_FARID_BACKUP, 0 , InetAddress.getByName(Constants.FARID_IP));
 			while (true) {
 				ReliableSocket aSocket = (ReliableSocket) serverSocket.accept();
 				new Handler(aSocket).start();
@@ -125,7 +125,7 @@ public class Udp implements Runnable {
 			} else {
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress(Constants.FARID_IP, Constants.FE_PORT_LISTEN));
+					aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
 					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();

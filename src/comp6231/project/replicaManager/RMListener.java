@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import comp6231.project.frontEnd.PortSwitcher;
@@ -25,7 +26,16 @@ public class RMListener implements Runnable {
 	public void run() {
 		socket = null;
 		try {
-			socket = new ReliableServerSocket(RMInformation.getInstance().getUDPListenPort());
+			String adress ="";
+			
+			if(RMInformation.getInstance().getRmCode().equals("FARID")) {
+				adress = Constants.FARID_IP;
+			}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
+				adress = Constants.MOSTAFA_IP;
+			}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
+				adress = Constants.SAMAN_IP;
+			}
+			socket = new ReliableServerSocket(RMInformation.getInstance().getUDPListenPort(), 0 , InetAddress.getByName(adress));
 
 			while(true){
 				ReliableSocket aSocket = (ReliableSocket) socket.accept();

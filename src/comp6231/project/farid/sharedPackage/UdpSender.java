@@ -28,7 +28,7 @@ public class UdpSender extends Thread{
 		ReliableSocket aSocket = null;
 		try {
 			aSocket = new ReliableSocket();
-			aSocket.connect(new InetSocketAddress("127.0.0.1", serverPort));
+			aSocket.connect(new InetSocketAddress(Constants.FARID_IP, serverPort));
 
 			OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream()) ;
 			out.write(new String(m,0,m.length));

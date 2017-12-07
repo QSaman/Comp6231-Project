@@ -35,7 +35,7 @@ public class UDPlistener  implements Runnable {
 	public void run() {
 		socket = null;
 		try {
-			socket = new ReliableServerSocket(Information.getInstance().getUDPListenPort());
+			socket = new ReliableServerSocket(Information.getInstance().getUDPListenPort(), 0 , InetAddress.getByName(Information.getInstance().isReOne == true ?Constants.MOSTAFA_IP : Constants.SAMAN_IP));
 
 			while(true){
 				ReliableSocket aSocket = (ReliableSocket) socket.accept();
@@ -116,7 +116,7 @@ public class UDPlistener  implements Runnable {
 			}else{
 				try {
 					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress(Information.getInstance().isReOne == true ?Constants.MOSTAFA_IP : Constants.SAMAN_IP, Constants.FE_PORT_LISTEN));
+					aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
 					out = new OutputStreamWriter(aSocket.getOutputStream());
 					out.write(data);
 					out.flush();

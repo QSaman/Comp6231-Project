@@ -3,6 +3,7 @@ package comp6231.project.frontEnd.udp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
@@ -22,7 +23,7 @@ public class MultiCastRUDPListener implements Runnable{
 	public void run() {
 		socket = null;
 		try {
-			socket = new ReliableServerSocket(Constants.FE_PORT_LISTEN);
+			socket = new ReliableServerSocket(Constants.FE_PORT_LISTEN, 0, InetAddress.getByName(Constants.FE_CLIENT_IP));
 
 			while(true){
 				ReliableSocket clientSocket = (ReliableSocket) socket.accept();

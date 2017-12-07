@@ -64,6 +64,7 @@ public class Sequencer extends Thread{
 	public void sendToReplica(byte[] sendBuffer) {
 
 		int[] replicaPorts =  new int[3];
+		String [] adresses = {Constants.FARID_IP,Constants.MOSTAFA_IP,Constants.SAMAN_IP};
 		boolean customSend = false;
 		String [] tokens = new String[3];
 		ArrayList<byte[]> msgs = new ArrayList<>(3); 
@@ -137,6 +138,7 @@ public class Sequencer extends Thread{
 				
 				final byte[] data = msgs.get(i);
 				final int idxPort = i;
+				final String adress = adresses[i];
 
 				new Thread(new Runnable() {
 					@Override
@@ -145,7 +147,7 @@ public class Sequencer extends Thread{
 						try {
 							ReliableSocket sendToReplica = new ReliableSocket();
 
-							sendToReplica.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, replicaPorts[idxPort]));
+							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
 							
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(data);
@@ -164,7 +166,8 @@ public class Sequencer extends Thread{
 			for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
 
 				final int idxPort = i;
-
+				final String adress = adresses[i];
+				
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -172,7 +175,7 @@ public class Sequencer extends Thread{
 						try {
 							ReliableSocket sendToReplica = new ReliableSocket();
 
-							sendToReplica.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, replicaPorts[idxPort]));
+							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
 							
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(sendBuffer);
