@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import comp6231.project.saman.campus.Campus.CampusType;
 import comp6231.project.saman.campus.CampusCommunication.RemoteInfo;
 import comp6231.project.saman.campus.communication.ProjectCampusCommunication;
 import comp6231.project.saman.campus.communication.RmiCampusCommunication;
@@ -36,10 +37,11 @@ public class Bootstrap {
 		PROJECT
 	}
 			
-	public final static CommunicationType com_type = CommunicationType.PROJECT;
+	public final static CommunicationType com_type = CommunicationType.RMI;
 	public final static String corba_port = "1050";
 	private static String[] campus_names = {"DVL", "KKL", "WST"};
 	private static int[] ports = {7777, 7778, 7779};
+	private static int[] backup_ports = {6667, 6668, 6669};
 	//If you set the following variable to true, run rmiregistry command from your bin directory
 	public final static boolean different_processes = false;
 
@@ -72,41 +74,64 @@ public class Bootstrap {
 		{
 			String campus_name = campus_names[i];
 			int port = ports[i];
+			int backup_port = backup_ports[i];
 			Logger logger = LoggerHelper.getCampusServerLogger(campus_name);
 			CampusCommunication comm = null;
+			CampusCommunication backup_comm = null;
 			switch (com_type)
 			{
 			case RMI:
 				Registry registry = LocateRegistry.getRegistry();
 				comm = new RmiCampusCommunication(registry);
+				backup_comm = new RmiCampusCommunication(registry);
 				break;
 			case CORBA:
 				comm = new CorbaCampusCommunication();
+				backup_comm = new CorbaCampusCommunication();
 				break;
 			case PROJECT:
 				ProjectCampusCommunication tmp = new ProjectCampusCommunication();
+				ProjectCampusCommunication backup_tmp = new ProjectCampusCommunication();
+				
 				tmp.campus_names = Bootstrap.campus_names;
+				backup_tmp.campus_names = Bootstrap.campus_names;
+				
 				HashMap<String, RemoteInfo> hm = new HashMap<>();
+				HashMap<String, RemoteInfo> backup_hm = new HashMap<>();
 				for (int ii = 0; ii < campus_names.length; ++ii)
 				{
 					RemoteInfo ri = tmp.new RemoteInfo();
+					RemoteInfo backup_ri = tmp.new RemoteInfo();
 					ri.address = "127.0.0.1";
+					backup_ri.address = "127.0.0.1";
 					ri.port = ports[ii];
+					backup_ri.port = backup_ports[ii];
 					hm.put(campus_names[ii], ri);
+					backup_hm.put(campus_names[ii], backup_ri);
 				}
 				tmp.campus_remote_info = hm;
+				backup_tmp.campus_remote_info = backup_hm;
 				comm = tmp;
+				backup_comm = backup_tmp;				
 				break;
 			default:
 				return;
 			}
-			Campus campus = new Campus(campus_name, "127.0.0.1", port, logger, comm);
+			Campus campus = new Campus(campus_name, "127.0.0.1", port, logger, comm, CampusType.Main);
+			Campus backup_campus = new Campus(campus_name, "127.0.0.1", backup_port, logger, backup_comm, CampusType.Backup);
 			HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db = new HashMap<>();
 			HashMap<String, StudentRecord> student_db = new HashMap<>();
 			campus.setDB(db);
+			backup_campus.setDB(db);
 			campus.setStudentDB(student_db);
+			backup_campus.setStudentDB(student_db);
 			campus.starServer();
+//			if ((i % 2) == 0)
+//				campus.starServer();
+//			else
+//				backup_campus.starServer();
 			campuses.add(campus);
+			campuses.add(backup_campus);
 		}		
 		
 	}
