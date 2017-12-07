@@ -12,7 +12,9 @@ import comp6231.project.messageProtocol.StartGson;
 public class Server {
 	public static Logger log;
 	public static Gson gson;
-
+	private static boolean isFakeGeneratorOff = true;
+	private static final Object fakeGeneratorLock = new Object();
+	
 	public static void main(String[] args) throws Exception{
 		if(args[0] == null){
 			return;
@@ -34,21 +36,21 @@ public class Server {
 		Database.getInstance().addTestCase();
 	}
 
-	private static void save() throws Exception {
+	public static void save() throws Exception {
 		try {
 			Database.getInstance().serializeDataOut();
-			System.out.println("Saved");
+			log("Saved");
 		} catch (IOException e) {
 			System.out.println("ERROR IN SERIALIZING");
 		}
 	}
 
-	private static void load() throws Exception{
+	public static void load() throws Exception{
 		try {
 			Database.serializeDataIn();
-			System.out.println("Loaded");
+			log("Loaded");
 		} catch (ClassNotFoundException|IOException e) {
-			System.out.println("ERROR IN LOADING");
+			log("ERROR IN LOADING");
 		}
 	}
 	private static void initializeLog(){
@@ -78,4 +80,24 @@ public class Server {
 	public static void log(String text){
 		log.info("ServerSide->"+"id: "+Information.getInstance().getServerName()+" Message: "+text);
 	}
+
+	/**
+	 * @return the isFakeGeneratorOff
+	 */
+	public static boolean isFakeGeneratorOff() {
+		synchronized (fakeGeneratorLock) {
+			return isFakeGeneratorOff;	
+		}
+	}
+
+	/**
+	 * @param isFakeGeneratorOff the isFakeGeneratorOff to set
+	 */
+	public static void setFakeGeneratorOff(boolean isFakeGeneratorOff) {
+		synchronized (fakeGeneratorLock) {
+			Server.isFakeGeneratorOff = isFakeGeneratorOff;
+		}
+	}
+	
+	
 }

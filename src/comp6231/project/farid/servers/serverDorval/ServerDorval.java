@@ -16,6 +16,9 @@ import comp6231.project.messageProtocol.sharedMessage.ServerToServerMessage;
 
 public class ServerDorval {
 	public static Gson gson;
+	private static boolean isFakeGeneratorOff = true;
+	private static final Object fakeGeneratorLock = new Object();
+	
 	// The main database of the server
 	static Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
@@ -26,7 +29,7 @@ public class ServerDorval {
 	// admins will be used by server to know which admins have already signed in
 	static Map<String, Admin> admins = Collections.synchronizedMap(new HashMap<>());
 
-	private static void save() throws Exception {
+	public static void save() throws Exception {
 		
 		SaverLoader saverLoader = new SaverLoader();
 		saverLoader.copyServerToObject();
@@ -40,7 +43,7 @@ public class ServerDorval {
 		}
 	}
 	
-	private static void load() throws Exception{
+	public static void load() throws Exception{
 		SaverLoader saverLoader = null;
 		try {
 			saverLoader = SaverLoader.serializeDataIn();
@@ -173,6 +176,24 @@ public class ServerDorval {
 				admins.remove(ID);
 			}
 			ServerDorval.dorvalServerLogger.log("\nAdmin " + ID + " signed out\n");
+		}
+	}
+	
+	/**
+	 * @return the isFakeGeneratorOff
+	 */
+	public static boolean isFakeGeneratorOff() {
+		synchronized (fakeGeneratorLock) {
+			return isFakeGeneratorOff;	
+		}
+	}
+
+	/**
+	 * @param isFakeGeneratorOff the isFakeGeneratorOff to set
+	 */
+	public static void setFakeGeneratorOff(boolean isFakeGeneratorOff) {
+		synchronized (fakeGeneratorLock) {
+			ServerDorval.isFakeGeneratorOff = isFakeGeneratorOff;
 		}
 	}
 }
