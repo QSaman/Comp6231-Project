@@ -270,7 +270,6 @@ public class UdpServer extends Thread {
 					if (json_msg.message_type == MessageType.Request)
 					{
 						handleRMRequests(json_msg);
-						sendDatagramToFE(Constants.ONE_WAY, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
 					else
 					{
