@@ -42,6 +42,7 @@ public class JsonMessage {
 		//udp_server.sendDatagramToFE(json_msg, address.getHostAddress(), port);
 		ReliableSocket aSocket = null;
 		try {
+			System.out.println("debug2: " + address);
 			OutputStreamWriter out = null;
 			aSocket = new ReliableSocket();
 			aSocket.connect(new InetSocketAddress(address, port));
