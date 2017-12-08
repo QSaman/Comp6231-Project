@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
@@ -50,7 +49,13 @@ public class Udp implements Runnable {
 	Udp(String args[]) {
 		udp_name = args[0];
 	}
+	public static int getCurrentSequenceNumber() {
+		return currentSequenceNumber;
+	}
 
+	public static void setCurrentSequenceNumber(int currentSequenceNumber) {
+		Udp.currentSequenceNumber = currentSequenceNumber;
+	}
 	@Override
 	public void run() {
 		serverSocket = null;

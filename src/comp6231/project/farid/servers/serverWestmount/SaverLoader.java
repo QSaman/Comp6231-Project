@@ -21,6 +21,8 @@ public class SaverLoader implements Serializable {
 	 */
 	private static final long serialVersionUID = 8285664676826383466L;
 
+	private int savedCurrentSequenceNumber;
+
 	private Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
 	
@@ -30,7 +32,16 @@ public class SaverLoader implements Serializable {
     private Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
 
+    public void setCurrentSequenceNumberByLoading() {
+		Udp.setCurrentSequenceNumber(savedCurrentSequenceNumber);
+	}
+
+	public void setSavedCurrentSequenceNumber() {
+		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber();
+	}
+	
     void copyObjectToServer(){
+    	setCurrentSequenceNumberByLoading();
     	ServerWestmount.dataBase.clear();
 		ServerWestmount.students.clear();
 		ServerWestmount.admins.clear();
@@ -44,6 +55,7 @@ public class SaverLoader implements Serializable {
     }
     
     void copyServerToObject() {
+    	setSavedCurrentSequenceNumber();
 		copyDataBase(ServerWestmount.dataBase, dataBase);
 		copyMap(ServerWestmount.students, students);
 		copyMap(ServerWestmount.admins, admins);

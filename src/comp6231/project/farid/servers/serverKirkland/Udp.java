@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
@@ -45,6 +44,14 @@ public class Udp implements Runnable {
 	private static int currentSequenceNumber = 0;
 	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
+
+	public static int getCurrentSequenceNumber() {
+		return currentSequenceNumber;
+	}
+
+	public static void setCurrentSequenceNumber(int currentSequenceNumber) {
+		Udp.currentSequenceNumber = currentSequenceNumber;
+	}
 
 	// udp name
 	Udp(String args[]) {

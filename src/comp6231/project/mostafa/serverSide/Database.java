@@ -35,14 +35,22 @@ public class Database implements Serializable {
 	private CopyDatabase copyDatabase;
 
 	private int savedIdGenerator;
+	private int savedCurrentSequenceNumber;
 
 	public void setIdGeneratorByLoading() {
 		RoomRecord.setIdGenerator(savedIdGenerator);
-		;
 	}
 
 	public void setSavedIdGeneratorToSave() {
 		this.savedIdGenerator = RoomRecord.getIdGenerator();
+	}
+	
+	public void setCurrentSequenceNumberByLoading() {
+		UDPlistener.setCurrentSequenceNumber(savedCurrentSequenceNumber);
+	}
+
+	public void setSavedCurrentSequenceNumber() {
+		this.savedCurrentSequenceNumber = UDPlistener.getCurrentSequenceNumber();
 	}
 
 	private Database() {
@@ -489,6 +497,7 @@ public class Database implements Serializable {
 
 	public void serializeDataOut() throws IOException {
 		setSavedIdGeneratorToSave();
+		setSavedCurrentSequenceNumber();
 		String fileName = Information.getInstance().getServerCode() + ".txt";
 		FileOutputStream fos = new FileOutputStream(fileName);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -503,6 +512,7 @@ public class Database implements Serializable {
 		Database database = (Database) ois.readObject();
 		instance = database;
 		instance.setIdGeneratorByLoading();
+		instance.setCurrentSequenceNumberByLoading();
 		ois.close();
 		return database;
 	}

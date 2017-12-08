@@ -22,6 +22,8 @@ public class SaverLoader implements Serializable {
 	 */
 	private static final long serialVersionUID = -9004471554681403988L;
 
+	private int savedCurrentSequenceNumber;
+
 	private Map<LocalDate, HashMap<Integer, HashMap<LocalTime, LocalTime>>> dataBase = Collections
 			.synchronizedMap(new HashMap<>());
 	
@@ -31,6 +33,14 @@ public class SaverLoader implements Serializable {
     private Map<String, ReserveManager> reserveMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, CountController> counterDB = Collections.synchronizedMap(new HashMap<>());
 
+    public void setCurrentSequenceNumberByLoading() {
+		Udp.setCurrentSequenceNumber(savedCurrentSequenceNumber);
+	}
+
+	public void setSavedCurrentSequenceNumber() {
+		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber();
+	}
+	
     void copyObjectToServer(){
     	ServerKirkland.dataBase.clear();
 		ServerKirkland.students.clear();

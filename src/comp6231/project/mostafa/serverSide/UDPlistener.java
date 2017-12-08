@@ -38,6 +38,15 @@ public class UDPlistener  implements Runnable {
 	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
 	
+	
+	public static int getCurrentSequenceNumber() {
+		return currentSequenceNumber;
+	}
+
+	public static void setCurrentSequenceNumber(int currentSequenceNumber) {
+		UDPlistener.currentSequenceNumber = currentSequenceNumber;
+	}
+
 	@Override
 	public void run() {
 		socket = null;

@@ -51,6 +51,13 @@ public class Udp implements Runnable {
 		udp_name = args[0];
 	}
 
+	public static int getCurrentSequenceNumber() {
+		return currentSequenceNumber;
+	}
+
+	public static void setCurrentSequenceNumber(int currentSequenceNumber) {
+		Udp.currentSequenceNumber = currentSequenceNumber;
+	}
 	@Override
 	public void run() {
 		serverSocket = null;
