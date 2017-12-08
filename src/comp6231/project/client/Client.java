@@ -145,7 +145,7 @@ public class Client {
 						case (4):
 							int fakeGen;
 							while (true) {
-								System.out.println("\nWhich server do you want to kill?\n");
+								System.out.println("\nWhich server do you want to generate fake?\n");
 								System.out.println("1- Dorval-Farid");
 								System.out.println("2- Kirkland-Farid");
 								System.out.println("3- Westmount-Farid");
@@ -275,7 +275,7 @@ public class Client {
 						case (6):
 							int fakeGen;
 							while (true) {
-								System.out.println("\nWhich server do you want to kill?\n");
+								System.out.println("\nWhich server do you want to generate fake?\n");
 								System.out.println("1- Dorval-Farid");
 								System.out.println("2- Kirkland-Farid");
 								System.out.println("3- Westmount-Farid");
