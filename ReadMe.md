@@ -1,5 +1,9 @@
 # Fall 2017 Project
 
+# maximum number of DatagramSockets reached
+
+If you get this exception run your program with `-Dsun.net.maxDatagramSockets=1000`
+
 # How to configure in Eclipse
 
 ```
