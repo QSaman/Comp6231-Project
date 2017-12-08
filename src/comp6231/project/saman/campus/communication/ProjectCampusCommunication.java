@@ -36,6 +36,11 @@ public class ProjectCampusCommunication extends CampusCommunication {
 			ri.port = Constants.kklPortListenRe2Active;
 		else if (campus_name.equals("WST"))
 			ri.port = Constants.wstPortListenRe2Active;
+		else
+		{
+			System.err.println("Invalid campus name: " + campus_name);
+			ri.port = 0;
+		}
 		//return campus_remote_info.get(campus_name);
 		return ri;
 	}
