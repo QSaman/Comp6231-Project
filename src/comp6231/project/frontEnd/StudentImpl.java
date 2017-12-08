@@ -118,7 +118,7 @@ public class StudentImpl extends StudentOperationsPOA {
 
 	@Override
 	public void fakeGenerate(String replicaName, String campusName) {
-		new Thread(new ErrorHandler(replicaName, campusName, false)).start();
+		new Thread(new ErrorHandler(replicaName, false)).start();
 		
 	}
 

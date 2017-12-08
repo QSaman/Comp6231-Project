@@ -4,7 +4,6 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -12,7 +11,6 @@ import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
-import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
 import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 import net.rudp.ReliableServerSocket;
@@ -99,8 +97,7 @@ public class RMListener implements Runnable {
 					PortSwitcher.switchServer(message.portSwitcherArg);
 					sendToAll(json_msg_str);
 				}else if (json_msg.command_type == CommandType.Fake_Generator) {
-					RMFakeGeneratorMessage message = (RMFakeGeneratorMessage) json_msg;
-					send(json_msg_str, message.port );
+					sendToAll(json_msg_str);
 				}else {
 					ReplicaManager.log("CommandType is incorrect");
 				}
@@ -110,30 +107,30 @@ public class RMListener implements Runnable {
 
 		}
 
-		private void send(String data, int port) {
-			try {
-				ReliableSocket aSocket = new ReliableSocket();
-				String adress ="";
-				
-				if(RMInformation.getInstance().getRmCode().equals("FARID")) {
-					adress = Constants.FARID_IP;
-				}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
-					adress = Constants.MOSTAFA_IP;
-				}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
-					adress = Constants.SAMAN_IP;
-				}
-				
-				aSocket.connect(new InetSocketAddress(adress, port));
-				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
-				out.write(data);
-				out.flush();
-				out.close();
-				aSocket.close();
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+//		private void send(String data, int port) {
+//			try {
+//				ReliableSocket aSocket = new ReliableSocket();
+//				String adress ="";
+//				
+//				if(RMInformation.getInstance().getRmCode().equals("FARID")) {
+//					adress = Constants.FARID_IP;
+//				}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
+//					adress = Constants.MOSTAFA_IP;
+//				}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
+//					adress = Constants.SAMAN_IP;
+//				}
+//				
+//				aSocket.connect(new InetSocketAddress(adress, port));
+//				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
+//				out.write(data);
+//				out.flush();
+//				out.close();
+//				aSocket.close();
+//
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
 
 		private void sendToAll(String data){
 

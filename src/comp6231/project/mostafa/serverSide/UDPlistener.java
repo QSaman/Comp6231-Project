@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
@@ -30,7 +31,12 @@ import comp6231.shared.Constants;
 
 public class UDPlistener  implements Runnable {
 	private ReliableServerSocket socket;
-
+	private static final Object lock = new Object();
+	
+	// total ordering
+	private static int currentSequenceNumber = 0;
+	private static ConcurrentHashMap<Integer, MessageHeader> history = new ConcurrentHashMap<Integer, MessageHeader>();
+	
 	@Override
 	public void run() {
 		socket = null;
@@ -180,7 +186,8 @@ public class UDPlistener  implements Runnable {
 		}
 		
 		private String processFrontEndToServer(MessageHeader json){
-
+			// total ordering
+			handleTotalOrder(json);
 			FEReplyMessage replyMessage = null;
 			if(json.command_type == CommandType.Create_Room){
 				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json;
@@ -279,6 +286,16 @@ public class UDPlistener  implements Runnable {
 			return result;
 		}
 	}
-
+	
+	private void handleTotalOrder(MessageHeader messageHeader){
+		synchronized (lock) {
+			int sequenceNumber = messageHeader.sequence_number;
+			if(currentSequenceNumber == sequenceNumber) {
+				currentSequenceNumber ++;
+			}else if (currentSequenceNumber <= sequenceNumber) {
+				history.put(currentSequenceNumber, messageHeader);
+			}
+		}
+	}
 
 }

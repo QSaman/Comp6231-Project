@@ -18,16 +18,14 @@ public class ErrorHandler implements Runnable{
 	}
 	
 	private String replicaId;
-	private String group;
 	
 	private int portTosend;
 	private MessageHeader messageHeader;
 	private messageStatus status;
 	private boolean turnOff;
 	
-	public ErrorHandler(String replicaId, String group, boolean turnOff) {
-		this.replicaId = replicaId;
-		this.group = group;
+	public ErrorHandler(String replicaId, boolean turnOff) {
+		this.replicaId = replicaId;;
 		this.turnOff = turnOff;
 		status = messageStatus.E_Fake_Generator;
 	}
@@ -43,7 +41,7 @@ public class ErrorHandler implements Runnable{
 	@Override
 	public void run() {
 		if(status == messageStatus.E_Fake_Generator) {
-			RMFakeGeneratorMessage message = new RMFakeGeneratorMessage(-1, turnOff, findServerPort(replicaId, group));
+			RMFakeGeneratorMessage message = new RMFakeGeneratorMessage(-1, turnOff);
 			String json = FE.toJson(message);
 			send(json, findRMPort(replicaId));
 		}else if(status == messageStatus.E_Kill) {
@@ -66,37 +64,37 @@ public class ErrorHandler implements Runnable{
 		}
 	}
 	
-	private int findServerPort(String replicaId,String group) {
-		if(group.equals(Constants.DVL_GROUP)) {
-			if(replicaId.contains("Farid")) {
-				return Constants.dvlPortListenFaridActive;
-			}else if(replicaId.contains("Mostafa")){
-				return Constants.dvlPortListenRe1Active;
-			}else if(replicaId.contains("Saman")){
-				return Constants.dvlPortListenRe2Active;
-			}
-		}else if (group.equals(Constants.KKL_GROUP)) {
-			if(replicaId.contains("Farid")) {
-				return Constants.kklPortListenFaridActive;
-			}else if(replicaId.contains("Mostafa")){
-				return Constants.kklPortListenRe1Active;
-			}else if(replicaId.contains("Saman")){
-				return Constants.kklPortListenRe2Active;
-			}
-		}else if (group.equals(Constants.WST_GROUP)) {
-			if(replicaId.contains("Farid")) {
-				return Constants.wstPortListenFaridActive;
-			}else if(replicaId.contains("Mostafa")){
-				return Constants.wstPortListenRe1Active;
-			}else if(replicaId.contains("Saman")){
-				return Constants.wstPortListenRe2Active;
-			}
-		}else {
-			FE.log(" Wrong value for group in error handleing");
-			return -1;
-		}
-		return -1;
-	}
+//	private int findServerPort(String replicaId,String group) {
+//		if(group.equals(Constants.DVL_GROUP)) {
+//			if(replicaId.contains("Farid")) {
+//				return Constants.dvlPortListenFaridActive;
+//			}else if(replicaId.contains("Mostafa")){
+//				return Constants.dvlPortListenRe1Active;
+//			}else if(replicaId.contains("Saman")){
+//				return Constants.dvlPortListenRe2Active;
+//			}
+//		}else if (group.equals(Constants.KKL_GROUP)) {
+//			if(replicaId.contains("Farid")) {
+//				return Constants.kklPortListenFaridActive;
+//			}else if(replicaId.contains("Mostafa")){
+//				return Constants.kklPortListenRe1Active;
+//			}else if(replicaId.contains("Saman")){
+//				return Constants.kklPortListenRe2Active;
+//			}
+//		}else if (group.equals(Constants.WST_GROUP)) {
+//			if(replicaId.contains("Farid")) {
+//				return Constants.wstPortListenFaridActive;
+//			}else if(replicaId.contains("Mostafa")){
+//				return Constants.wstPortListenRe1Active;
+//			}else if(replicaId.contains("Saman")){
+//				return Constants.wstPortListenRe2Active;
+//			}
+//		}else {
+//			FE.log(" Wrong value for group in error handleing");
+//			return -1;
+//		}
+//		return -1;
+//	}
 	
 	private int findRMPort(String replicaId) {
 		if(replicaId.contains("Farid")) {

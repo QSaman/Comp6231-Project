@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,12 @@ public class Udp implements Runnable {
 	//
 	private ReliableServerSocket serverSocket;
 	String udp_name;
+	
+	// total ordering
+	private static int currentSequenceNumber = 0;
+	private static ConcurrentHashMap<Integer, MessageHeader> history = new ConcurrentHashMap<Integer, MessageHeader>();
+	private static final Object lock = new Object();
+	
 	//udp name
 	Udp(String args[]) {
 		udp_name = args[0];
@@ -147,6 +154,7 @@ public class Udp implements Runnable {
 			FEReplyMessage replyMessage = null;
 
 			if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica) {
+				handleTotalOrder(json_msg);
 				isFeToServer = true;
 				// json = json.substring(3);
 				protocolType = ProtocolType.Frontend_To_Replica;
@@ -425,4 +433,14 @@ public class Udp implements Runnable {
 
 	}
 
+	private void handleTotalOrder(MessageHeader messageHeader){
+		synchronized (lock) {
+			int sequenceNumber = messageHeader.sequence_number;
+			if(currentSequenceNumber == sequenceNumber) {
+				currentSequenceNumber ++;
+			}else if (currentSequenceNumber <= sequenceNumber) {
+				history.put(currentSequenceNumber, messageHeader);
+			}
+		}
+	}
 }
