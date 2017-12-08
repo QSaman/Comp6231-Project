@@ -54,6 +54,7 @@ public class Campus implements Serializable {
 	private JsonMessage json_message;
 	private Gson gson;
 	private boolean fake_result;
+	private CampusContainer campus_container;
 		
 	public Campus(String name, String address, int port, Logger logger, CampusCommunication campus_comm, CampusType campus_type) throws IOException
 	{
@@ -79,6 +80,11 @@ public class Campus implements Serializable {
 		this.db = db;
 	}
 	
+	public void setCampusContainer(CampusContainer campus_container)
+	{
+		this.campus_container = campus_container;
+	}
+	
 	public void setStudentDB(HashMap<String, StudentRecord> student_db)
 	{
 		this.student_db = student_db;
@@ -92,7 +98,7 @@ public class Campus implements Serializable {
 		gson = StartGson.initGsonSaman();
 	}
 	
-	public void starServer() throws RemoteException
+	public void starServer()
 	{		
 		campus_comm.startServer();
 		logger.info(LoggerHelper.format(getName() + " - " + campus_type + " bound"));
@@ -880,6 +886,13 @@ public class Campus implements Serializable {
 	 */
 	public void setFakeResult(boolean fake_result) {
 		this.fake_result = fake_result;
+	}
+
+	/**
+	 * @return the campus_container
+	 */
+	public CampusContainer getCampusContainer() {
+		return campus_container;
 	}
 	
 }

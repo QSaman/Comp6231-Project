@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
+import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -35,6 +36,8 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
+import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.project.saman.campus.message_protocol.saman_replica.JsonMessage;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplicaRequestMessageHeader;
 import comp6231.project.saman.campus.message_protocol.saman_replica.ReplyMessageHeader;
@@ -67,13 +70,32 @@ public class UdpServer extends Thread {
 		this.campus = campus;
 		this.logger = logger;
 		//socket = new DatagramSocket(this.campus.getPort());
-		server_socket = new ReliableServerSocket(this.campus.getPort());
+		server_socket = new ReliableServerSocket(this.campus.getPort(), 0 , InetAddress.getByName(Constants.SAMAN_IP));
 		//System.setProperty("sun.net.maxDatagramSockets", "10000");
 	}
 	
 	public void setJsonMessage(JsonMessage json_message)
 	{
 		this.json_message = json_message;
+	}
+	
+	private void handleRMRequests(MessageHeader json_msg)
+	{
+		switch (json_msg.command_type) {
+		case Kill:
+			RMKillMessage kill_message = (RMKillMessage) json_msg;
+			PortSwitcher.switchServer(kill_message.portSwitcherArg);
+			logger.info("RM request for switching server is done in " + campus.getCampusName());
+			break;
+		case Fake_Generator:
+			RMFakeGeneratorMessage fake_message  = (RMFakeGeneratorMessage) json_msg;
+			campus.setFakeResult(!fake_message.turnOff);
+			logger.info("Received fake_message.turnOff: " + fake_message.turnOff);
+			logger.info(campus.getName() + "isFakeResult: " + campus.isFakeResult());
+			break;
+		default:
+				
+		}
 	}
 	
 	private FEReplyMessage handleFERequests(MessageHeader json_msg)
@@ -236,11 +258,23 @@ public class UdpServer extends Thread {
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
 						logger.info("I'm trying to send this message as reply to FE: " + reply_msg);
-						sendDatagramToFE(reply_msg, "127.0.0.1", Constants.FE_PORT_LISTEN);
+						sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
 					else if (json_msg.message_type == MessageType.Reply)
 					{
-						System.out.println("Reply messages are not supported for frontend to server");
+						logger.severe("Reply messages are not supported for frontend to server");
+					}
+				}
+				else if (json_msg.protocol_type == ProtocolType.ReplicaManager_Message)
+				{
+					if (json_msg.message_type == MessageType.Request)
+					{
+						handleRMRequests(json_msg);
+						sendDatagramToFE(Constants.ONE_WAY, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
+					}
+					else
+					{
+						logger.severe("Reply messages are not supported for replica manger messages");
 					}
 				}
 			  
