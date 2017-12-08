@@ -20,6 +20,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
@@ -63,6 +65,11 @@ public class UdpServer extends Thread {
 	JsonMessage json_message;
 	Gson gson;
 	private Logger logger;
+
+	// total ordering
+	private static int currentSequenceNumber = 0;
+	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
+	private static final Object lock = new Object();
 	
 	public UdpServer(Campus campus, Gson gson, Logger logger) throws IOException
 	{
@@ -73,12 +80,12 @@ public class UdpServer extends Thread {
 		server_socket = new ReliableServerSocket(this.campus.getPort(), 0 , InetAddress.getByName(Constants.SAMAN_IP));
 		//System.setProperty("sun.net.maxDatagramSockets", "10000");
 	}
-	
+
 	public void setJsonMessage(JsonMessage json_message)
 	{
 		this.json_message = json_message;
 	}
-	
+
 	private void handleRMRequests(MessageHeader json_msg)
 	{
 		switch (json_msg.command_type) {
@@ -94,10 +101,10 @@ public class UdpServer extends Thread {
 			logger.info(campus.getName() + "isFakeResult: " + campus.isFakeResult());
 			break;
 		default:
-				
+
 		}
 	}
-	
+
 	private FEReplyMessage handleFERequests(MessageHeader json_msg)
 	{
 		FEReplyMessage reply = null;
@@ -118,8 +125,8 @@ public class UdpServer extends Thread {
 				e.printStackTrace();
 				reply_msg = "Booking operation wasn't successful: " + e.getMessage();
 			}
-//			reply = new FEReplyMessage(book_room_req.sequence_number, book_room_req.command_type, 
-//					reply_msg, true);
+			//			reply = new FEReplyMessage(book_room_req.sequence_number, book_room_req.command_type, 
+			//					reply_msg, true);
 			reply = new FEReplyMessage(book_room_req.sequence_number, book_room_req.command_type, 
 					reply_msg, true, booking_id, "Saman");
 			System.out.println("debug1:" + reply_msg);
@@ -127,7 +134,7 @@ public class UdpServer extends Thread {
 		case Cancel_Book_Room:
 			FECancelBookingMessage cancel_booking_req = (FECancelBookingMessage)json_msg;
 			try {						
-				 boolean_res = campus.cancelBooking(cancel_booking_req.user_id, cancel_booking_req.booking_id);
+				boolean_res = campus.cancelBooking(cancel_booking_req.user_id, cancel_booking_req.booking_id);
 				if (boolean_res)
 					reply_msg = "Booked time slot cancelled successfully!";
 				else
@@ -147,7 +154,7 @@ public class UdpServer extends Thread {
 					reply_msg = "Cannot change reservation";
 				else
 					reply_msg = "new booking id: " + booking_id;
-				
+
 			} catch (NotBoundException | IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -216,69 +223,71 @@ public class UdpServer extends Thread {
 		}
 		return reply;
 	}
-	
+
 	private void processRequest(ReliableSocket socket)
 	{
 		logger.info("Campus " + campus.getCampusName() + " received a request to process. Campus type: " + campus.getCampusType());
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			
+
 			CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
-			
+
 			while(true) {
-				  int n = in.read();
-				  if( n < 0  || n == '\u0004') break;
-				  writer.write(n);
-				}
-			
-			  String json_msg_str = writer.toString();
-			  System.out.println(json_msg_str);
-			  
-				MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
-				if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+				int n = in.read();
+				if( n < 0  || n == '\u0004') break;
+				writer.write(n);
+			}
+
+			String json_msg_str = writer.toString();
+			System.out.println(json_msg_str);
+
+			MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
+			if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+			{
+				if (json_msg.message_type == MessageType.Request)
 				{
-					if (json_msg.message_type == MessageType.Request)
-					{
-						ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
-						ReplyMessageHeader reply = tmp.handleRequest(campus);
-						String reply_msg = gson.toJson(reply);
-						out.write(reply_msg);
-						out.write('\u0004');
-						out.flush();
-						out.close();
-					}
-					else if (json_msg.message_type == MessageType.Reply)
-					{
-						//json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
-					}
+					ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
+					ReplyMessageHeader reply = tmp.handleRequest(campus);
+					String reply_msg = gson.toJson(reply);
+					out.write(reply_msg);
+					out.write('\u0004');
+					out.flush();
+					out.close();
 				}
-				else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
+				else if (json_msg.message_type == MessageType.Reply)
 				{
-					if (json_msg.message_type == MessageType.Request)
-					{
+					//json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
+				}
+			}
+			else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
+			{
+				if (json_msg.message_type == MessageType.Request)
+				{
+					if (handleTotalOrder(json_msg)) {
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
 						logger.info("I'm (" + campus.getCampusName() + " - " + campus.getCampusType() + ") trying to send this message as reply to FE: " + reply_msg);
 						sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
-					else if (json_msg.message_type == MessageType.Reply)
-					{
-						logger.severe("Reply messages are not supported for frontend to server");
-					}
 				}
-				else if (json_msg.protocol_type == ProtocolType.ReplicaManager_Message)
+				else if (json_msg.message_type == MessageType.Reply)
 				{
-					if (json_msg.message_type == MessageType.Request)
-					{
-						handleRMRequests(json_msg);
-					}
-					else
-					{
-						logger.severe("Reply messages are not supported for replica manger messages");
-					}
+					logger.severe("Reply messages are not supported for frontend to server");
 				}
-			  
+			}
+			else if (json_msg.protocol_type == ProtocolType.ReplicaManager_Message)
+			{
+				if (json_msg.message_type == MessageType.Request)
+				{
+					handleRMRequests(json_msg);
+				}
+				else
+				{
+					logger.severe("Reply messages are not supported for replica manger messages");
+				}
+			}
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -296,111 +305,112 @@ public class UdpServer extends Thread {
 			}
 		}
 	}
-		
-//	private void processRequest(byte[] message, InetAddress address, int port)
-//	{
-//		String json_msg_str = new String(message);
-//		System.out.println(json_msg_str);
-//		MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
-//		if (json_msg.protocol_type == ProtocolType.Server_To_Server)
-//		{
-//			if (json_msg.message_type == MessageType.Request)
-//			{
-//				ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
-//				ReplyMessageHeader reply = tmp.handleRequest(campus);
-//				String reply_msg = gson.toJson(reply);
-//				try {
-//					sendDatagram(reply_msg.getBytes(), address, port);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//			else if (json_msg.message_type == MessageType.Reply)
-//				json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
-//		}
-//		else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
-//		{
-//			if (json_msg.message_type == MessageType.Request)
-//			{
-//				FEReplyMessage reply = handleFERequests(json_msg);
-//			}
-//			else if (json_msg.message_type == MessageType.Reply)
-//			{
-//				System.out.println("Reply messages are not supported for frontend to server");
-//			}
-//		}
-//	}
-	
+
+	//	private void processRequest(byte[] message, InetAddress address, int port)
+	//	{
+	//		String json_msg_str = new String(message);
+	//		System.out.println(json_msg_str);
+	//		MessageHeader json_msg = gson.fromJson(json_msg_str, MessageHeader.class);
+	//		if (json_msg.protocol_type == ProtocolType.Server_To_Server)
+	//		{
+	//			if (json_msg.message_type == MessageType.Request)
+	//			{
+	//				ReplicaRequestMessageHeader tmp = (ReplicaRequestMessageHeader)json_msg;
+	//				ReplyMessageHeader reply = tmp.handleRequest(campus);
+	//				String reply_msg = gson.toJson(reply);
+	//				try {
+	//					sendDatagram(reply_msg.getBytes(), address, port);
+	//				} catch (IOException e) {
+	//					// TODO Auto-generated catch block
+	//					e.printStackTrace();
+	//				}
+	//			}
+	//			else if (json_msg.message_type == MessageType.Reply)
+	//				json_message.onReceivedReplyMessage((ReplyMessageHeader)json_msg);
+	//		}
+	//		else if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica)
+	//		{
+	//			if (json_msg.message_type == MessageType.Request)
+	//			{
+	//				FEReplyMessage reply = handleFERequests(json_msg);
+	//			}
+	//			else if (json_msg.message_type == MessageType.Reply)
+	//			{
+	//				System.out.println("Reply messages are not supported for frontend to server");
+	//			}
+	//		}
+	//	}
+
 	public ReliableSocket sendDatagramToServer(String message, String address, int port) throws IOException
 	{
 		//System.out.println("Send message to " + address + ":" + port);
 		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
 		OutputStreamWriter out = null;
 		//synchronized (write_socket_lock) {
-			//socket.send(packet);
-			
-			ReliableSocket aSocket = new ReliableSocket();
-			try
-			{
-				aSocket.connect(new InetSocketAddress(address, port));
-				out = new OutputStreamWriter(aSocket.getOutputStream());
-				out.write(message);
-				out.write('\u0004');
-				out.flush();
-				out.close();
-			}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-				aSocket.close();
-			}
-			return aSocket;
+		//socket.send(packet);
+
+		ReliableSocket aSocket = new ReliableSocket();
+		try
+		{
+			aSocket.connect(new InetSocketAddress(address, port));
+			out = new OutputStreamWriter(aSocket.getOutputStream());
+			out.write(message);
+			out.write('\u0004');
+			out.flush();
+			out.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+			aSocket.close();
+		}
+		return aSocket;
 	}
-	
+
 	public void sendDatagramToFE(String message, String address, int port) throws IOException
 	{
 		//System.out.println("Send message to " + address + ":" + port);
 		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
 		OutputStreamWriter out = null;
 		//synchronized (write_socket_lock) {
-			//socket.send(packet);
-			
-			ReliableSocket aSocket = new ReliableSocket();
-			try
-			{
-				aSocket.connect(new InetSocketAddress(address, port));
-				out = new OutputStreamWriter(aSocket.getOutputStream());
-				out.write(message);
-				out.flush();
-				out.close();
+		//socket.send(packet);
+
+		ReliableSocket aSocket = new ReliableSocket();
+		try
+		{
+			aSocket.connect(new InetSocketAddress(address, port));
+			out = new OutputStreamWriter(aSocket.getOutputStream());
+			out.write(message);
+			out.flush();
+			out.close();
+			aSocket.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (aSocket != null)
 				aSocket.close();
-			}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				if (aSocket != null)
-					aSocket.close();
-			}
+		}
+		adjustCurrentSeqNumber();
 		//}		
 	}
-	
+
 	@Override
 	public void run()
 	{
 		while (true)
 		{
-			
+
 			//byte[] buffer = new byte[datagram_send_size];
 			//DatagramPacket packet = new DatagramPacket(buffer, datagram_send_size);
 			try {
 				ReliableSocket active_socket = (ReliableSocket)server_socket.accept();
 				//socket.receive(packet);
 				Thread thread = new Thread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						//UdpServer.this.processRequest(Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength()), packet.getAddress(), packet.getPort());
@@ -408,7 +418,7 @@ public class UdpServer extends Thread {
 					}
 				});
 				thread.start();
-				
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -423,5 +433,49 @@ public class UdpServer extends Thread {
 		// TODO Auto-generated method stub
 
 	}
-
+	
+	private boolean handleTotalOrder(MessageHeader messageHeader){
+		synchronized (lock) {
+			int sequenceNumber = messageHeader.sequence_number;
+			if (currentSequenceNumber < sequenceNumber) {
+				holdBack.offer(messageHeader);
+				logger.info("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return false;
+			}else if (currentSequenceNumber > sequenceNumber) {
+				logger.info("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return false;
+			}
+			logger.info("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+			return true;
+		}
+	}
+	
+	private void adjustCurrentSeqNumber() {
+		synchronized (lock) {
+			currentSequenceNumber ++;
+			for(int i = 0; i < holdBack.size(); ++i) {
+				MessageHeader messageHeader = holdBack.poll();
+				if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
+					Thread thread = new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							String reply_msg = gson.toJson(handleFERequests(messageHeader));
+							logger.info("I'm (" + campus.getCampusName() + " - " + campus.getCampusType() + ") trying to send this message as reply to FE: " + reply_msg);
+							try {
+								sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					});
+					thread.start();
+					break;
+				}else {
+					holdBack.offer(messageHeader);
+				}
+			}
+		}
+	}
 }

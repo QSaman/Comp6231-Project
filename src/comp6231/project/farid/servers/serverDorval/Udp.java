@@ -9,9 +9,11 @@ import java.net.InetSocketAddress;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
@@ -42,8 +44,9 @@ public class Udp implements Runnable {
 	
 	// total ordering
 	private static int currentSequenceNumber = 0;
-	private static ConcurrentHashMap<Integer, MessageHeader> history = new ConcurrentHashMap<Integer, MessageHeader>();
+	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
+	
 	Udp(String args[]) {
 		udp_name = args[0];
 	}
@@ -105,43 +108,188 @@ public class Udp implements Runnable {
 
 			ServerDorval.dorvalServerLogger.log("UDP Socket Received JSON: " + json_msg_str);
 			String result = processData(json_msg_str);
-			ServerDorval.dorvalServerLogger.log("UDP Socket Listener Result: " + result);
+			if(result != null) {
+				ServerDorval.dorvalServerLogger.log("UDP Socket Listener Result: " + result);
 
-			if(protocolType != ProtocolType.ReplicaManager_Message) {
-				//save here
-				ServerDorval.save();
-				send(socket.getInetAddress(), socket.getPort(), result);
+				if(protocolType != ProtocolType.ReplicaManager_Message) {
+					//save here
+					ServerDorval.save();
+					send(socket.getInetAddress(), socket.getPort(), result);
+				}
 			}
 		}
 
-		private void send(InetAddress address, int port, String data) {
-			OutputStreamWriter out;
-			if (protocolType == ProtocolType.Server_To_Server) {
+		private void send(InetAddress address, int port, String data){
+			if(protocolType == ProtocolType.Server_To_Server){
 				try {
-					out = new OutputStreamWriter(socket.getOutputStream());
+					OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 					out.write(data);
 					out.write('\u0004');
 					out.flush();
 					out.close();
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else {
-				try {
-					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
-					out = new OutputStreamWriter(aSocket.getOutputStream());
-					out.write(data);
-					out.flush();
-					out.close();
-					aSocket.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			}else{
+				sendReplicaToFe(data);
 			}
 
 		}
+		
+		private void sendReplicaToFe(String data) {
+			try {
+				ReliableSocket aSocket = new ReliableSocket();
+				aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
+				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
+				out.write(data);
+				out.flush();
+				out.close();
+				aSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			adjustCurrentSeqNumber();
+		}
 
+		private FEReplyMessage processFrontEnd(MessageHeader json_msg) throws Exception {
+			FEReplyMessage replyMessage = null;
+			String packetToSend = null;
+			protocolType = ProtocolType.Frontend_To_Replica;
+			// json = json.substring(3);
+			int seqNumber = json_msg.sequence_number;
+			if (json_msg.command_type == CommandType.LoginStudent) {
+
+				FELoginStudentMessage message = (FELoginStudentMessage) json_msg;
+
+				String tempStudentID = message.userId.toUpperCase();
+				packetToSend = ServerDorval.setStudentID(tempStudentID) ? "True" : "False";
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginStudent, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.LoginAdmin) {
+
+				FELoginAdminMessage message = (FELoginAdminMessage) json_msg;
+
+				String tempAdminID = message.userId.toUpperCase();
+				packetToSend = ServerDorval.setAdminID(tempAdminID) ? "True" : "False";
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginAdmin, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.SignOut) {
+
+				FESignOutMessage message = (FESignOutMessage) json_msg;
+
+				String tempID = message.userId.toUpperCase();
+				ServerDorval.signOut(tempID);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.SignOut, "Sign Out Called", ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.Book_Room) {
+
+				ServerDorval.dorvalServerLogger.log("book room entered: " + json_msg);
+				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json_msg;
+
+				String tempStudentID = message.userId.toUpperCase();
+				int tempRoomNumber = message.roomNumber;
+				int campus = message.campusName.toUpperCase().equals("DVL") ? 1
+						: message.campusName.toUpperCase().equals("KKL") ? 2 : 3;
+				LocalDate date = getLocalDate(message.date);
+				LocalTime startTime = getLocalTime(message.timeSlot.substring(0, message.timeSlot.indexOf("-")));
+				LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-") + 1));
+				packetToSend = ServerDorval.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime,
+						endTime);
+				if (packetToSend.indexOf(Constants.DILIMITER_STRING) != -1) {
+					String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
+					packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING) + 1);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true,
+							bookingId, "Farid");
+				} else {
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+				}
+				ServerDorval.dorvalServerLogger.log("book room: " + packetToSend);
+
+			} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
+
+				FECancelBookingMessage message = (FECancelBookingMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				String tempBookingID = message.booking_id;
+
+				packetToSend = ServerDorval.cancelBooking(tempStudentID, tempBookingID);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Cancel_Book_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.Get_Available_TimeSlots) {
+
+				FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				LocalDate date = getLocalDate(message.date);
+
+				packetToSend = ServerDorval.getAvailableTimeSlot(tempStudentID, date);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Get_Available_TimeSlots, packetToSend,
+						ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.Change_Reservation) {
+
+				FEChangeReservationMessage message = (FEChangeReservationMessage) json_msg;
+
+				String tempStudentID = message.user_id.toUpperCase();
+				String bookingID = message.booking_id;
+				int tempRoomNumber = message.new_room_number;
+				int campus = message.new_campus_name.toUpperCase().equals("DVL") ? 1
+						: message.new_campus_name.toUpperCase().equals("KKL") ? 2 : 3;
+
+				LocalTime startTime = getLocalTime(
+						message.new_time_slot.substring(0, message.new_time_slot.indexOf("-")));
+				LocalTime endTime = getLocalTime(
+						message.new_time_slot.substring(message.new_time_slot.indexOf("-") + 1));
+
+				packetToSend = ServerDorval.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
+						startTime, endTime);
+				if (packetToSend.indexOf(Constants.DILIMITER_STRING) != -1) {
+					String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
+					packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING) + 1);
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend, true,
+							bookingId, "Farid");
+				} else {
+					replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend,
+							ServerDorval.isFakeGeneratorOff(), "Farid");
+				}
+
+			} else if (json_msg.command_type == CommandType.Create_Room) {
+
+				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json_msg;
+
+				String adminID = message.userId.toUpperCase();
+				int roomNumber = message.roomNumber;
+				LocalDate date = getLocalDate(message.date);
+				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
+				for (String timeSlot : message.timeSlots) {
+					listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
+							getLocalTime(timeSlot.substring(timeSlot.indexOf("-") + 1)));
+				}
+
+				packetToSend = ServerDorval.createRoom(adminID, roomNumber, date, listOfTimeSlots);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Create_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+
+			} else if (json_msg.command_type == CommandType.Delete_Room) {
+
+				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json_msg;
+
+				String adminID = message.userId.toUpperCase();
+				int roomNumber = message.roomNumber;
+				LocalDate date = getLocalDate(message.date);
+				LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
+				for (String timeSlot : message.timeSlots) {
+					listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
+							getLocalTime(timeSlot.substring(timeSlot.indexOf("-") + 1)));
+				}
+
+				packetToSend = ServerDorval.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
+				replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+			}
+			return replyMessage;
+		}
+		
 		private String processData(String json) throws Exception {
 			String packetToSend = null;
 			MessageHeader json_msg = ServerDorval.gson.fromJson(json, MessageHeader.class);
@@ -150,138 +298,11 @@ public class Udp implements Runnable {
 			FEReplyMessage replyMessage = null;
 
 			if (json_msg.protocol_type == ProtocolType.Frontend_To_Replica) {
-				handleTotalOrder(json_msg);
 				isFeToServer = true;
-				protocolType = ProtocolType.Frontend_To_Replica;
-				// json = json.substring(3);
-				int seqNumber = json_msg.sequence_number;
-				if (json_msg.command_type == CommandType.LoginStudent) {
-
-					FELoginStudentMessage message = (FELoginStudentMessage) json_msg;
-
-					String tempStudentID = message.userId.toUpperCase();
-					packetToSend = ServerDorval.setStudentID(tempStudentID) ? "True" : "False";
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginStudent, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.LoginAdmin) {
-
-					FELoginAdminMessage message = (FELoginAdminMessage) json_msg;
-
-					String tempAdminID = message.userId.toUpperCase();
-					packetToSend = ServerDorval.setAdminID(tempAdminID) ? "True" : "False";
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.LoginAdmin, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.SignOut) {
-
-					FESignOutMessage message = (FESignOutMessage) json_msg;
-
-					String tempID = message.userId.toUpperCase();
-					ServerDorval.signOut(tempID);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.SignOut, "Sign Out Called", ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.Book_Room) {
-
-					ServerDorval.dorvalServerLogger.log("book room entered: " + json_msg);
-					FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json_msg;
-
-					String tempStudentID = message.userId.toUpperCase();
-					int tempRoomNumber = message.roomNumber;
-					int campus = message.campusName.toUpperCase().equals("DVL") ? 1
-							: message.campusName.toUpperCase().equals("KKL") ? 2 : 3;
-					LocalDate date = getLocalDate(message.date);
-					LocalTime startTime = getLocalTime(message.timeSlot.substring(0, message.timeSlot.indexOf("-")));
-					LocalTime endTime = getLocalTime(message.timeSlot.substring(message.timeSlot.indexOf("-") + 1));
-					packetToSend = ServerDorval.bookRoom(tempStudentID, campus, tempRoomNumber, date, startTime,
-							endTime);
-					if (packetToSend.indexOf(Constants.DILIMITER_STRING) != -1) {
-						String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
-						packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING) + 1);
-						replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, true,
-								bookingId, "Farid");
-					} else {
-						replyMessage = new FEReplyMessage(seqNumber, CommandType.Book_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
-					}
-					ServerDorval.dorvalServerLogger.log("book room: " + packetToSend);
-
-				} else if (json_msg.command_type == CommandType.Cancel_Book_Room) {
-
-					FECancelBookingMessage message = (FECancelBookingMessage) json_msg;
-
-					String tempStudentID = message.user_id.toUpperCase();
-					String tempBookingID = message.booking_id;
-
-					packetToSend = ServerDorval.cancelBooking(tempStudentID, tempBookingID);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Cancel_Book_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.Get_Available_TimeSlots) {
-
-					FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json_msg;
-
-					String tempStudentID = message.user_id.toUpperCase();
-					LocalDate date = getLocalDate(message.date);
-
-					packetToSend = ServerDorval.getAvailableTimeSlot(tempStudentID, date);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Get_Available_TimeSlots, packetToSend,
-							ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.Change_Reservation) {
-
-					FEChangeReservationMessage message = (FEChangeReservationMessage) json_msg;
-
-					String tempStudentID = message.user_id.toUpperCase();
-					String bookingID = message.booking_id;
-					int tempRoomNumber = message.new_room_number;
-					int campus = message.new_campus_name.toUpperCase().equals("DVL") ? 1
-							: message.new_campus_name.toUpperCase().equals("KKL") ? 2 : 3;
-
-					LocalTime startTime = getLocalTime(
-							message.new_time_slot.substring(0, message.new_time_slot.indexOf("-")));
-					LocalTime endTime = getLocalTime(
-							message.new_time_slot.substring(message.new_time_slot.indexOf("-") + 1));
-
-					packetToSend = ServerDorval.changeReservation(tempStudentID, bookingID, campus, tempRoomNumber,
-							startTime, endTime);
-					if (packetToSend.indexOf(Constants.DILIMITER_STRING) != -1) {
-						String bookingId = packetToSend.substring(0, packetToSend.indexOf(Constants.DILIMITER_STRING));
-						packetToSend = packetToSend.substring(packetToSend.indexOf(Constants.DILIMITER_STRING) + 1);
-						replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend, true,
-								bookingId, "Farid");
-					} else {
-						replyMessage = new FEReplyMessage(seqNumber, CommandType.Change_Reservation, packetToSend,
-								ServerDorval.isFakeGeneratorOff(), "Farid");
-					}
-
-				} else if (json_msg.command_type == CommandType.Create_Room) {
-
-					FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json_msg;
-
-					String adminID = message.userId.toUpperCase();
-					int roomNumber = message.roomNumber;
-					LocalDate date = getLocalDate(message.date);
-					LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
-					for (String timeSlot : message.timeSlots) {
-						listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
-								getLocalTime(timeSlot.substring(timeSlot.indexOf("-") + 1)));
-					}
-
-					packetToSend = ServerDorval.createRoom(adminID, roomNumber, date, listOfTimeSlots);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Create_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
-
-				} else if (json_msg.command_type == CommandType.Delete_Room) {
-
-					FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json_msg;
-
-					String adminID = message.userId.toUpperCase();
-					int roomNumber = message.roomNumber;
-					LocalDate date = getLocalDate(message.date);
-					LinkedHashMap<LocalTime, LocalTime> listOfTimeSlots = new LinkedHashMap<>();
-					for (String timeSlot : message.timeSlots) {
-						listOfTimeSlots.put(getLocalTime(timeSlot.substring(0, timeSlot.indexOf("-"))),
-								getLocalTime(timeSlot.substring(timeSlot.indexOf("-") + 1)));
-					}
-
-					packetToSend = ServerDorval.deleteRoom(adminID, roomNumber, date, listOfTimeSlots);
-					replyMessage = new FEReplyMessage(seqNumber, CommandType.Delete_Room, packetToSend, ServerDorval.isFakeGeneratorOff(), "Farid");
+				if(handleTotalOrder(json_msg)) {
+					replyMessage = processFrontEnd(json_msg);
+				}else {
+					isFeToServer = false;
 				}
 			} else if(json_msg.protocol_type == ProtocolType.Server_To_Server){
 				protocolType = ProtocolType.Server_To_Server;
@@ -427,16 +448,52 @@ public class Udp implements Runnable {
 			return LocalDate.of(year, month, day);
 		}
 
-	}
-	
-	private void handleTotalOrder(MessageHeader messageHeader){
-		synchronized (lock) {
-			int sequenceNumber = messageHeader.sequence_number;
-			if(currentSequenceNumber == sequenceNumber) {
+		private boolean handleTotalOrder(MessageHeader messageHeader){
+			synchronized (lock) {
+				int sequenceNumber = messageHeader.sequence_number;
+				if (currentSequenceNumber < sequenceNumber) {
+					holdBack.offer(messageHeader);
+					ServerDorval.dorvalServerLogger.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}else if (currentSequenceNumber > sequenceNumber) {
+					ServerDorval.dorvalServerLogger.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}
+				ServerDorval.dorvalServerLogger.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return true;
+			}
+		}
+		
+		private void adjustCurrentSeqNumber() {
+			synchronized (lock) {
 				currentSequenceNumber ++;
-			}else if (currentSequenceNumber <= sequenceNumber) {
-				history.put(currentSequenceNumber, messageHeader);
+				for(int i = 0; i < holdBack.size(); ++i) {
+					MessageHeader messageHeader = holdBack.poll();
+					if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
+						Thread thread = new Thread(new Runnable() {
+							
+							@Override
+							public void run() {
+								try {
+									String reply_msg = ServerDorval.gson.toJson(processFrontEnd(messageHeader));
+									ServerDorval.save();
+									ServerDorval.dorvalServerLogger.log("UDP Socket Listener Handled out of order with seq number :"+ messageHeader.sequence_number+" And Result: "+reply_msg);
+									sendReplicaToFe(reply_msg);
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						});
+						thread.start();
+						break;
+					}else {
+						holdBack.offer(messageHeader);
+					}
+				}
 			}
 		}
 	}
+	
+
 }

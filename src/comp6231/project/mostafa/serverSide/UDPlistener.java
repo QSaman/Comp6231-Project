@@ -6,7 +6,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
@@ -31,11 +32,11 @@ import comp6231.shared.Constants;
 
 public class UDPlistener  implements Runnable {
 	private ReliableServerSocket socket;
-	private static final Object lock = new Object();
-	
+
 	// total ordering
 	private static int currentSequenceNumber = 0;
-	private static ConcurrentHashMap<Integer, MessageHeader> history = new ConcurrentHashMap<Integer, MessageHeader>();
+	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
+	private static final Object lock = new Object();
 	
 	@Override
 	public void run() {
@@ -58,59 +59,82 @@ public class UDPlistener  implements Runnable {
 		ReliableSocket socket;
 		private ProtocolType protocolType;
 		
+		private boolean runOutOfOrder;
+		private MessageHeader message;
+		
 		public Handler(ReliableSocket socket) {
 			this.socket = socket;
+			runOutOfOrder = false;
 		}
-
+		
+		public Handler(MessageHeader message) {
+			runOutOfOrder = true;
+			this.message = message;
+		}
+		
 		@Override
 		public void run(){
-			try {
-				InputStreamReader in = new InputStreamReader(socket.getInputStream());
-
-				CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
-				
-				while(true) {
-				  int n = in.read();
-				  if( n < 0  || n == '\u0004') break;
-				  writer.write(n);
-				}
-
-				handlePacket(writer.toString());
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			}finally{
-				if(socket !=null){try {
-					socket.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}}
-			}
-		}
-
-		private void handlePacket(String json_msg_str) {
-			
-			Server.log("UDP Socket Received JSON: "+json_msg_str);
-			String result = process(json_msg_str);
-			Server.log("UDP Socket Listener Result: "+result);
-			
-			if(protocolType != ProtocolType.ReplicaManager_Message) {
+			if(runOutOfOrder) {
+				String result = processFrontEndToServer(message);
 				try {
 					Server.save();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				send(socket.getInetAddress(), socket.getPort(), result);
+				Server.log("UDP Socket Listener Handled out of order with seq number :"+ message.sequence_number+" And Result: "+result);
+				sendReplicaToFe(result);
+			}else {
+				try {
+					InputStreamReader in = new InputStreamReader(socket.getInputStream());
+
+					CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
+					
+					while(true) {
+					  int n = in.read();
+					  if( n < 0  || n == '\u0004') break;
+					  writer.write(n);
+					}
+
+					handlePacket(writer.toString());
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}finally{
+					if(socket !=null){try {
+						socket.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}}
+				}
+			}
+
+		}
+
+		private void handlePacket(String json_msg_str) {
+			
+			Server.log("UDP Socket Received JSON: "+json_msg_str);
+			String result = process(json_msg_str);
+			if(result != null) {
+				Server.log("UDP Socket Listener Result: "+result);
+				
+				if(protocolType != ProtocolType.ReplicaManager_Message) {
+					try {
+						Server.save();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					send(socket.getInetAddress(), socket.getPort(), result);
+				}
 			}
 		}
 
 		private void send(InetAddress address, int port, String data){
-			OutputStreamWriter out;
 			if(protocolType == ProtocolType.Server_To_Server){
 				try {
-					out = new OutputStreamWriter(socket.getOutputStream());
+					OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 					out.write(data);
 					out.write('\u0004');
 					out.flush();
@@ -120,20 +144,25 @@ public class UDPlistener  implements Runnable {
 					e.printStackTrace();
 				}
 			}else{
-				try {
-					ReliableSocket aSocket = new ReliableSocket();
-					aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
-					out = new OutputStreamWriter(aSocket.getOutputStream());
-					out.write(data);
-					out.flush();
-					out.close();
-					aSocket.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				sendReplicaToFe(data);
 			}
 
+		}
+		
+		private void sendReplicaToFe(String data) {
+			try {
+				ReliableSocket aSocket = new ReliableSocket();
+				aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
+				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
+				out.write(data);
+				out.flush();
+				out.close();
+				aSocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			adjustCurrentSeqNumber();
 		}
 
 		private String process(String json_msg_str){
@@ -147,7 +176,10 @@ public class UDPlistener  implements Runnable {
 			}else if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
 				protocolType = ProtocolType.Frontend_To_Replica;
 				if(json_msg.message_type == MessageType.Request){
-					result = processFrontEndToServer(json_msg);
+					// total ordering
+					if (handleTotalOrder(json_msg)) {
+						result = processFrontEndToServer(json_msg);
+					}
 				}else{
 					Server.log("message type is reply");
 				}
@@ -186,8 +218,6 @@ public class UDPlistener  implements Runnable {
 		}
 		
 		private String processFrontEndToServer(MessageHeader json){
-			// total ordering
-			handleTotalOrder(json);
 			FEReplyMessage replyMessage = null;
 			if(json.command_type == CommandType.Create_Room){
 				FECreateRoomRequestMessage message = (FECreateRoomRequestMessage) json;
@@ -287,15 +317,34 @@ public class UDPlistener  implements Runnable {
 		}
 	}
 	
-	private void handleTotalOrder(MessageHeader messageHeader){
+	private boolean handleTotalOrder(MessageHeader messageHeader){
 		synchronized (lock) {
 			int sequenceNumber = messageHeader.sequence_number;
-			if(currentSequenceNumber == sequenceNumber) {
-				currentSequenceNumber ++;
-			}else if (currentSequenceNumber <= sequenceNumber) {
-				history.put(currentSequenceNumber, messageHeader);
+			if (currentSequenceNumber < sequenceNumber) {
+				holdBack.offer(messageHeader);
+				Server.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return false;
+			}else if (currentSequenceNumber > sequenceNumber) {
+				Server.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return false;
+			}
+			Server.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+			return true;
+		}
+	}
+	
+	private void adjustCurrentSeqNumber() {
+		synchronized (lock) {
+			currentSequenceNumber ++;
+			for(int i = 0; i < holdBack.size(); ++i) {
+				MessageHeader messageHeader = holdBack.poll();
+				if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
+					new Handler(messageHeader).start();
+					break;
+				}else {
+					holdBack.offer(messageHeader);
+				}
 			}
 		}
 	}
-
 }
