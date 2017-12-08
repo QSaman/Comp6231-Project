@@ -43,7 +43,14 @@ public class BookingIdGenerator {
 			throw new IllegalArgumentException("Invalid Booking ID: " + booking_id);
 		campus_name = tokens[0];
 		date = new DateReservation(tokens[1]);
-		room_number = Integer.parseInt(tokens[2].trim());
+		try
+		{
+			room_number = Integer.parseInt(tokens[2].trim());
+		}
+		catch(NumberFormatException ex)
+		{
+			throw new IllegalArgumentException("Invalid room number in booking id");
+		}
 	}
 	
 	public String getCampusName()

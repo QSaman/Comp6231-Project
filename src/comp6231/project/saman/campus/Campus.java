@@ -806,6 +806,20 @@ public class Campus implements Serializable {
 		try
 		{
 			BookingIdGenerator big = new BookingIdGenerator(bookingID);
+			boolean found = false;
+			for (String campus_str : campus_comm.getAllCampusNames())
+			{
+				if (campus_str.equals(big.getCampusName()))
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				logger.warning("Invalid booking id: " + bookingID);
+				return false;
+			}
 			UserDbOperations ops = new UserDbOperations(student_db, user) {
 				
 				@Override
