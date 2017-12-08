@@ -202,6 +202,12 @@ public class StudentClientTest {
 		assertFalse("This booking id is not valid", status);
 		status = client.cancelBooking("InvalidFormatBookingID$%^");
 		assertFalse("This booking id is not valid", status);
+		status = client.cancelBooking("SSL@17-9-2017@777#1");
+		assertFalse("This booking id is not valid (invalid campus name)", status);
+		status = client.cancelBooking("DVL@InvalidDate@777#1");
+		assertFalse("This booking id is not valid (invalid date)", status);
+		status = client.cancelBooking("DVL@17-9-2017@InvalidRoom#1");
+		assertFalse("This booking id is not valid (invalid room number)", status);
 		client = ClientUserFactory.createStudentClient(new CampusUser(booking_list_dvl.get(0).student_id));
 		status = client.cancelBooking(booking_list_dvl.get(0).booking_id);
 		assertTrue(status);
