@@ -5,8 +5,10 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import comp6231.project.frontEnd.FE;
+import comp6231.project.frontEnd.FEUtility;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 import net.rudp.ReliableSocket;
 
@@ -31,6 +33,8 @@ public class ErrorHandler implements Runnable{
 	}
 	
 	public ErrorHandler(int portTosend, MessageHeader messageHeader) {
+		RMKillMessage m = (RMKillMessage)messageHeader;
+		replicaId = FEUtility.getInstance().findRMCode(m.portSwitcherArg);
 		this.portTosend = portTosend;
 		this.messageHeader = messageHeader;
 		status = messageStatus.E_Kill;

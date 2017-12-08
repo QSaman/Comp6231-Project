@@ -44,4 +44,16 @@ public class FEUtility {
 			return -1;
 		}
 	}
+	
+	public String findRMCode(String campusName) {
+		if(campusName.startsWith("F")) {
+			return "Farid";
+		}else if(campusName.startsWith("M")){
+			return "Mostafa";
+		}else if(campusName.startsWith("S")) {
+			return "Saman";
+		}else {
+			return Constants.NULL_STRING;
+		}
+	}
 }
