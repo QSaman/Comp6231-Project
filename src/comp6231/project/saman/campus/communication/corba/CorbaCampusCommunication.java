@@ -184,4 +184,10 @@ public class CorbaCampusCommunication extends CampusCommunication {
 		orb.run();		
 	}
 
+	@Override
+	public void updateCampusRemoteInfo(String campus_name, RemoteInfo remote_info) {
+		if (campus_name.equals(campus.getCampusName()))
+			startServer();		
+	}
+
 }

@@ -133,4 +133,10 @@ public class RmiCampusCommunication extends CampusCommunication implements Admin
 			throws NotBoundException, IOException, InterruptedException {
 		return campus.changeReservation(user_id, booking_id, new_campus_name, new_room_number, new_date, new_time_slot);
 	}
+
+	@Override
+	public void updateCampusRemoteInfo(String campus_name, RemoteInfo remote_info) {
+		if (campus.getCampusName().equals(campus_name))
+			startServer();		
+	}
 }

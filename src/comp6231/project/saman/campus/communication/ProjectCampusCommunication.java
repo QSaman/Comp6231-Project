@@ -6,6 +6,7 @@ package comp6231.project.saman.campus.communication;
 import java.util.HashMap;
 
 import comp6231.project.saman.campus.CampusCommunication;
+import comp6231.shared.Constants;
 
 /**
  * @author saman
@@ -20,7 +21,6 @@ public class ProjectCampusCommunication extends CampusCommunication {
 	 * 
 	 */
 	public ProjectCampusCommunication() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -28,7 +28,16 @@ public class ProjectCampusCommunication extends CampusCommunication {
 	 */
 	@Override
 	public RemoteInfo getRemoteInfo(String campus_name) {
-		return campus_remote_info.get(campus_name);
+		RemoteInfo ri = new RemoteInfo();
+		ri.address = Constants.SAMAN_IP;
+		if (campus_name == "DVL")
+			ri.port = Constants.dvlPortListenRe2Active;
+		else if (campus_name == "KKL")
+			ri.port = Constants.kklPortListenRe2Active;
+		else if (campus_name == "WST")
+			ri.port = Constants.wstPortListenRe2Active;
+		//return campus_remote_info.get(campus_name);
+		return ri;
 	}
 
 	/* (non-Javadoc)
@@ -50,4 +59,8 @@ public class ProjectCampusCommunication extends CampusCommunication {
 		campus_remote_info.put(campus.getCampusName(), ri);
 	}
 
+	@Override
+	public void updateCampusRemoteInfo(String campus_name, RemoteInfo remote_info) {
+//		campus_remote_info.put(campus_name, remote_info);		
+	}
 }
