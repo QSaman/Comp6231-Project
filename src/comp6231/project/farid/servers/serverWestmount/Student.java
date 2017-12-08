@@ -301,7 +301,7 @@ public class Student implements Serializable {
 						}
 						resultToSendToStudent.append(bookResult);
 					} else {
-						resultToSendToStudent.append("There is no such a booking ID.");
+						resultToSendToStudent.append("\nThere is no such a booking ID.");
 					}
 				}
 				resultToSendToStudent.append("\n=== FINISHED - Result of changing time slot with booking ID ")
