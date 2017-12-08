@@ -803,55 +803,64 @@ public class Campus implements Serializable {
 					user_id, getName()));
 			return false;
 		}
-		BookingIdGenerator big = new BookingIdGenerator(bookingID);
-		UserDbOperations ops = new UserDbOperations(student_db, user) {
-			
-			@Override
-			public boolean onUserBelongHere(StudentRecord record) {
-				return true;
-			}
-			
-			@Override
-			public void onPostUserBelongHere(StudentRecord record) {
-				_status = record.removeBookRoomRequest(bookingID);
-			}
-			
-			@Override
-			public boolean onOperationOnThisCampus(ArrayList<TimeSlot> time_slots) {
-				for (TimeSlot time_slot : time_slots)
-					if (time_slot.getBookingId().equals(bookingID) && time_slot.getUsername().equals(user_id))
-					{
-						time_slot.cancelTimeSlot();
-						return true;
-					}
-				_status = false;
-				return _status;
-			}
-			
-			@Override
-			public boolean onOperationOnOtherCampus(int message_id) throws NotBoundException, IOException, InterruptedException {
-				int msg_id = MessageProtocol.generateMessageId();
-				ReplicaRequestCancelBookRoom send_msg = new ReplicaRequestCancelBookRoom(msg_id, user_id, bookingID);				
-				ReplicaReplyMessageStatus reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, big.getCampusName());
-				_status = reply.status;
-				return _status;				
-			}
-			
-			@Override
-			public StudentRecord onNullUserRecord(CampusUser user) {_status = false; return null;}
-			
-			@Override
-			public ArrayList<TimeSlot> findTimeSlots() {				
-				ArrayList<TimeSlot> time_slots = Campus.this.findTimeSlots(big.getRoomNumber(), big.getDate());
-				if (time_slots == null)
+		try
+		{
+			BookingIdGenerator big = new BookingIdGenerator(bookingID);
+			UserDbOperations ops = new UserDbOperations(student_db, user) {
+				
+				@Override
+				public boolean onUserBelongHere(StudentRecord record) {
+					return true;
+				}
+				
+				@Override
+				public void onPostUserBelongHere(StudentRecord record) {
+					_status = record.removeBookRoomRequest(bookingID);
+				}
+				
+				@Override
+				public boolean onOperationOnThisCampus(ArrayList<TimeSlot> time_slots) {
+					for (TimeSlot time_slot : time_slots)
+						if (time_slot.getBookingId().equals(bookingID) && time_slot.getUsername().equals(user_id))
+						{
+							time_slot.cancelTimeSlot();
+							return true;
+						}
 					_status = false;
-				return time_slots;
-			}
-		};
-		traverseStudentDb(ops, user, big.getCampusName());
-		if (fake_result)
-			return !ops._status;
-		return ops._status;		
+					return _status;
+				}
+				
+				@Override
+				public boolean onOperationOnOtherCampus(int message_id) throws NotBoundException, IOException, InterruptedException {
+					int msg_id = MessageProtocol.generateMessageId();
+					ReplicaRequestCancelBookRoom send_msg = new ReplicaRequestCancelBookRoom(msg_id, user_id, bookingID);				
+					ReplicaReplyMessageStatus reply = (ReplicaReplyMessageStatus)sendMessage(send_msg, big.getCampusName());
+					_status = reply.status;
+					return _status;				
+				}
+				
+				@Override
+				public StudentRecord onNullUserRecord(CampusUser user) {_status = false; return null;}
+				
+				@Override
+				public ArrayList<TimeSlot> findTimeSlots() {				
+					ArrayList<TimeSlot> time_slots = Campus.this.findTimeSlots(big.getRoomNumber(), big.getDate());
+					if (time_slots == null)
+						_status = false;
+					return time_slots;
+				}
+			};
+			
+			traverseStudentDb(ops, user, big.getCampusName());
+			if (fake_result)
+				return !ops._status;		
+			return ops._status;		
+		}
+		catch(IllegalArgumentException ex)
+		{
+			logger.warning("Invalid booking id " + bookingID);
+			return false;
+		}
 	}
 
 	public void testMethod() {
