@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import net.rudp.ReliableSocket;
 import comp6231.project.frontEnd.FE;
+import comp6231.project.frontEnd.FEUtility;
 import comp6231.project.frontEnd.Info;
+import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.ReturnStatus;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
 import comp6231.project.frontEnd.messages.FEChangeReservationMessage;
@@ -17,6 +19,7 @@ import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 
 public class Sequencer extends Thread{
@@ -25,6 +28,7 @@ public class Sequencer extends Thread{
 	// value : FEPair
 	public static ConcurrentHashMap<Integer, FEPair> holdBack = new ConcurrentHashMap<Integer, FEPair>();
 	private static ConcurrentHashMap<String, ArrayList<String>> b_id = new ConcurrentHashMap<String, ArrayList<String>>();
+	private static final Object lock_b_id = new Object();
 	public FEPair pair;
 	
 	private String b_id_main_key;
@@ -60,7 +64,6 @@ public class Sequencer extends Thread{
 		}
 	}
 
-	@SuppressWarnings("null")
 	public void sendToReplica(byte[] sendBuffer) {
 
 		int[] replicaPorts =  new int[3];
@@ -196,7 +199,8 @@ public class Sequencer extends Thread{
 	
 	public void setTimeOut(){
 		try {
-			if(pair.semaphore.tryAcquire(15,TimeUnit.SECONDS)){
+			FE.log("................................................Wating For The Results................................................");
+			if(pair.semaphore.tryAcquire(30,TimeUnit.SECONDS)){
 					for(int i = 0 ; i< Constants.ACTIVE_SERVERS; ++i){
 						handlePair(i);
 					}
@@ -204,8 +208,36 @@ public class Sequencer extends Thread{
 						returnStatus = ReturnStatus.Ok;
 					}
 			}else{
+				// this is for catching the crash and inform replica manager to replace the replica
 				generateResult("Time out for sequence Number: "+ pair.id+ " for the group of : "+ pair.group, ReturnStatus.Timeout);
-				// TODO handle rm that killed here if needed
+				for(int i = 0 ; i < Constants.ACTIVE_SERVERS; ++i) {
+					if(!pair.infos.containsKey(i)) {
+						String portSwitcherArgs;
+						RMKillMessage killMessage;
+						switch (i) {
+						case 0:
+							portSwitcherArgs = "F"+pair.group;
+							killMessage = new RMKillMessage(-1, portSwitcherArgs);
+							PortSwitcher.switchServer(portSwitcherArgs);
+							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+							break;
+						case 1:
+							portSwitcherArgs = "M"+pair.group;
+							killMessage = new RMKillMessage(-1, portSwitcherArgs);
+							PortSwitcher.switchServer(portSwitcherArgs);
+							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+							break;
+						case 2:
+							portSwitcherArgs = "S"+pair.group;
+							killMessage = new RMKillMessage(-1, portSwitcherArgs);
+							PortSwitcher.switchServer(portSwitcherArgs);
+							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+							break;
+						default:
+							break;
+						}
+					}
+				}
 			}
 		} catch (InterruptedException e) {
 			generateResult(ReturnStatus.ErrorSetTimeOut.toString(), ReturnStatus.ErrorSetTimeOut);
@@ -221,7 +253,7 @@ public class Sequencer extends Thread{
 		
 		if(message.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) message;
-			FE.log("message from port: " + info.port +" with index of: "+index+" is: "+ replyMessage.replyMessage);
+			FE.log(">>HANDLE PAIR: message with sequence number of : " + replyMessage.sequence_number +" with index of: "+index+" is: "+ replyMessage.replyMessage);
 			
 			// handle wrong results
 			if(!replyMessage.isFakeGeneratorOff){
@@ -247,27 +279,29 @@ public class Sequencer extends Thread{
 			// handle global booking id
 			if(replyMessage.command_type == CommandType.Book_Room || replyMessage.command_type == CommandType.Change_Reservation){
 				if(!replyMessage.bookingId.equals(Constants.NULL_STRING)) {
-					switch (index) {
-					case 0:
-						b_id_main_key = replyMessage.bookingId;
-						b_id.put(b_id_main_key, new ArrayList<String>());
-						break;
-					case 1:
-						if(b_id.containsKey(b_id_main_key)) {
-							b_id.get(b_id_main_key).add(replyMessage.bookingId);
-						}else {
-							FE.log("global booking key is not exist");
-						}
-						break;
-					case 2:
-						if(b_id.containsKey(b_id_main_key)) {
-							b_id.get(b_id_main_key).add(replyMessage.bookingId);
-						}else {
-							FE.log("global booking key is not exist");
-						}
-					default:
-						break;
-					}	
+					synchronized (lock_b_id) {
+						switch (index) {
+						case 0:
+							b_id_main_key = replyMessage.bookingId;
+							b_id.put(b_id_main_key, new ArrayList<String>());
+							break;
+						case 1:
+							if(b_id.containsKey(b_id_main_key)) {
+								b_id.get(b_id_main_key).add(replyMessage.bookingId);
+							}else {
+								FE.log("global booking key is not exist");
+							}
+							break;
+						case 2:
+							if(b_id.containsKey(b_id_main_key)) {
+								b_id.get(b_id_main_key).add(replyMessage.bookingId);
+							}else {
+								FE.log("global booking key is not exist");
+							}
+						default:
+							break;
+						}	
+					}
 				}
 			}
 

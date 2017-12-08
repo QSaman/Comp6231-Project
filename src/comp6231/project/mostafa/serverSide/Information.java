@@ -136,13 +136,18 @@ public class Information {
 	}
 	
 	public boolean isMine(String id){
-		if(id.contains("DVL") || id.contains("dvl") && getServerCode().equalsIgnoreCase("DVL")){
+		Server.log("DEBUG_LOG: isMine(String id), id: "+id+ ", MyServer: "+getServerCode());
+		if((id.contains("DVL") || id.contains("dvl") )&& getServerCode().equalsIgnoreCase("DVL")){
+			Server.log("DEBUG_LOG: isMine(String id), return: "+ " true");
 			return true;
-		}else if (id.contains("KKL") || id.contains("kkl") && getServerCode().equalsIgnoreCase("KKL")){
+		}else if ((id.contains("KKL") || id.contains("kkl")) && getServerCode().equalsIgnoreCase("KKL")){
+			Server.log("DEBUG_LOG: isMine(String id), return: "+ " true");
 			return true;
-		}else if(id.contains("WST") || id.contains("wst") && getServerCode().equalsIgnoreCase("WST")) {
+		}else if((id.contains("WST") || id.contains("wst")) && getServerCode().equalsIgnoreCase("WST")) {
+			Server.log("DEBUG_LOG: isMine(String id), return: "+ " true");
 			return true;
 		}else{
+			Server.log("DEBUG_LOG: isMine(String id), return: "+ " false");
 			return false;	
 		}
 	}

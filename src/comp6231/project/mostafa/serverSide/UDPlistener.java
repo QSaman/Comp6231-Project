@@ -202,7 +202,7 @@ public class UDPlistener  implements Runnable {
 					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
 					int endIndex = result.indexOf("booked") -1;
 					bookingId = result.substring(startIndex,endIndex);
-					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
 				}else {
 					Server.log(" not booked");
 				}
@@ -225,7 +225,7 @@ public class UDPlistener  implements Runnable {
 					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
 					int endIndex = result.indexOf("booked") -1;
 					bookingId = result.substring(startIndex,endIndex);
-					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
 				}else {
 					Server.log(" not booked");
 				}
