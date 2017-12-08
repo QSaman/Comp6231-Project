@@ -112,11 +112,11 @@ public class ErrorHandler implements Runnable{
 	
 	private String findRMAdrr(String replicaId) {
 		if(replicaId.contains("Farid")) {
-			return Constants.FE_CLIENT_IP;
+			return Constants.FARID_IP;
 		}else if(replicaId.contains("Mostafa")) {
 			return Constants.MOSTAFA_IP;
 		}else if(replicaId.contains("Saman")) {
-			return Constants.FARID_IP;
+			return Constants.SAMAN_IP;
 		}else {
 			return Constants.NULL_STRING;
 		}
