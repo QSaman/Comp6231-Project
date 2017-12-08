@@ -122,6 +122,7 @@ public class UdpServer extends Thread {
 //					reply_msg, true);
 			reply = new FEReplyMessage(book_room_req.sequence_number, book_room_req.command_type, 
 					reply_msg, true, booking_id, "Saman");
+			System.out.println("debug1:" + reply_msg);
 			break;					
 		case Cancel_Book_Room:
 			FECancelBookingMessage cancel_booking_req = (FECancelBookingMessage)json_msg;
