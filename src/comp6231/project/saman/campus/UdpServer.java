@@ -218,6 +218,7 @@ public class UdpServer extends Thread {
 	
 	private void processRequest(ReliableSocket socket)
 	{
+		logger.info("Campus " + campus.getCampusName() + " received a request to process. Campus type: " + campus.getCampusType());
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -257,7 +258,7 @@ public class UdpServer extends Thread {
 					{
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
-						logger.info("I'm trying to send this message as reply to FE: " + reply_msg);
+						logger.info("I'm (" + campus.getCampusName() + " - " + campus.getCampusType() + ") trying to send this message as reply to FE: " + reply_msg);
 						sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
 					else if (json_msg.message_type == MessageType.Reply)
