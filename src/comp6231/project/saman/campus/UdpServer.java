@@ -122,6 +122,7 @@ public class UdpServer extends Thread {
 //					reply_msg, true);
 			reply = new FEReplyMessage(book_room_req.sequence_number, book_room_req.command_type, 
 					reply_msg, true, booking_id, "Saman");
+			System.out.println("debug1:" + reply_msg);
 			break;					
 		case Cancel_Book_Room:
 			FECancelBookingMessage cancel_booking_req = (FECancelBookingMessage)json_msg;
@@ -218,6 +219,7 @@ public class UdpServer extends Thread {
 	
 	private void processRequest(ReliableSocket socket)
 	{
+		logger.info("Campus " + campus.getCampusName() + " received a request to process. Campus type: " + campus.getCampusType());
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -257,7 +259,7 @@ public class UdpServer extends Thread {
 					{
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
-						logger.info("I'm trying to send this message as reply to FE: " + reply_msg);
+						logger.info("I'm (" + campus.getCampusName() + " - " + campus.getCampusType() + ") trying to send this message as reply to FE: " + reply_msg);
 						sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
 					else if (json_msg.message_type == MessageType.Reply)

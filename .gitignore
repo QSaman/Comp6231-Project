@@ -18,6 +18,10 @@ Documentations/*.gz
 .mtj.tmp/
 
 # Package Files #
+DVL.txt
+ServerKirklandSavedData.txt
+ServerWestmountSavedData.txt
+
 #*.jar
 *.war
 *.ear
