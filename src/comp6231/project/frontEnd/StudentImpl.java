@@ -27,7 +27,7 @@ public class StudentImpl extends StudentOperationsPOA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return "==> Successfully booked, the booking ID is: " +thread.getResult();
+		return thread.getResult();
 	}
  
 	@Override

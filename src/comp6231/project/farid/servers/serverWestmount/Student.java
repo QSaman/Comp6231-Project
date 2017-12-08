@@ -300,6 +300,8 @@ public class Student implements Serializable {
 							resultToSendToStudent.insert(0, bookingId+Constants.DILIMITER_STRING);
 						}
 						resultToSendToStudent.append(bookResult);
+					} else {
+						resultToSendToStudent.append("There is no such a booking ID.");
 					}
 				}
 				resultToSendToStudent.append("\n=== FINISHED - Result of changing time slot with booking ID ")
