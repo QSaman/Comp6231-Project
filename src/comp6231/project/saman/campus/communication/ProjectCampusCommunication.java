@@ -30,11 +30,11 @@ public class ProjectCampusCommunication extends CampusCommunication {
 	public RemoteInfo getRemoteInfo(String campus_name) {
 		RemoteInfo ri = new RemoteInfo();
 		ri.address = Constants.SAMAN_IP;
-		if (campus_name == "DVL")
+		if (campus_name.equals("DVL"))
 			ri.port = Constants.dvlPortListenRe2Active;
-		else if (campus_name == "KKL")
+		else if (campus_name.equals("KKL"))
 			ri.port = Constants.kklPortListenRe2Active;
-		else if (campus_name == "WST")
+		else if (campus_name.equals("WST"))
 			ri.port = Constants.wstPortListenRe2Active;
 		//return campus_remote_info.get(campus_name);
 		return ri;
