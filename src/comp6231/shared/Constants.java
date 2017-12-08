@@ -48,22 +48,22 @@ public class Constants {
 	//2906
 	//2907
 	//2908
-	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 2906;
-	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 2907;
-	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 2908;
-//	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 7778;
-//	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 7777;
-//	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 7779;
+//	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 2906;
+//	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 2907;
+//	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 2908;
+	public static final int KKL_PORT_LISTEN_RE2_ORIGINAL = 7778;
+	public static final int DVL_PORT_LISTEN_RE2_ORIGINAL = 7777;
+	public static final int WST_PORT_LISTEN_RE2_ORIGINAL = 7779;
 	
 	//2909
 	//2910
 	//2911
-	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 2909;
-	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 2910;
-	public static final int WST_PORT_LISTEN_RE2_BACKUP = 2911;
-//	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 6668;
-//	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 6667;
-//	public static final int WST_PORT_LISTEN_RE2_BACKUP = 6669;
+//	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 2909;
+//	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 2910;
+//	public static final int WST_PORT_LISTEN_RE2_BACKUP = 2911;
+	public static final int KKL_PORT_LISTEN_RE2_BACKUP = 6668;
+	public static final int DVL_PORT_LISTEN_RE2_BACKUP = 6667;
+	public static final int WST_PORT_LISTEN_RE2_BACKUP = 6669;
 	
 	public static final int KKL_PORT_RE2_ORIGINAL = 2967;
 	public static final int DVL_PORT_RE2_ORIGINAL = 2968;
