@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import net.rudp.ReliableServerSocket;
 import net.rudp.ReliableSocket;
-import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.frontEnd.PortSwitcher;
 import comp6231.project.frontEnd.messages.FEBookRoomRequestMessage;
 import comp6231.project.frontEnd.messages.FECancelBookingMessage;
@@ -289,7 +288,7 @@ public class Udp implements Runnable {
 			}
 			return replyMessage;
 		}
-		
+
 		private String processData(String json) throws Exception {
 			String packetToSend = null;
 			MessageHeader json_msg = ServerKirkland.gson.fromJson(json, MessageHeader.class);
@@ -447,23 +446,28 @@ public class Udp implements Runnable {
 			int day = Integer.parseInt(string.substring(8));
 			return LocalDate.of(year, month, day);
 		}
-		
+
 		private boolean handleTotalOrder(MessageHeader messageHeader){
 			synchronized (lock) {
 				int sequenceNumber = messageHeader.sequence_number;
-				if (currentSequenceNumber < sequenceNumber) {
-					holdBack.offer(messageHeader);
-					ServerKirkland.kirklandServerLogger.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-					return false;
-				}else if (currentSequenceNumber > sequenceNumber) {
-					ServerKirkland.kirklandServerLogger.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-					return false;
+				if(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent ) {
+					currentSequenceNumber = messageHeader.sequence_number;
+					return true;
+				}else {
+					if (currentSequenceNumber < sequenceNumber) {
+						holdBack.offer(messageHeader);
+						ServerKirkland.kirklandServerLogger.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+						return false;
+					}else if (currentSequenceNumber > sequenceNumber) {
+						ServerKirkland.kirklandServerLogger.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+						return false;
+					}
+					ServerKirkland.kirklandServerLogger.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return true;
 				}
-				ServerKirkland.kirklandServerLogger.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return true;
 			}
 		}
-		
+
 		private void adjustCurrentSeqNumber() {
 			synchronized (lock) {
 				currentSequenceNumber ++;
@@ -471,7 +475,7 @@ public class Udp implements Runnable {
 					MessageHeader messageHeader = holdBack.poll();
 					if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
 						Thread thread = new Thread(new Runnable() {
-							
+
 							@Override
 							public void run() {
 								try {

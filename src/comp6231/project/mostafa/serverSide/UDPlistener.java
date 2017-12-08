@@ -37,7 +37,7 @@ public class UDPlistener  implements Runnable {
 	private static int currentSequenceNumber = 0;
 	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
-	
+
 	@Override
 	public void run() {
 		socket = null;
@@ -58,20 +58,20 @@ public class UDPlistener  implements Runnable {
 
 		ReliableSocket socket;
 		private ProtocolType protocolType;
-		
+
 		private boolean runOutOfOrder;
 		private MessageHeader message;
-		
+
 		public Handler(ReliableSocket socket) {
 			this.socket = socket;
 			runOutOfOrder = false;
 		}
-		
+
 		public Handler(MessageHeader message) {
 			runOutOfOrder = true;
 			this.message = message;
 		}
-		
+
 		@Override
 		public void run(){
 			if(runOutOfOrder) {
@@ -89,11 +89,11 @@ public class UDPlistener  implements Runnable {
 					InputStreamReader in = new InputStreamReader(socket.getInputStream());
 
 					CharArrayWriter writer = new CharArrayWriter(Constants.BUFFER_SIZE);
-					
+
 					while(true) {
-					  int n = in.read();
-					  if( n < 0  || n == '\u0004') break;
-					  writer.write(n);
+						int n = in.read();
+						if( n < 0  || n == '\u0004') break;
+						writer.write(n);
 					}
 
 					handlePacket(writer.toString());
@@ -113,12 +113,12 @@ public class UDPlistener  implements Runnable {
 		}
 
 		private void handlePacket(String json_msg_str) {
-			
+
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
 			String result = process(json_msg_str);
 			if(result != null) {
 				Server.log("UDP Socket Listener Result: "+result);
-				
+
 				if(protocolType != ProtocolType.ReplicaManager_Message) {
 					try {
 						Server.save();
@@ -148,7 +148,7 @@ public class UDPlistener  implements Runnable {
 			}
 
 		}
-		
+
 		private void sendReplicaToFe(String data) {
 			try {
 				ReliableSocket aSocket = new ReliableSocket();
@@ -196,7 +196,7 @@ public class UDPlistener  implements Runnable {
 			return result;
 		}
 
-		
+
 		private void processReplicaManager(MessageHeader json) {
 			if(json.command_type == CommandType.Kill) {
 				RMKillMessage message = (RMKillMessage) json;
@@ -216,7 +216,7 @@ public class UDPlistener  implements Runnable {
 				Server.log(" process replica has wrong Command Type");
 			}
 		}
-		
+
 		private String processFrontEndToServer(MessageHeader json){
 			FEReplyMessage replyMessage = null;
 			if(json.command_type == CommandType.Create_Room){
@@ -226,17 +226,17 @@ public class UDPlistener  implements Runnable {
 			}else if(json.command_type == CommandType.Book_Room){
 				FEBookRoomRequestMessage message = (FEBookRoomRequestMessage) json;
 				String result = ServerImpl.GetInstance().bookRoom(message.campusName, message.roomNumber, message.date, message.timeSlot, message.userId);
-				
+
 				String bookingId = Constants.NULL_STRING;
 				if(result.contains("booked") && !result.contains("notbooked")){
 					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
 					int endIndex = result.indexOf("booked") -1;
 					bookingId = result.substring(startIndex,endIndex);
-//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+					//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
 				}else {
 					Server.log(" not booked");
 				}
-				
+
 				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Book_Room, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId,  Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Delete_Room){
 				FEDeleteRoomRequestMessage message = (FEDeleteRoomRequestMessage) json;
@@ -249,17 +249,17 @@ public class UDPlistener  implements Runnable {
 			}else if (json.command_type == CommandType.Change_Reservation){
 				FEChangeReservationMessage message = (FEChangeReservationMessage) json;
 				String result = ServerImpl.GetInstance().changeReservation(message.booking_id, message.new_campus_name, message.new_date, message.new_room_number, message.new_time_slot, message.user_id);
-				
+
 				String bookingId = Constants.NULL_STRING;
 				if(result.contains("booked") && !result.contains("notbooked")){
 					int startIndex = result.indexOf("bookingId")+ "bookingId".length() +1;
 					int endIndex = result.indexOf("booked") -1;
 					bookingId = result.substring(startIndex,endIndex);
-//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
+					//					Server.log("booking id: " + bookingId + " size: " + bookingId.length() + " trimed bookingID: " + bookingId.trim() + " size trimed: " + bookingId.trim().length());
 				}else {
 					Server.log(" not booked");
 				}
-				
+
 				replyMessage = new FEReplyMessage(message.sequence_number, CommandType.Change_Reservation, Information.getInstance().isReOne == true ? "Mostafa: "+result : "Saman: "+result, true, bookingId,  Information.getInstance().replicaId);
 			}else if (json.command_type == CommandType.Get_Available_TimeSlots){
 				FEGetAvailableTimeSlotMessage message = (FEGetAvailableTimeSlotMessage) json;
@@ -316,23 +316,29 @@ public class UDPlistener  implements Runnable {
 			return result;
 		}
 	}
-	
+
 	private boolean handleTotalOrder(MessageHeader messageHeader){
 		synchronized (lock) {
 			int sequenceNumber = messageHeader.sequence_number;
-			if (currentSequenceNumber < sequenceNumber) {
-				holdBack.offer(messageHeader);
-				Server.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return false;
-			}else if (currentSequenceNumber > sequenceNumber) {
-				Server.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return false;
+			if(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent ) {
+				currentSequenceNumber = messageHeader.sequence_number;
+				return true;
+			}else {
+				if (currentSequenceNumber < sequenceNumber) {
+					holdBack.offer(messageHeader);
+					Server.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}else if (currentSequenceNumber > sequenceNumber) {
+					Server.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}
+				Server.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return true;
 			}
-			Server.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-			return true;
 		}
+
 	}
-	
+
 	private void adjustCurrentSeqNumber() {
 		synchronized (lock) {
 			currentSequenceNumber ++;

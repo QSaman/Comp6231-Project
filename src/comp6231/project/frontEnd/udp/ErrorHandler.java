@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
-import comp6231.project.frontEnd.FE;
+import com.google.gson.Gson;
+
 import comp6231.project.frontEnd.FEUtility;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.StartGson;
 import comp6231.project.replicaManager.messages.RMFakeGeneratorMessage;
 import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
@@ -24,10 +26,14 @@ public class ErrorHandler implements Runnable{
 	private messageStatus status;
 	private boolean turnOff;
 	
+	private static Gson gson;
+	private static final Object lock = new Object();
+	
 	public ErrorHandler(String replicaId, boolean turnOff) {
 		this.replicaId = replicaId;;
 		this.turnOff = turnOff;
 		status = messageStatus.E_Fake_Generator;
+		gson = StartGson.initReplicaManager();
 	}
 	
 	public ErrorHandler(int portTosend, MessageHeader messageHeader) {
@@ -36,16 +42,17 @@ public class ErrorHandler implements Runnable{
 		this.portTosend = portTosend;
 		this.messageHeader = messageHeader;
 		status = messageStatus.E_Kill;
+		gson = StartGson.initReplicaManager();
 	}
 
 	@Override
 	public void run() {
 		if(status == messageStatus.E_Fake_Generator) {
 			RMFakeGeneratorMessage message = new RMFakeGeneratorMessage(-1, turnOff);
-			String json = FE.toJson(message);
+			String json = toJson(message);
 			send(json, findRMPort(replicaId));
 		}else if(status == messageStatus.E_Kill) {
-			String json = FE.toJson(messageHeader);
+			String json = toJson(messageHeader);
 			send(json, portTosend);
 		}	
 	}
@@ -117,6 +124,18 @@ public class ErrorHandler implements Runnable{
 			return Constants.SAMAN_IP;
 		}else {
 			return Constants.NULL_STRING;
+		}
+	}
+	
+	public static MessageHeader fromJson(String json){
+		synchronized (lock) {
+			return gson.fromJson(json, MessageHeader.class);
+		}
+	}
+	
+	public static String toJson(MessageHeader args){
+		synchronized (lock) {
+			return gson.toJson(args);
 		}
 	}
 }

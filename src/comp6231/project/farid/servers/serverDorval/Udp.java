@@ -41,12 +41,12 @@ public class Udp implements Runnable {
 	private ReliableServerSocket serverSocket;
 	String udp_name;
 	//udp name
-	
+
 	// total ordering
 	private static int currentSequenceNumber = 0;
 	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
-	
+
 	Udp(String args[]) {
 		udp_name = args[0];
 	}
@@ -136,7 +136,7 @@ public class Udp implements Runnable {
 			}
 
 		}
-		
+
 		private void sendReplicaToFe(String data) {
 			try {
 				ReliableSocket aSocket = new ReliableSocket();
@@ -289,7 +289,7 @@ public class Udp implements Runnable {
 			}
 			return replyMessage;
 		}
-		
+
 		private String processData(String json) throws Exception {
 			String packetToSend = null;
 			MessageHeader json_msg = ServerDorval.gson.fromJson(json, MessageHeader.class);
@@ -425,7 +425,7 @@ public class Udp implements Runnable {
 			}else {
 				ServerDorval.dorvalServerLogger.log(" Protocol type is incorecct");
 			}
-			
+
 			if (isFeToServer) {
 				return ServerDorval.gson.toJson(replyMessage);
 			}else if(isReplicaManagerMessage) {
@@ -451,19 +451,24 @@ public class Udp implements Runnable {
 		private boolean handleTotalOrder(MessageHeader messageHeader){
 			synchronized (lock) {
 				int sequenceNumber = messageHeader.sequence_number;
-				if (currentSequenceNumber < sequenceNumber) {
-					holdBack.offer(messageHeader);
-					ServerDorval.dorvalServerLogger.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-					return false;
-				}else if (currentSequenceNumber > sequenceNumber) {
-					ServerDorval.dorvalServerLogger.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-					return false;
+				if(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent ) {
+					currentSequenceNumber = messageHeader.sequence_number;
+					return true;
+				}else {
+					if (currentSequenceNumber < sequenceNumber) {
+						holdBack.offer(messageHeader);
+						ServerDorval.dorvalServerLogger.log("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+						return false;
+					}else if (currentSequenceNumber > sequenceNumber) {
+						ServerDorval.dorvalServerLogger.log("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+						return false;
+					}
+					ServerDorval.dorvalServerLogger.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return true;
 				}
-				ServerDorval.dorvalServerLogger.log("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return true;
 			}
 		}
-		
+
 		private void adjustCurrentSeqNumber() {
 			synchronized (lock) {
 				currentSequenceNumber ++;
@@ -471,7 +476,7 @@ public class Udp implements Runnable {
 					MessageHeader messageHeader = holdBack.poll();
 					if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
 						Thread thread = new Thread(new Runnable() {
-							
+
 							@Override
 							public void run() {
 								try {
@@ -494,6 +499,6 @@ public class Udp implements Runnable {
 			}
 		}
 	}
-	
+
 
 }
