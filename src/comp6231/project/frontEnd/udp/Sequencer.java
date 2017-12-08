@@ -196,7 +196,7 @@ public class Sequencer extends Thread{
 	
 	public void setTimeOut(){
 		try {
-			if(pair.semaphore.tryAcquire(2,TimeUnit.MINUTES)){
+			if(pair.semaphore.tryAcquire(15,TimeUnit.SECONDS)){
 					for(int i = 0 ; i< Constants.ACTIVE_SERVERS; ++i){
 						handlePair(i);
 					}
