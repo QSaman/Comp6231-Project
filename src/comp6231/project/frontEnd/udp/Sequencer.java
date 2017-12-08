@@ -227,7 +227,7 @@ public class Sequencer extends Thread{
 			if(!replyMessage.isFakeGeneratorOff){
 				FE.log("\n"+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+"Fake Generator is detected for packet with sequence Number: " +pair.id + " from Campus of : " + pair.group + " from replica of : "+replyMessage.replicaId+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+"\n");
 				returnStatus = ReturnStatus.FakeGenertor;
-				new Thread(new ErrorHandler(replyMessage.replicaId, pair.group, true)).start();;
+				new Thread(new ErrorHandler(replyMessage.replicaId, true)).start();;
 			}
 			
 			// handle return message 

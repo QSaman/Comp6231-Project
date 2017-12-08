@@ -77,7 +77,7 @@ public class MultiCastRUDPListener implements Runnable{
 			process(json_msg_str);
 		}
 		private void process(String json_msg_str){
-			FE.log("message of json_msg_str: "+ json_msg_str);
+
 			MessageHeader json_msg = FE.fromJson(json_msg_str);
 
 			if(json_msg.protocol_type == ProtocolType.Frontend_To_Replica){
@@ -107,7 +107,7 @@ public class MultiCastRUDPListener implements Runnable{
 			}
 
 			pair.semaphore.release();
-			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage + " with booking id: " +replyMessage.bookingId);
+			FE.log("semaphore released for seqnum: "+ replyMessage.sequence_number + " with message: " + replyMessage.replyMessage);
 		}
 	}
 
