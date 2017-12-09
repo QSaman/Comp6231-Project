@@ -137,9 +137,30 @@ public class Bootstrap {
 			addTestValueToDataBase(campus);
 			addTestValueToDataBase(backup_campus);
 		}		
-		
 	}
 	
+	
+	public static void save() throws Exception {
+		SaverLoader saverLoader = new SaverLoader();
+		saverLoader.copyServerToObject();
+		try {
+			saverLoader.serializeDataOut();
+			System.out.println("Saved");
+		} catch (IOException e) {
+			System.out.println("ERROR IN SERIALIZING");
+		}
+	}
+	
+	public static void load() throws Exception{
+		SaverLoader saverLoader = null;
+		try {
+			saverLoader = SaverLoader.serializeDataIn();
+			saverLoader.copyObjectToServer();
+			System.out.println("Loaded");
+		} catch (ClassNotFoundException|IOException e) {
+			System.out.println("ERROR IN LOADING");
+		}
+	}
 	private static void addTestValueToDataBase(Campus campus) 
 	{
 		ArrayList<TimeSlot> time_slots = new ArrayList<>();

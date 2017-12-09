@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -56,7 +57,11 @@ import net.rudp.ReliableSocket;
  * @author saman
  *
  */
-public class UdpServer extends Thread {
+public class UdpServer extends Thread{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7361957900966148879L;
 	private Campus campus;
 	//private DatagramSocket socket;	//https://stackoverflow.com/questions/6265731/do-java-sockets-support-full-duplex
 	private ReliableServerSocket server_socket;
@@ -70,7 +75,7 @@ public class UdpServer extends Thread {
 	private static int currentSequenceNumber = 0;
 	private static Queue<MessageHeader> holdBack = new ConcurrentLinkedQueue<MessageHeader>();
 	private static final Object lock = new Object();
-	
+
 	public UdpServer(Campus campus, Gson gson, Logger logger) throws IOException
 	{
 		this.gson = gson;
@@ -92,6 +97,12 @@ public class UdpServer extends Thread {
 		case Kill:
 			RMKillMessage kill_message = (RMKillMessage) json_msg;
 			PortSwitcher.switchServer(kill_message.portSwitcherArg);
+			try {
+				Bootstrap.load();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			synchronized (lock) {
 				currentSequenceNumber = kill_message.sequence_number + 1;
 			}
@@ -372,6 +383,12 @@ public class UdpServer extends Thread {
 
 	public void sendDatagramToFE(String message, String address, int port) throws IOException
 	{
+		try {
+			Bootstrap.save();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//System.out.println("Send message to " + address + ":" + port);
 		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
 		OutputStreamWriter out = null;
@@ -436,23 +453,28 @@ public class UdpServer extends Thread {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	private boolean handleTotalOrder(MessageHeader messageHeader){
 		synchronized (lock) {
 			int sequenceNumber = messageHeader.sequence_number;
-			if (currentSequenceNumber < sequenceNumber) {
-				holdBack.offer(messageHeader);
-				logger.info("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return false;
-			}else if (currentSequenceNumber > sequenceNumber) {
-				logger.info("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-				return false;
+			if(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent) {
+				currentSequenceNumber = messageHeader.sequence_number;
+				return true;
+			}else {
+				if (currentSequenceNumber < sequenceNumber) {
+					holdBack.offer(messageHeader);
+					logger.info("total ordering: message pushed to queue, currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}else if (currentSequenceNumber > sequenceNumber) {
+					logger.info("total ordering: message disgarded , currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+					return false;
+				}
+				logger.info("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
+				return true;
 			}
-			logger.info("total ordering: currentseq: " + currentSequenceNumber +" messageSeq: " +sequenceNumber);
-			return true;
 		}
 	}
-	
+
 	private void adjustCurrentSeqNumber() {
 		synchronized (lock) {
 			currentSequenceNumber ++;
@@ -460,7 +482,7 @@ public class UdpServer extends Thread {
 				MessageHeader messageHeader = holdBack.poll();
 				if(messageHeader != null && messageHeader.sequence_number == currentSequenceNumber) {
 					Thread thread = new Thread(new Runnable() {
-						
+
 						@Override
 						public void run() {
 							String reply_msg = gson.toJson(handleFERequests(messageHeader));

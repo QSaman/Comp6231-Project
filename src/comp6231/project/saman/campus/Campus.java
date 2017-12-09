@@ -27,11 +27,13 @@ import comp6231.project.saman.common.users.CampusUser;
  *
  */
 public class Campus implements Serializable {
+
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
-	
+	private static final long serialVersionUID = 4266457842199746243L;
+
 	public enum CampusType
 	{
 		Main,
@@ -41,10 +43,10 @@ public class Campus implements Serializable {
 	private CampusType campus_type;
 	private String name;
 
-	private HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db;
+	public HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> db;
 	private final Object date_db_lock = new Object();
 	private final Object room_db_lock = new Object();
-	private HashMap<String, StudentRecord> student_db;
+	public HashMap<String, StudentRecord> student_db;
 	private final Object write_student_db_lock = new Object();		
 	private String address;	//The address of this server
 	private int port;	//The UDP listening port of this server	

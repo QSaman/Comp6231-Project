@@ -1,11 +1,18 @@
 package comp6231.project.messageProtocol;
 
+import java.io.Serializable;
+
 /**
  * @author saman
  *
  */
-public class MessageHeader {
+public class MessageHeader implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5324916409612888894L;
+
 	// some of the Command Types are shared between saman(S),mostafa(M),farid(F).
 	public enum CommandType
 	{

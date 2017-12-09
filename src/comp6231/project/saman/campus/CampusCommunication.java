@@ -3,9 +3,10 @@ package comp6231.project.saman.campus;
 import java.util.Properties;
 
 public abstract class CampusCommunication {
+
 	protected Campus campus;
 	
-	public class RemoteInfo
+	public class RemoteInfo  
 	{
 		public int port;
 		public String address;

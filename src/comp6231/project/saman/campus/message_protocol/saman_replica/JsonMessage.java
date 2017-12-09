@@ -26,7 +26,8 @@ import comp6231.project.messageProtocol.MessageHeaderDeserializer;
  * @author saman
  *
  */
-public class JsonMessage {
+public class JsonMessage{
+
 	HashMap<Integer, ReplyMessageHeader> replied_msg_list;
 	HashMap<Integer, Object> wait_object_list;
 	public Gson gson;

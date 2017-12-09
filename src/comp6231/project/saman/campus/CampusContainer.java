@@ -3,11 +3,12 @@
  */
 package comp6231.project.saman.campus;
 
+
 /**
  * @author saman
  *
  */
-public class CampusContainer {
+public class CampusContainer{
 	private Campus[] campus_list;
 	private int current_index;
 	private int sequence_number;

@@ -3,6 +3,7 @@
  */
 package comp6231.project.saman.campus.communication;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import comp6231.project.saman.campus.CampusCommunication;
@@ -12,8 +13,12 @@ import comp6231.shared.Constants;
  * @author saman
  *
  */
-public class ProjectCampusCommunication extends CampusCommunication {
+public class ProjectCampusCommunication extends CampusCommunication implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4648183792781810278L;
 	public String[] campus_names;
 	public HashMap<String, RemoteInfo> campus_remote_info;
 

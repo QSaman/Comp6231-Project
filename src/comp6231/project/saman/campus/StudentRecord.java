@@ -14,8 +14,8 @@ import comp6231.project.saman.common.users.CampusUser;
  *
  */
 public class StudentRecord {	
-	
-	private class ReservationRecord
+
+	private class ReservationRecord 
 	{
 		private DateReservation date;
 		private TimeSlot time_slot;
