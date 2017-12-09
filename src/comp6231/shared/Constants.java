@@ -8,9 +8,9 @@ public class Constants {
 	
 	//IP CONFIG
 	public static final String LOCAL_IP = "127.0.0.1";
-	public static final String FE_CLIENT_IP = "132.205.94.115";
+	public static final String FE_CLIENT_IP = "172.31.80.10";
 	public static final String FARID_IP =  "172.31.80.10";
-	public static final String SAMAN_IP = "132.205.94.1";
+	public static final String SAMAN_IP = "172.31.35.0";
 	public static final String MOSTAFA_IP = "172.31.35.0";
 	
 //	public static final String FE_CLIENT_IP = LOCAL_IP;
