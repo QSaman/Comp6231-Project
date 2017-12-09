@@ -92,6 +92,9 @@ public class UdpServer extends Thread {
 		case Kill:
 			RMKillMessage kill_message = (RMKillMessage) json_msg;
 			PortSwitcher.switchServer(kill_message.portSwitcherArg);
+			synchronized (lock) {
+				currentSequenceNumber = kill_message.sequence_number + 1;
+			}
 			logger.info("RM request for switching server is done in " + campus.getCampusName());
 			break;
 		case Fake_Generator:

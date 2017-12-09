@@ -96,6 +96,7 @@ public class RMListener implements Runnable {
 					RMKillMessage message  = (RMKillMessage) json_msg;
 					PortSwitcher.switchServer(message.portSwitcherArg);
 					sendToAll(json_msg_str);
+					send(json_msg_str);
 				}else if (json_msg.command_type == CommandType.Fake_Generator) {
 					sendToAll(json_msg_str);
 				}else {
@@ -107,30 +108,21 @@ public class RMListener implements Runnable {
 
 		}
 
-//		private void send(String data, int port) {
-//			try {
-//				ReliableSocket aSocket = new ReliableSocket();
-//				String adress ="";
-//				
-//				if(RMInformation.getInstance().getRmCode().equals("FARID")) {
-//					adress = Constants.FARID_IP;
-//				}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
-//					adress = Constants.MOSTAFA_IP;
-//				}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
-//					adress = Constants.SAMAN_IP;
-//				}
-//				
-//				aSocket.connect(new InetSocketAddress(adress, port));
-//				OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
-//				out.write(data);
-//				out.flush();
-//				out.close();
-//				aSocket.close();
-//
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
+		private void send(String data) {
+			try {
+				ReliableSocket aSocket = new ReliableSocket();
+				
+				aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
+				OutputStream out = aSocket.getOutputStream();
+				out.write(data.getBytes());
+				out.flush();
+				out.close();
+				aSocket.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		private void sendToAll(String data){
 

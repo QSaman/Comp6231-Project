@@ -420,6 +420,9 @@ public class Udp implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					synchronized (lock) {
+						currentSequenceNumber = message.sequence_number + 1;
+					}
 					ServerWestmount.westmountServerLogger.log("Server Switched");
 				}else if(json_msg.command_type == CommandType.Fake_Generator) {
 					RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json_msg;

@@ -11,6 +11,7 @@ import comp6231.project.frontEnd.FE;
 import comp6231.project.frontEnd.Info;
 import comp6231.project.frontEnd.messages.FEReplyMessage;
 import comp6231.project.messageProtocol.MessageHeader;
+import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
 import comp6231.shared.Constants;
@@ -87,6 +88,15 @@ public class MultiCastRUDPListener implements Runnable{
 				}else{
 					FE.log("MulitCast udp error in message type");
 				}
+			}else if (json_msg.protocol_type == ProtocolType.ReplicaManager_Message) {
+				if(json_msg.command_type == CommandType.Kill) {
+					synchronized (FEPair.monitor) {
+						FEPair.monitor.notify();
+					}
+				}else {
+					FE.log("Wrong message type from Replica manager");
+				}
+
 			}else{
 				FE.log("Multi cast udp error in protocol type");
 			}

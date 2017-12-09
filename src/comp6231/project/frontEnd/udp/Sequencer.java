@@ -30,7 +30,7 @@ public class Sequencer extends Thread{
 	private static ConcurrentHashMap<String, ArrayList<String>> b_id = new ConcurrentHashMap<String, ArrayList<String>>();
 	private static final Object lock_b_id = new Object();
 	public FEPair pair;
-	
+
 	private String b_id_main_key;
 	private static int sequenceNumber = 0;
 	private static final Object lock = new Object();
@@ -39,7 +39,7 @@ public class Sequencer extends Thread{
 	private String group;
 	private String result;
 	public ReturnStatus returnStatus;
-	
+
 	public Sequencer(MessageHeader args, String group){
 		this.args = args;
 		this.group = group;
@@ -71,11 +71,11 @@ public class Sequencer extends Thread{
 		boolean customSend = false;
 		String [] tokens = new String[3];
 		ArrayList<byte[]> msgs = new ArrayList<>(3); 
-		
+
 		if(args.command_type == CommandType.Cancel_Book_Room) {
 			customSend = true;
 			FECancelBookingMessage message = (FECancelBookingMessage) args;
-			
+
 			if(b_id.containsKey(message.booking_id)) {
 				tokens[0] = message.booking_id;
 				tokens[1] = b_id.get(message.booking_id).get(0);
@@ -87,7 +87,7 @@ public class Sequencer extends Thread{
 					FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
 				}
 			}
-			
+
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
 			FECancelBookingMessage message2 = new FECancelBookingMessage(message.sequence_number, message.user_id, tokens[1]);
@@ -98,7 +98,7 @@ public class Sequencer extends Thread{
 		}else if(args.command_type == CommandType.Change_Reservation) {
 			customSend = true;
 			FEChangeReservationMessage message = (FEChangeReservationMessage) args;
-			
+
 			if(b_id.containsKey(message.booking_id)) {
 				tokens[0] = message.booking_id;
 				tokens[1] = b_id.get(message.booking_id).get(0);
@@ -110,7 +110,7 @@ public class Sequencer extends Thread{
 					FE.log(tokens[0] +"," + tokens[1]+","+tokens[2]);
 				}
 			}
-			
+
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
 			FEChangeReservationMessage message2 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[1], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
@@ -118,7 +118,7 @@ public class Sequencer extends Thread{
 			FEChangeReservationMessage message3 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[2], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
 			msgs.add(FE.toJson(message3).getBytes());
 		}
-		
+
 		if(group.equals(Constants.DVL_GROUP)){
 			replicaPorts[0] = Constants.dvlPortListenFaridActive;
 			replicaPorts[1] = Constants.dvlPortListenRe1Active;
@@ -135,10 +135,10 @@ public class Sequencer extends Thread{
 			FE.log("group is not valid in sequencer class: " + group);
 			return;
 		}
-		
+
 		if(customSend) {
 			for(int i=0;i< Constants.ACTIVE_SERVERS; ++i) {
-				
+
 				final byte[] data = msgs.get(i);
 				final int idxPort = i;
 				final String adress = adresses[i];
@@ -151,7 +151,7 @@ public class Sequencer extends Thread{
 							ReliableSocket sendToReplica = new ReliableSocket();
 
 							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
-							
+
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(data);
 
@@ -170,7 +170,7 @@ public class Sequencer extends Thread{
 
 				final int idxPort = i;
 				final String adress = adresses[i];
-				
+
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -179,7 +179,7 @@ public class Sequencer extends Thread{
 							ReliableSocket sendToReplica = new ReliableSocket();
 
 							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
-							
+
 							OutputStream out = sendToReplica.getOutputStream();
 							out.write(sendBuffer);
 
@@ -196,17 +196,17 @@ public class Sequencer extends Thread{
 		}
 
 	}
-	
+
 	public void setTimeOut(){
 		try {
 			FE.log("................................................Wating For The Results................................................");
 			if(pair.semaphore.tryAcquire(30,TimeUnit.SECONDS)){
-					for(int i = 0 ; i< Constants.ACTIVE_SERVERS; ++i){
-						handlePair(i);
-					}
-					if(returnStatus != ReturnStatus.ErrorInMessageType && returnStatus != ReturnStatus.FakeGenertor && returnStatus != ReturnStatus.CantLogin){
-						returnStatus = ReturnStatus.Ok;
-					}
+				for(int i = 0 ; i< Constants.ACTIVE_SERVERS; ++i){
+					handlePair(i);
+				}
+				if(returnStatus != ReturnStatus.ErrorInMessageType && returnStatus != ReturnStatus.FakeGenertor && returnStatus != ReturnStatus.CantLogin){
+					returnStatus = ReturnStatus.Ok;
+				}
 			}else{
 				// this is for catching the crash and inform replica manager to replace the replica
 				generateResult("Time out for sequence Number: "+ pair.id+ " for the group of : "+ pair.group, ReturnStatus.Timeout);
@@ -214,28 +214,38 @@ public class Sequencer extends Thread{
 					if(!pair.infos.containsKey(i)) {
 						String portSwitcherArgs;
 						RMKillMessage killMessage;
-						switch (i) {
-						case 0:
-							portSwitcherArgs = "F"+pair.group;
-							killMessage = new RMKillMessage(-1, portSwitcherArgs);
-							PortSwitcher.switchServer(portSwitcherArgs);
-							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-							break;
-						case 1:
-							portSwitcherArgs = "M"+pair.group;
-							killMessage = new RMKillMessage(-1, portSwitcherArgs);
-							PortSwitcher.switchServer(portSwitcherArgs);
-							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-							break;
-						case 2:
-							portSwitcherArgs = "S"+pair.group;
-							killMessage = new RMKillMessage(-1, portSwitcherArgs);
-							PortSwitcher.switchServer(portSwitcherArgs);
-							new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-							break;
-						default:
-							break;
+						if(!FEPair.isWait()){
+							FE.log("wait started");
+							FEPair.setWait(true);
+							switch (i) {
+							case 0:
+								portSwitcherArgs = "F"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								PortSwitcher.switchServer(portSwitcherArgs);
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								break;
+							case 1:
+								portSwitcherArgs = "M"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								PortSwitcher.switchServer(portSwitcherArgs);
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								break;
+							case 2:
+								portSwitcherArgs = "S"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								PortSwitcher.switchServer(portSwitcherArgs);
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								break;
+							default:
+								break;
+							}
+							synchronized (FEPair.monitor) {
+								FEPair.monitor.wait();
+								FE.log("wait finished");
+								FEPair.setWait(false);
+							}
 						}
+
 					}
 				}
 			}
@@ -243,25 +253,25 @@ public class Sequencer extends Thread{
 			generateResult(ReturnStatus.ErrorSetTimeOut.toString(), ReturnStatus.ErrorSetTimeOut);
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void handlePair(int index){
 		Info info = pair.infos.get(index);
 		String json = info.json;
 		MessageHeader message = FE.fromJson(json);
-		
+
 		if(message.message_type == MessageType.Reply){
 			FEReplyMessage replyMessage = (FEReplyMessage) message;
 			FE.log(">>HANDLE PAIR: message with sequence number of : " + replyMessage.sequence_number +" with index of: "+index+" is: "+ replyMessage.replyMessage);
-			
+
 			// handle wrong results
 			if(!replyMessage.isFakeGeneratorOff){
 				FE.log("\n"+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+"Fake Generator is detected for packet with sequence Number: " +pair.id + " from Campus of : " + pair.group + " from replica of : "+replyMessage.replicaId+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+"\n");
 				returnStatus = ReturnStatus.FakeGenertor;
 				new Thread(new ErrorHandler(replyMessage.replicaId, true)).start();;
 			}
-			
+
 			// handle return message 
 			if(replyMessage.command_type == CommandType.LoginAdmin || replyMessage.command_type == CommandType.LoginStudent){
 				if(replyMessage.replyMessage.equals("False")){
@@ -275,7 +285,7 @@ public class Sequencer extends Thread{
 					result = replyMessage.replyMessage;
 				}
 			}
-			
+
 			// handle global booking id
 			if(replyMessage.command_type == CommandType.Book_Room || replyMessage.command_type == CommandType.Change_Reservation){
 				if(!replyMessage.bookingId.equals(Constants.NULL_STRING)) {
@@ -315,7 +325,7 @@ public class Sequencer extends Thread{
 		returnStatus = status;
 		FE.log(result);
 	}
-	
+
 	public String getResult(){
 		return result;
 	}
