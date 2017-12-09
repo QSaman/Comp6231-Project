@@ -8,15 +8,15 @@ public class Constants {
 	
 	//IP CONFIG
 	public static final String LOCAL_IP = "127.0.0.1";
-	public static final String FE_CLIENT_IP = "172.31.80.10";
-	public static final String FARID_IP =  "172.31.80.10";
-	public static final String SAMAN_IP = "172.31.35.0";
-	public static final String MOSTAFA_IP = "172.31.35.0";
+//	public static final String FE_CLIENT_IP = "172.31.80.10";
+//	public static final String FARID_IP =  "172.31.80.10";
+//	public static final String SAMAN_IP = "172.20.10.9";
+//	public static final String MOSTAFA_IP = "172.20.10.9";
 	
-//	public static final String FE_CLIENT_IP = LOCAL_IP;
-//	public static final String FARID_IP =  LOCAL_IP;
-//	public static final String SAMAN_IP = LOCAL_IP;
-//	public static final String MOSTAFA_IP = LOCAL_IP;
+	public static final String FE_CLIENT_IP = LOCAL_IP;
+	public static final String FARID_IP =  LOCAL_IP;
+	public static final String SAMAN_IP = LOCAL_IP;
+	public static final String MOSTAFA_IP = LOCAL_IP;
 	
 	// RE1 = mostafa RE2 = saman RE3 = farid
 	// Replica managers
