@@ -13,6 +13,7 @@ public class FEPair {
 	public int id;
 	public String group;
 	private static boolean isWait = false;
+	public static final Object wait = new Object();
 	public static final Object monitor = new Object();
 
 	public FEPair(int id, String group) {
@@ -38,7 +39,7 @@ public class FEPair {
 	}
 	
 	public static boolean isWait() {
-		synchronized (monitor) {
+		synchronized (wait) {
 			return isWait;
 		}
 	}
