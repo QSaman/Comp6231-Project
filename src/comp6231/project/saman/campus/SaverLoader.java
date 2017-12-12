@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import comp6231.project.farid.servers.serverDorval.ServerDorval;
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
 
@@ -33,7 +34,13 @@ public class SaverLoader implements Serializable {
 	}
 	
     void copyObjectToServer(){
-    	setCurrentSequenceNumberByLoading();
+//    	setCurrentSequenceNumberByLoading();
+    	
+    	for (int i = 0; i < 6; ++i) {
+		Bootstrap.campuses.get(0).db.clear();
+		Bootstrap.campuses.get(0).student_db.clear();
+    	}
+    	
     	for (int i = 0; i < 6; ++i) {
 		copyMap(dataBase, Bootstrap.campuses.get(0).db);
 		copyMap(students, Bootstrap.campuses.get(0).student_db);
@@ -42,7 +49,7 @@ public class SaverLoader implements Serializable {
     }
     
     void copyServerToObject() {
-    	setSavedCurrentSequenceNumber();
+//    	setSavedCurrentSequenceNumber();
     	for (int i = 0; i < 6; ++i) {
 		copyMap(Bootstrap.campuses.get(0).db, dataBase);
 		copyMap(Bootstrap.campuses.get(0).student_db , students);
@@ -57,6 +64,7 @@ public class SaverLoader implements Serializable {
 
 	// Saving
 	public void serializeDataOut()throws IOException{
+		setSavedCurrentSequenceNumber();
 	    String fileName= "samandb.txt";
 	    FileOutputStream fos = new FileOutputStream(fileName);
 	    ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -69,6 +77,7 @@ public class SaverLoader implements Serializable {
 	   FileInputStream fin = new FileInputStream(fileName);
 	   ObjectInputStream ois = new ObjectInputStream(fin);
 	   SaverLoader saverLoader= (SaverLoader) ois.readObject();
+	   saverLoader.setCurrentSequenceNumberByLoading();
 	   ois.close();
 	   return saverLoader;
 	}

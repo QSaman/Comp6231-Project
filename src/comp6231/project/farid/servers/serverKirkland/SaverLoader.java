@@ -38,7 +38,7 @@ public class SaverLoader implements Serializable {
 	}
 
 	public void setSavedCurrentSequenceNumber() {
-		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber();
+		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber() +1;
 	}
 	
     void copyObjectToServer(){
@@ -97,6 +97,7 @@ public class SaverLoader implements Serializable {
 	
 	// Save on file
 	public void serializeDataOut()throws IOException{
+		setSavedCurrentSequenceNumber();
 	    String fileName= "ServerKirklandSavedData.txt";
 	    FileOutputStream fos = new FileOutputStream(fileName);
 	    ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -123,6 +124,7 @@ public class SaverLoader implements Serializable {
 	   FileInputStream fin = new FileInputStream(fileName);
 	   ObjectInputStream ois = new ObjectInputStream(fin);
 	   SaverLoader saverLoader= (SaverLoader) ois.readObject();
+	   saverLoader.setCurrentSequenceNumberByLoading();
 	   ois.close();
 	   return saverLoader;
 	}

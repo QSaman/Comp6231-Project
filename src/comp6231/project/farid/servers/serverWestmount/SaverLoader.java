@@ -41,7 +41,7 @@ public class SaverLoader implements Serializable {
 	}
 	
     void copyObjectToServer(){
-    	setCurrentSequenceNumberByLoading();
+//    	setCurrentSequenceNumberByLoading();
     	ServerWestmount.dataBase.clear();
 		ServerWestmount.students.clear();
 		ServerWestmount.admins.clear();
@@ -55,7 +55,7 @@ public class SaverLoader implements Serializable {
     }
     
     void copyServerToObject() {
-    	setSavedCurrentSequenceNumber();
+//    	setSavedCurrentSequenceNumber();
 		copyDataBase(ServerWestmount.dataBase, dataBase);
 		copyMap(ServerWestmount.students, students);
 		copyMap(ServerWestmount.admins, admins);
@@ -98,6 +98,8 @@ public class SaverLoader implements Serializable {
 	
 	// Saving
 	public void serializeDataOut()throws IOException{
+		setSavedCurrentSequenceNumber();
+		System.out.println("my seq number is :" +savedCurrentSequenceNumber + "udp seq is :" + Udp.getCurrentSequenceNumber());
 	    String fileName= "ServerWestmountSavedData.txt";
 	    FileOutputStream fos = new FileOutputStream(fileName);
 	    ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -111,6 +113,7 @@ public class SaverLoader implements Serializable {
 		dataBase.forEach((key, value) -> value.forEach((key1, value1) -> log.append("\nDate:").append(key)
 				.append("   Room number: ").append(key1).append("   Time slots:").append(sortByValue(value1))));
 		log.append("\n");
+		log.append("\n$$$ seq: " + savedCurrentSequenceNumber);
 		System.out.println(log.toString());
 	}
 	
@@ -124,6 +127,8 @@ public class SaverLoader implements Serializable {
 	   FileInputStream fin = new FileInputStream(fileName);
 	   ObjectInputStream ois = new ObjectInputStream(fin);
 	   SaverLoader saverLoader= (SaverLoader) ois.readObject();
+	   saverLoader.setCurrentSequenceNumberByLoading();
+	   System.out.println("my seq number is :" +saverLoader.savedCurrentSequenceNumber + "udp seq is :" + Udp.getCurrentSequenceNumber());
 	   ois.close();
 	   return saverLoader;
 	}
