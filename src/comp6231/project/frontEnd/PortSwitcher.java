@@ -7,21 +7,21 @@ public class PortSwitcher {
 
 	public static void switchServer(String campusCode) {
 		synchronized (lock) {
-			if (campusCode.contains("F")) {
+			if (campusCode.startsWith("F")) {
 				Constants.dvlPortListenFaridActive = changePort(Constants.dvlPortListenFaridActive,
 						Constants.DVL_PORT_LISTEN_FARID_ORIGINAL, Constants.DVL_PORT_LISTEN_FARID_BACKUP);
 				Constants.kklPortListenFaridActive = changePort(Constants.kklPortListenFaridActive,
 						Constants.KKL_PORT_LISTEN_FARID_ORIGINAL, Constants.KKL_PORT_LISTEN_FARID_BACKUP);
 				Constants.wstPortListenFaridActive = changePort(Constants.wstPortListenFaridActive,
 						Constants.WST_PORT_LISTEN_FARID_ORIGINAL, Constants.WST_PORT_LISTEN_FARID_BACKUP);
-			} else if (campusCode.contains("S")){
+			} else if (campusCode.startsWith("S")){
 				Constants.dvlPortListenRe2Active = changePort(Constants.dvlPortListenRe2Active,
 						Constants.DVL_PORT_LISTEN_RE2_ORIGINAL, Constants.DVL_PORT_LISTEN_RE2_BACKUP);
 				Constants.kklPortListenRe2Active = changePort(Constants.kklPortListenRe2Active,
 						Constants.KKL_PORT_LISTEN_RE2_ORIGINAL, Constants.KKL_PORT_LISTEN_RE2_BACKUP);
 				Constants.wstPortListenRe2Active = changePort(Constants.wstPortListenRe2Active,
 						Constants.WST_PORT_LISTEN_RE2_ORIGINAL, Constants.WST_PORT_LISTEN_RE2_BACKUP);
-			} else if (campusCode.contains("M")) {
+			} else if (campusCode.startsWith("M")) {
 				Constants.dvlPortListenRe1Active = changePort(Constants.dvlPortListenRe1Active,
 						Constants.DVL_PORT_LISTEN_RE1_ORIGINAL, Constants.DVL_PORT_LISTEN_RE1_BACKUP);
 				Constants.kklPortListenRe1Active = changePort(Constants.kklPortListenRe1Active,

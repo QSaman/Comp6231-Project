@@ -85,11 +85,8 @@ public class UDPlistener  implements Runnable {
 		public void run(){
 			if(runOutOfOrder) {
 				String result = processFrontEndToServer(message);
-				try {
-					Server.save();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!(message.command_type == CommandType.LoginAdmin || message.command_type == CommandType.LoginStudent)) {
+					save();
 				}
 				Server.log("UDP Socket Listener Handled out of order with seq number :"+ message.sequence_number+" And Result: "+result);
 				sendReplicaToFe(result);
@@ -121,6 +118,15 @@ public class UDPlistener  implements Runnable {
 
 		}
 
+		private void save() {
+			try {
+				Server.save();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		private void handlePacket(String json_msg_str) {
 
 			Server.log("UDP Socket Received JSON: "+json_msg_str);
@@ -129,11 +135,13 @@ public class UDPlistener  implements Runnable {
 				Server.log("UDP Socket Listener Result: "+result);
 
 				if(protocolType != ProtocolType.ReplicaManager_Message) {
-					try {
-						Server.save();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if(protocolType == ProtocolType.Server_To_Server) {
+						save();
+					}else {
+						MessageHeader m = Server.gson.fromJson(result, MessageHeader.class);
+						if(!(m.command_type == CommandType.LoginAdmin || m.command_type == CommandType.LoginStudent)) {
+							save();
+						}
 					}
 					send(socket.getInetAddress(), socket.getPort(), result);
 				}
@@ -216,9 +224,9 @@ public class UDPlistener  implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				synchronized (lock) {
-					currentSequenceNumber = message.sequence_number + 1;
-				}
+				//				synchronized (lock) {
+				//					currentSequenceNumber = message.sequence_number;
+				//				}
 				Server.log("Server Switched");
 			}else if (json.command_type == CommandType.Fake_Generator) {
 				RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json;

@@ -2,9 +2,11 @@ package comp6231.project.frontEnd.udp;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.rudp.ReliableSocket;
@@ -30,6 +32,10 @@ public class Sequencer extends Thread{
 	private static ConcurrentHashMap<String, ArrayList<String>> b_id = new ConcurrentHashMap<String, ArrayList<String>>();
 	private static final Object lock_b_id = new Object();
 	public FEPair pair;
+
+	// key: replicaId 
+	private static ConcurrentHashMap<Integer, ConcurrentLinkedQueue<Info>> timeOutCach = new ConcurrentHashMap<>();
+	private static final Object timeOutLock = new Object();
 
 	private String b_id_main_key;
 	private static int sequenceNumber = 0;
@@ -58,7 +64,9 @@ public class Sequencer extends Thread{
 	private void adjustSeqNumber(){
 		synchronized (lock) {
 			args.sequence_number = sequenceNumber;
-			pair = new FEPair(sequenceNumber, group);
+			String json = FE.toJson(args);
+			Info [] data = {new Info(json),new Info(json),new Info(json)};
+			pair = new FEPair(sequenceNumber, group, data);
 			holdBack.put(sequenceNumber, pair);
 			sequenceNumber ++;
 		}
@@ -90,10 +98,13 @@ public class Sequencer extends Thread{
 
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
+			pair.data[0] = new Info(FE.toJson(message));
 			FECancelBookingMessage message2 = new FECancelBookingMessage(message.sequence_number, message.user_id, tokens[1]);
 			msgs.add(FE.toJson(message2).getBytes());
+			pair.data[1] = new Info(FE.toJson(message2));
 			FECancelBookingMessage message3 = new FECancelBookingMessage(message.sequence_number, message.user_id, tokens[2]);
 			msgs.add(FE.toJson(message3).getBytes());
+			pair.data[2] = new Info(FE.toJson(message3));
 
 		}else if(args.command_type == CommandType.Change_Reservation) {
 			customSend = true;
@@ -113,10 +124,13 @@ public class Sequencer extends Thread{
 
 			message.booking_id = tokens[0];
 			msgs.add(FE.toJson(message).getBytes());
+			pair.data[0] = new Info(FE.toJson(message));
 			FEChangeReservationMessage message2 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[1], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
 			msgs.add(FE.toJson(message2).getBytes());
+			pair.data[1] = new Info(FE.toJson(message2));
 			FEChangeReservationMessage message3 = new FEChangeReservationMessage(message.sequence_number, message.user_id, tokens[2], message.new_campus_name, message.new_room_number, message.new_date, message.new_time_slot);
 			msgs.add(FE.toJson(message3).getBytes());
+			pair.data[2] = new Info(FE.toJson(message3));
 		}
 
 		if(group.equals(Constants.DVL_GROUP)){
@@ -212,42 +226,81 @@ public class Sequencer extends Thread{
 				generateResult("Time out for sequence Number: "+ pair.id+ " for the group of : "+ pair.group, ReturnStatus.Timeout);
 				for(int i = 0 ; i < Constants.ACTIVE_SERVERS; ++i) {
 					if(!pair.infos.containsKey(i)) {
-						String portSwitcherArgs;
-						RMKillMessage killMessage;
-						if(!FEPair.isWait()){
-							FEPair.setWait(true);
-							FE.log("wait started");
-							switch (i) {
-							case 0:
-								portSwitcherArgs = "F"+pair.group;
-								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
-								PortSwitcher.switchServer(portSwitcherArgs);
-								FE.log("kill message sent: " + killMessage);
-								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-								break;
-							case 1:
-								portSwitcherArgs = "M"+pair.group;
-								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
-								PortSwitcher.switchServer(portSwitcherArgs);
-								FE.log("kill message sent: " + killMessage);
-								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-								break;
-							case 2:
-								portSwitcherArgs = "S"+pair.group;
-								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
-								PortSwitcher.switchServer(portSwitcherArgs);
-								FE.log("kill message sent: " + killMessage);
-								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
-								break;
-							default:
-								break;
-							}
-							synchronized (FEPair.monitor) {
-								FEPair.monitor.wait();
-								FE.log("wait finished");
-								FEPair.setWait(false);
+						synchronized (timeOutLock) {
+							if(timeOutCach.containsKey(i)) {
+								Info info =  pair.data[i];
+								info.timeOutGroup = pair.group;
+								timeOutCach.get(i).offer(info);
+							}else {
+								ConcurrentLinkedQueue<Info> queue = new ConcurrentLinkedQueue<>();
+								Info info =  pair.data[i];
+								info.timeOutGroup = pair.group;
+								queue.offer(info);
+								timeOutCach.put(i, queue);
 							}
 						}
+
+						String portSwitcherArgs;
+						RMKillMessage killMessage;
+						switch (i) {
+						case 0:
+							if(!FEPair.isOneLock()){
+								FEPair.setLockOne(true);
+								FE.log("wait started for one");
+								portSwitcherArgs = "F"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage.replicaId = portSwitcherArgs.substring(0,1);
+								FE.log("kill message sent: " + killMessage.toString());
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								synchronized (FEPair.lockOne) {
+									FEPair.lockOne.wait();
+									FE.log("wait finished for one");
+									PortSwitcher.switchServer(portSwitcherArgs);
+									resend(i);
+									FEPair.isOneLock = false;
+								}
+							}
+							break;
+						case 1:
+							if(!FEPair.isTwoLock()){
+								FEPair.setLockTwo(true);
+								FE.log("wait started for two");
+								portSwitcherArgs = "M"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage.replicaId = portSwitcherArgs.substring(0,1);
+								FE.log("kill message sent: " + killMessage.toString());
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								synchronized (FEPair.lockTwo) {
+									FEPair.lockTwo.wait();
+									FE.log("wait finished for two");
+									PortSwitcher.switchServer(portSwitcherArgs);
+									resend(i);
+									FEPair.isTwoLock = false;
+								}
+							}
+							break;
+						case 2:
+							if(!FEPair.isThreeLock()){
+								FEPair.setLockThree(true);
+								FE.log("wait started for three");
+								portSwitcherArgs = "S"+pair.group;
+								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage.replicaId  = portSwitcherArgs.substring(0,1);
+								FE.log("kill message sent: " + killMessage.toString());
+								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
+								synchronized (FEPair.lockThree) {
+									FEPair.lockThree.wait();
+									FE.log("wait finished for three");
+									PortSwitcher.switchServer(portSwitcherArgs);
+									resend(i);
+									FEPair.isThreeLock = false;
+								}
+							}
+							break;
+						default:
+							break;
+						}
+
 
 					}
 				}
@@ -259,6 +312,71 @@ public class Sequencer extends Thread{
 
 	}
 
+	private void resend(int replicaId) {
+		synchronized (timeOutLock) {
+			while(!timeOutCach.get(replicaId).isEmpty()) {
+				 Info info = timeOutCach.get(replicaId).poll();
+				 if(info != null) {
+					 String addr = "";
+					 int port = -1;
+					 if(replicaId == 0) {
+						 addr = Constants.FARID_IP;
+						 if(info.timeOutGroup.contains("DVL")) {
+							 port = Constants.dvlPortListenFaridActive;
+						 }else if (info.timeOutGroup.contains("KKL")) {
+							 port = Constants.kklPortListenFaridActive;
+						 }else if (info.timeOutGroup.contains("WST")) {
+							 port = Constants.wstPortListenFaridActive;
+						 }else {
+							FE.log(" port in resend for farid is wrong!!");
+						}
+					 }else if (replicaId == 1) {
+						 addr = Constants.MOSTAFA_IP;
+						 if(info.timeOutGroup.contains("DVL")) {
+							 port = Constants.dvlPortListenRe1Active;
+						 }else if (info.timeOutGroup.contains("KKL")) {
+							 port = Constants.kklPortListenRe1Active;
+						 }else if (info.timeOutGroup.contains("WST")) {
+							 port = Constants.wstPortListenRe1Active;
+						 }else {
+							FE.log(" port in resend for Mostafa is wrong!!");
+						}
+					}else if (replicaId == 2) {
+						 addr = Constants.SAMAN_IP;
+						 if(info.timeOutGroup.contains("DVL")) {
+							 port = Constants.dvlPortListenRe2Active;
+						 }else if (info.timeOutGroup.contains("KKL")) {
+							 port = Constants.kklPortListenRe2Active;
+						 }else if (info.timeOutGroup.contains("WST")) {
+							 port = Constants.wstPortListenRe2Active;
+						 }else {
+							FE.log(" port in resend for Saman is wrong!!");
+						}
+					}else {
+						FE.log(" replica id in resend is Wrong");
+					}
+					 FE.log("resend json for port: " +info.json + " "+ port);
+					 resendToReplica(info.json, addr, port);
+				 }
+			}
+		}
+	}
+	
+	private void resendToReplica(String data, String addr, int port) {
+		try {
+			ReliableSocket aSocket = new ReliableSocket();
+			aSocket.connect(new InetSocketAddress(addr, port));
+			OutputStreamWriter out = new OutputStreamWriter(aSocket.getOutputStream());
+			out.write(data);
+			out.flush();
+			out.close();
+			aSocket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private void handlePair(int index){
 		Info info = pair.infos.get(index);
 		String json = info.json;
@@ -332,10 +450,10 @@ public class Sequencer extends Thread{
 	public String getResult(){
 		return result;
 	}
-	
-	private static int getSeqNumber() {
-		synchronized (lock) {
-			return sequenceNumber;
-		}
-	}
+
+//	private static int getSeqNumber() {
+//		synchronized (lock) {
+//			return sequenceNumber;
+//		}
+//	}
 }

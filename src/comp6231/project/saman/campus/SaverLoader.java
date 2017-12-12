@@ -47,7 +47,7 @@ public class SaverLoader implements Serializable {
 
 	// Saving
 	public void serializeDataOut()throws IOException{
-	    String fileName= "saman db.txt";
+	    String fileName= "samandb.txt";
 	    FileOutputStream fos = new FileOutputStream(fileName);
 	    ObjectOutputStream oos = new ObjectOutputStream(fos);
 	    oos.writeObject(this);
@@ -55,7 +55,7 @@ public class SaverLoader implements Serializable {
 	}
 	
 	public static SaverLoader serializeDataIn() throws IOException, ClassNotFoundException{
-	   String fileName= "saman db.txt";
+	   String fileName= "samandb.txt";
 	   FileInputStream fin = new FileInputStream(fileName);
 	   ObjectInputStream ois = new ObjectInputStream(fin);
 	   SaverLoader saverLoader= (SaverLoader) ois.readObject();

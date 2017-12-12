@@ -120,8 +120,16 @@ public class Udp implements Runnable {
 			if(result != null) {
 				ServerKirkland.kirklandServerLogger.log("UDP Socket Listener Result: " + result);
 				if(protocolType != ProtocolType.ReplicaManager_Message) {
-					//save here
-					ServerKirkland.save();
+					if(protocolType == ProtocolType.Server_To_Server) {
+						//save here
+						ServerKirkland.save();
+
+					}else {
+						MessageHeader m = ServerKirkland.gson.fromJson(result, MessageHeader.class);
+						if(!(m.command_type == CommandType.LoginAdmin || m.command_type == CommandType.LoginStudent)) {
+							ServerKirkland.save();
+						}
+					}
 					send(socket.getInetAddress(), socket.getPort(), result);
 				}
 			}
@@ -421,9 +429,9 @@ public class Udp implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					synchronized (lock) {
-						currentSequenceNumber = message.sequence_number + 1;
-					}
+//					synchronized (lock) {
+//						currentSequenceNumber = message.sequence_number + 1;
+//					}
 					ServerKirkland.kirklandServerLogger.log("Server Switched");
 				}else if(json_msg.command_type == CommandType.Fake_Generator) {
 					RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json_msg;
@@ -491,7 +499,9 @@ public class Udp implements Runnable {
 							public void run() {
 								try {
 									String reply_msg = ServerKirkland.gson.toJson(processFrontEnd(messageHeader));
-									ServerKirkland.save();
+									if(!(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent)) {
+										ServerKirkland.save();
+									}
 									ServerKirkland.kirklandServerLogger.log("UDP Socket Listener Handled out of order with seq number :"+ messageHeader.sequence_number+" And Result: "+reply_msg);
 									sendReplicaToFe(reply_msg);
 								} catch (Exception e) {

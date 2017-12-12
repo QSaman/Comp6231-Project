@@ -103,9 +103,9 @@ public class UdpServer extends Thread{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			synchronized (lock) {
-				currentSequenceNumber = kill_message.sequence_number + 1;
-			}
+//			synchronized (lock) {
+//				currentSequenceNumber = kill_message.sequence_number + 1;
+//			}
 			logger.info("RM request for switching server is done in " + campus.getCampusName());
 			break;
 		case Fake_Generator:
@@ -281,6 +281,14 @@ public class UdpServer extends Thread{
 					if (handleTotalOrder(json_msg)) {
 						FEReplyMessage reply = handleFERequests(json_msg);
 						String reply_msg = gson.toJson(reply);
+						if(!(json_msg.command_type == CommandType.LoginAdmin || json_msg.command_type == CommandType.LoginStudent)) {
+							try {
+								Bootstrap.save();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
 						logger.info("I'm (" + campus.getCampusName() + " - " + campus.getCampusType() + ") trying to send this message as reply to FE: " + reply_msg);
 						sendDatagramToFE(reply_msg, Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN);
 					}
@@ -383,12 +391,6 @@ public class UdpServer extends Thread{
 
 	public void sendDatagramToFE(String message, String address, int port) throws IOException
 	{
-		try {
-			Bootstrap.save();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		//System.out.println("Send message to " + address + ":" + port);
 		//DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
 		OutputStreamWriter out = null;

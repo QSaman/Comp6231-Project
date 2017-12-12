@@ -14,6 +14,7 @@ import comp6231.project.messageProtocol.MessageHeader;
 import comp6231.project.messageProtocol.MessageHeader.CommandType;
 import comp6231.project.messageProtocol.MessageHeader.MessageType;
 import comp6231.project.messageProtocol.MessageHeader.ProtocolType;
+import comp6231.project.replicaManager.messages.RMKillMessage;
 import comp6231.shared.Constants;
 
 public class MultiCastRUDPListener implements Runnable{
@@ -90,9 +91,23 @@ public class MultiCastRUDPListener implements Runnable{
 				}
 			}else if (json_msg.protocol_type == ProtocolType.ReplicaManager_Message) {
 				if(json_msg.command_type == CommandType.Kill) {
-					synchronized (FEPair.monitor) {
-						FEPair.monitor.notify();
+					RMKillMessage message = (RMKillMessage) json_msg;
+					if(message.replicaId.equalsIgnoreCase("F")) {
+						synchronized (FEPair.lockOne) {
+							FEPair.lockOne.notify();
+						}
+					}else if(message.replicaId.equalsIgnoreCase("M")) {
+						synchronized (FEPair.lockTwo) {
+							FEPair.lockTwo.notify();
+						}
+					}else if(message.replicaId.equalsIgnoreCase("S")){
+						synchronized (FEPair.lockThree) {
+							FEPair.lockThree.notify();
+						}
+					}else {
+						FE.log("replica id in multicast listener from kill message is wrong!");
 					}
+
 				}else {
 					FE.log("Wrong message type from Replica manager");
 				}

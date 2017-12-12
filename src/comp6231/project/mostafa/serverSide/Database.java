@@ -50,7 +50,7 @@ public class Database implements Serializable {
 	}
 
 	public void setSavedCurrentSequenceNumber() {
-		this.savedCurrentSequenceNumber = UDPlistener.getCurrentSequenceNumber();
+		this.savedCurrentSequenceNumber = UDPlistener.getCurrentSequenceNumber() + 1;
 	}
 
 	private Database() {

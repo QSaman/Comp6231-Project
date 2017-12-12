@@ -119,8 +119,16 @@ public class Udp implements Runnable {
 				ServerDorval.dorvalServerLogger.log("UDP Socket Listener Result: " + result);
 
 				if(protocolType != ProtocolType.ReplicaManager_Message) {
-					//save here
-					ServerDorval.save();
+					if(protocolType == ProtocolType.Server_To_Server) {
+						//save here
+						ServerDorval.save();
+					}else {
+						MessageHeader m = ServerDorval.gson.fromJson(result, MessageHeader.class);
+						if(!(m.command_type == CommandType.LoginAdmin || m.command_type == CommandType.LoginStudent)) {
+							ServerDorval.save();
+
+						}
+					}
 					send(socket.getInetAddress(), socket.getPort(), result);
 				}
 			}
@@ -421,9 +429,9 @@ public class Udp implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					synchronized (lock) {
-						currentSequenceNumber = message.sequence_number + 1;
-					}
+					//					synchronized (lock) {
+					//						currentSequenceNumber = message.sequence_number + 1;
+					//					}
 					ServerDorval.dorvalServerLogger.log("Server Switched");
 				}else if(json_msg.command_type == CommandType.Fake_Generator) {
 					RMFakeGeneratorMessage message  = (RMFakeGeneratorMessage) json_msg;
@@ -491,7 +499,9 @@ public class Udp implements Runnable {
 							public void run() {
 								try {
 									String reply_msg = ServerDorval.gson.toJson(processFrontEnd(messageHeader));
-									ServerDorval.save();
+									if(!(messageHeader.command_type == CommandType.LoginAdmin || messageHeader.command_type == CommandType.LoginStudent)) {
+										ServerDorval.save();
+									}
 									ServerDorval.dorvalServerLogger.log("UDP Socket Listener Handled out of order with seq number :"+ messageHeader.sequence_number+" And Result: "+reply_msg);
 									sendReplicaToFe(reply_msg);
 								} catch (Exception e) {

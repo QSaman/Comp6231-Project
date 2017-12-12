@@ -95,7 +95,7 @@ public class RMListener implements Runnable {
 				if(json_msg.command_type == CommandType.Kill) {
 					RMKillMessage message  = (RMKillMessage) json_msg;
 					PortSwitcher.switchServer(message.portSwitcherArg);
-					sendToAll(json_msg_str);
+					sendKillToAll(json_msg_str);
 					send(json_msg_str);
 				}else if (json_msg.command_type == CommandType.Fake_Generator) {
 					sendToAll(json_msg_str);
@@ -110,6 +110,7 @@ public class RMListener implements Runnable {
 
 		private void send(String data) {
 			try {
+				Thread.sleep(5000);
 				ReliableSocket aSocket = new ReliableSocket();
 				
 				aSocket.connect(new InetSocketAddress(Constants.FE_CLIENT_IP, Constants.FE_PORT_LISTEN));
@@ -119,7 +120,7 @@ public class RMListener implements Runnable {
 				out.close();
 				aSocket.close();
 
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
@@ -144,6 +145,72 @@ public class RMListener implements Runnable {
 			}
 
 			for(int i=0;i < 3; ++i) {
+
+				final int idxPort = i;
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+
+						try {
+							ReliableSocket sendToReplica = new ReliableSocket();
+
+							String adress ="";
+							
+							if(RMInformation.getInstance().getRmCode().equals("FARID")) {
+								adress = Constants.FARID_IP;
+							}else if (RMInformation.getInstance().getRmCode().equals("RE1")){
+								adress = Constants.MOSTAFA_IP;
+							}else if(RMInformation.getInstance().getRmCode().equals("RE2")) {
+								adress = Constants.SAMAN_IP;
+							}
+							
+							sendToReplica.connect(new InetSocketAddress(adress, replicaPorts[idxPort]));
+
+							OutputStream out = sendToReplica.getOutputStream();
+							out.write(data.getBytes());
+
+							out.flush();
+							out.close();
+							sendToReplica.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
+				}).start();
+			}
+		}
+		
+		private void sendKillToAll(String data){
+
+			int[] replicaPorts =  new int[6];
+			if(RMInformation.getInstance().getRmName().equals(Constants.RM_FARID)) {
+				replicaPorts[0] = Constants.DVL_PORT_LISTEN_FARID_ORIGINAL;
+				replicaPorts[1] = Constants.DVL_PORT_LISTEN_FARID_BACKUP;
+				replicaPorts [2] = Constants.KKL_PORT_LISTEN_FARID_ORIGINAL;
+				replicaPorts[3] = Constants.KKL_PORT_LISTEN_FARID_BACKUP;
+				replicaPorts[4] = Constants.WST_PORT_LISTEN_FARID_ORIGINAL;
+				replicaPorts [5] = Constants.WST_PORT_LISTEN_FARID_BACKUP;
+			}else if (RMInformation.getInstance().getRmName().equals(Constants.RM_RE1)) {
+				replicaPorts[0] = Constants.DVL_PORT_LISTEN_RE1_ORIGINAL;
+				replicaPorts[1] = Constants.DVL_PORT_LISTEN_RE1_BACKUP;
+				replicaPorts [2] = Constants.KKL_PORT_LISTEN_RE1_ORIGINAL;
+				replicaPorts[3] = Constants.KKL_PORT_LISTEN_RE1_BACKUP;
+				replicaPorts[4] = Constants.WST_PORT_LISTEN_RE1_ORIGINAL;
+				replicaPorts [5] = Constants.WST_PORT_LISTEN_RE1_BACKUP;
+			}else if (RMInformation.getInstance().getRmName().equals(Constants.RM_RE2)) {
+				replicaPorts[0] = Constants.DVL_PORT_LISTEN_RE2_ORIGINAL;
+				replicaPorts[1] = Constants.DVL_PORT_LISTEN_RE2_BACKUP;
+				replicaPorts [2] = Constants.KKL_PORT_LISTEN_RE2_ORIGINAL;
+				replicaPorts[3] = Constants.KKL_PORT_LISTEN_RE2_BACKUP;
+				replicaPorts[4] = Constants.WST_PORT_LISTEN_RE2_ORIGINAL;
+				replicaPorts [5] = Constants.WST_PORT_LISTEN_RE2_BACKUP;
+			}else {
+				ReplicaManager.log("Wrong Replica name ");
+			}
+
+			for(int i=0;i < 6; ++i) {
 
 				final int idxPort = i;
 
