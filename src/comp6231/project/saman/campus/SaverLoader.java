@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
 
@@ -20,11 +19,21 @@ public class SaverLoader implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 8285664676826383466L;
-
+	private int savedCurrentSequenceNumber;
 	HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> dataBase = new HashMap<>();
 	HashMap<String, StudentRecord> students = new HashMap<>();
 	
+	
+    public void setCurrentSequenceNumberByLoading() {
+		UdpServer.setCurrentSequenceNumber(savedCurrentSequenceNumber);
+	}
+
+	public void setSavedCurrentSequenceNumber() {
+		this.savedCurrentSequenceNumber = UdpServer.getCurrentSequenceNumber() + 1;
+	}
+	
     void copyObjectToServer(){
+    	setCurrentSequenceNumberByLoading();
     	for (int i = 0; i < 6; ++i) {
 		copyMap(dataBase, Bootstrap.campuses.get(0).db);
 		copyMap(students, Bootstrap.campuses.get(0).student_db);
@@ -33,6 +42,7 @@ public class SaverLoader implements Serializable {
     }
     
     void copyServerToObject() {
+    	setSavedCurrentSequenceNumber();
     	for (int i = 0; i < 6; ++i) {
 		copyMap(Bootstrap.campuses.get(0).db, dataBase);
 		copyMap(Bootstrap.campuses.get(0).student_db , students);

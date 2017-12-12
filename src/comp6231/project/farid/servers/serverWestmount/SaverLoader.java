@@ -37,7 +37,7 @@ public class SaverLoader implements Serializable {
 	}
 
 	public void setSavedCurrentSequenceNumber() {
-		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber();
+		this.savedCurrentSequenceNumber = Udp.getCurrentSequenceNumber() + 1;
 	}
 	
     void copyObjectToServer(){

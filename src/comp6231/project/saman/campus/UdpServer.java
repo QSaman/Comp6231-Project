@@ -86,6 +86,14 @@ public class UdpServer extends Thread{
 		//System.setProperty("sun.net.maxDatagramSockets", "10000");
 	}
 
+	public static int getCurrentSequenceNumber() {
+		return currentSequenceNumber;
+	}
+
+	public static void setCurrentSequenceNumber(int currentSequenceNumber) {
+		UdpServer.currentSequenceNumber = currentSequenceNumber;
+	}
+	
 	public void setJsonMessage(JsonMessage json_message)
 	{
 		this.json_message = json_message;
