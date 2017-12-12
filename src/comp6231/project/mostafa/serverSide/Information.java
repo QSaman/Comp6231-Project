@@ -12,33 +12,36 @@ import comp6231.shared.Constants;
 public class Information {
 	private static Information instance = null;
 	private static Object singeltoneLock = new Object();
-	
+
 	private String serverCode;
 	private String serverName;
 	private int serverPort;
 	private int UDPListenPort;
 	public boolean isReOne;
 	public String replicaId;
-	
+
 	private Information(){
 		setServerName(null);
 		setServerPort(-1);
 	}
-	
+
 	public static Information getInstance(){
-		synchronized (singeltoneLock) {
-			if(instance == null){
-				instance = new Information();
+		if(instance == null) {
+			synchronized (singeltoneLock) {
+				if(instance == null){
+					instance = new Information();
+
+				}
 			}
-			return instance;
 		}
+		return instance;
 	}
 
 	public void initializeServerInformation(int port){
 		serverPort = port;
 		setServer(port);
 	}
-	
+
 	public boolean isUserClient(String id){
 		if(id.contains("dvls") || id.contains("DVLS")){
 			return true;
@@ -50,7 +53,7 @@ public class Information {
 			return false;
 		}
 	}
-	
+
 	public boolean isUserAdmin(String id){
 		if(id.contains("dvla")|| id.contains("DVLA")){
 			return true;
@@ -62,11 +65,11 @@ public class Information {
 			return false;
 		}
 	}
-	
+
 	public MessageHeader sendMessageServerToServer(String data, String studentID){
 		return new ServerToServerMessage(data, studentID);
 	}
-	
+
 	public void transaction(boolean isCommit){
 		MessageHeader args;
 		if(isCommit){
@@ -77,7 +80,7 @@ public class Information {
 			args = sendMessageServerToServer(Constants.ROLLBACK, "");
 		}
 		List<UDP> threads = new ArrayList<UDP>();
-		
+
 		if(getServerCode().equals("DVL")){
 			threads.add(new UDP(args, isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active, "WST"));
 			threads.add(new UDP(args, isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active, "KKL"));	
@@ -88,7 +91,7 @@ public class Information {
 			threads.add(new UDP(args, isReOne == true ? Constants.wstPortListenRe1Active : Constants.wstPortListenRe2Active, "WST"));
 			threads.add(new UDP(args, isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active, "DVL"));
 		}
-		
+
 		for (UDP udp : threads) {
 			udp.start();
 		}
@@ -101,7 +104,7 @@ public class Information {
 			}
 		}
 	}
-	
+
 	public boolean isBooked(String bookingId){
 		String str = bookingId.substring(0,3);
 		if(str.equalsIgnoreCase("DVL") || str.equalsIgnoreCase("KKL") || str.equalsIgnoreCase("WST")){
@@ -110,19 +113,19 @@ public class Information {
 			return false;
 		}
 	}
-	
+
 	public int convertTimeToSec(String time){
 		String parser[] = time.split(":");
 		return(Integer.parseInt(parser[0])*3600 + Integer.parseInt(parser[1])*60);
 	}
-	
+
 	public String convertTimeToString(int time){
 		int hour = time / 3600;
 		int minToSec = time % 3600;
 		int min = minToSec / 60;
 		return hour+":"+min+"0";
 	}
-	
+
 	public int tryToFindUDPPort(String id){
 		if(id.contains("DVL") || id.contains("dvl")){
 			return isReOne == true ? Constants.dvlPortListenRe1Active : Constants.dvlPortListenRe2Active;
@@ -134,7 +137,7 @@ public class Information {
 			return -1;	
 		}
 	}
-	
+
 	public boolean isMine(String id){
 		Server.log("DEBUG_LOG: isMine(String id), id: "+id+ ", MyServer: "+getServerCode());
 		if((id.contains("DVL") || id.contains("dvl") )&& getServerCode().equalsIgnoreCase("DVL")){
@@ -248,7 +251,7 @@ public class Information {
 			break;
 		}
 	}
-	
+
 	public int findUDPPort(String campusName){
 		if(campusName.equalsIgnoreCase("KKL")){
 			return isReOne == true ? Constants.kklPortListenRe1Active : Constants.kklPortListenRe2Active;
@@ -260,14 +263,14 @@ public class Information {
 			return -1;
 		}
 	}
-	
+
 	/**
 	 * @param serverName the serverName to set
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
 	}
-	
+
 	/**
 	 * @return the serverPort
 	 */

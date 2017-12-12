@@ -15,12 +15,15 @@ public class RMInformation {
 	}
 	
 	public static RMInformation getInstance(){
-		synchronized (singeltoneLock) {
-			if(instance == null){
-				instance = new RMInformation();
+		if(instance == null) {
+			synchronized (singeltoneLock) {
+				if(instance == null){
+					instance = new RMInformation();
+
+				}
 			}
-			return instance;
 		}
+		return instance;
 	}
 
 	public void initializeServerInformation(String name){

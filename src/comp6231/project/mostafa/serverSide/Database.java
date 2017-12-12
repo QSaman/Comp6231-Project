@@ -75,12 +75,15 @@ public class Database implements Serializable {
 	}
 
 	public static Database getInstance() {
-		synchronized (singeltoneLock) {
-			if (instance == null) {
-				instance = new Database();
+		if(instance == null) {
+			synchronized (singeltoneLock) {
+				if(instance == null){
+					instance = new Database();
+
+				}
 			}
-			return instance;
 		}
+		return instance;
 	}
 
 	public Boolean removeBookingId(String bookingId) {

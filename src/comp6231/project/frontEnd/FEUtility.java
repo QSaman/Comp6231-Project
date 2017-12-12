@@ -4,7 +4,7 @@ import comp6231.shared.Constants;
 
 public class FEUtility {
 	private static FEUtility instance = null;
-	private static final Object lock = new Object();
+	private static final Object singeltoneLock = new Object();
 	
 	private FEUtility(){
 	}
@@ -13,12 +13,15 @@ public class FEUtility {
 	 * @return the instance
 	 */
 	public static FEUtility getInstance() {
-		synchronized (lock) {
-			if(instance == null){
-				instance = new FEUtility();
+		if(instance == null) {
+			synchronized (singeltoneLock) {
+				if(instance == null){
+					instance = new FEUtility();
+
+				}
 			}
-			return instance;
 		}
+		return instance;
 	}
 	
 	public String findUDPListenerPort(String id){
