@@ -221,6 +221,18 @@ public class TestConcurrentClient {
 									new Thread(runnable).start();
 									new Thread(runnable).start();
 									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
+									new Thread(runnable).start();
 
 									break;
 								}

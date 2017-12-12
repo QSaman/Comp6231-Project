@@ -215,25 +215,28 @@ public class Sequencer extends Thread{
 						String portSwitcherArgs;
 						RMKillMessage killMessage;
 						if(!FEPair.isWait()){
-							FE.log("wait started");
 							FEPair.setWait(true);
+							FE.log("wait started");
 							switch (i) {
 							case 0:
 								portSwitcherArgs = "F"+pair.group;
-								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
 								PortSwitcher.switchServer(portSwitcherArgs);
+								FE.log("kill message sent: " + killMessage);
 								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
 								break;
 							case 1:
 								portSwitcherArgs = "M"+pair.group;
-								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
 								PortSwitcher.switchServer(portSwitcherArgs);
+								FE.log("kill message sent: " + killMessage);
 								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
 								break;
 							case 2:
 								portSwitcherArgs = "S"+pair.group;
-								killMessage = new RMKillMessage(pair.id, portSwitcherArgs);
+								killMessage = new RMKillMessage(getSeqNumber(), portSwitcherArgs);
 								PortSwitcher.switchServer(portSwitcherArgs);
+								FE.log("kill message sent: " + killMessage);
 								new Thread((new ErrorHandler(FEUtility.getInstance().findRMPort(portSwitcherArgs), killMessage))).start();
 								break;
 							default:
@@ -328,5 +331,11 @@ public class Sequencer extends Thread{
 
 	public String getResult(){
 		return result;
+	}
+	
+	private static int getSeqNumber() {
+		synchronized (lock) {
+			return sequenceNumber;
+		}
 	}
 }

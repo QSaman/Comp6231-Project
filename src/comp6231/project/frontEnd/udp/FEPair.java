@@ -45,7 +45,7 @@ public class FEPair {
 	}
 	
 	public static void setWait(boolean isWait) {
-		synchronized (monitor) {
+		synchronized (wait) {
 			FEPair.isWait = isWait;
 		}
 	}
