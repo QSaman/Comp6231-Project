@@ -22,63 +22,68 @@ public class SaverLoader implements Serializable {
 	private int savedCurrentSequenceNumber;
 	HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> dataBase = new HashMap<>();
 	HashMap<String, StudentRecord> students = new HashMap<>();
-	
-	
-    public void setCurrentSequenceNumberByLoading() {
+
+	public void setCurrentSequenceNumberByLoading() {
 		UdpServer.setCurrentSequenceNumber(savedCurrentSequenceNumber);
 	}
 
 	public void setSavedCurrentSequenceNumber() {
 		this.savedCurrentSequenceNumber = UdpServer.getCurrentSequenceNumber() + 1;
 	}
-	
-    void copyObjectToServer(){
-//    	setCurrentSequenceNumberByLoading();
-    	
-    	for (int i = 0; i < 6; ++i) {
-		Bootstrap.campuses.get(i).db.clear();
-		Bootstrap.campuses.get(i).student_db.clear();
-    	}
-    	
-    	for (int i = 0; i < 6; ++i) {
-		copyMap(dataBase, Bootstrap.campuses.get(i).db);
-		copyMap(students, Bootstrap.campuses.get(i).student_db);
-    	}
-    	
-    }
-    
-    void copyServerToObject() {
-//    	setSavedCurrentSequenceNumber();
-    	for (int i = 0; i < 6; ++i) {
-		copyMap(Bootstrap.campuses.get(i).db, dataBase);
-		copyMap(Bootstrap.campuses.get(i).student_db , students);
-    	}
-    }
-    
-    private <K, V, M extends Map<K, V>> void copyMap(M baseMap, M copyMap) {	
-    	baseMap.forEach((k, v)->{
-    		copyMap.put(k, v);
-    	});
-    }
 
-	// Saving
-	public void serializeDataOut()throws IOException{
-		setSavedCurrentSequenceNumber();
-	    String fileName= "samandb.txt";
-	    FileOutputStream fos = new FileOutputStream(fileName);
-	    ObjectOutputStream oos = new ObjectOutputStream(fos);
-	    oos.writeObject(this);
-	    oos.close();
+	void copyObjectToServer() {
+		// setCurrentSequenceNumberByLoading();
+
+		for (int i = 0; i < 6; ++i) {
+			Bootstrap.campuses.get(i).db.clear();
+			Bootstrap.campuses.get(i).student_db.clear();
+		}
+
+		for (int i = 0; i < 6; ++i) {
+			copyMap(dataBase, Bootstrap.campuses.get(i).db);
+			copyMap(students, Bootstrap.campuses.get(i).student_db);
+		}
+
+	}
+
+	void copyServerToObject() {
+		// setSavedCurrentSequenceNumber();
+		for (int i = 0; i < 6; ++i) {
+			copyMap(Bootstrap.campuses.get(i).db, dataBase);
+			copyMap(Bootstrap.campuses.get(i).student_db, students);
+		}
+	}
+
+	private <K, V, M extends Map<K, V>> void copyMap(M baseMap, M copyMap) {
+		baseMap.forEach((k, v) -> {
+			copyMap.put(k, v);
+		});
 	}
 	
-	public static SaverLoader serializeDataIn() throws IOException, ClassNotFoundException{
-	   String fileName= "samandb.txt";
-	   FileInputStream fin = new FileInputStream(fileName);
-	   ObjectInputStream ois = new ObjectInputStream(fin);
-	   SaverLoader saverLoader= (SaverLoader) ois.readObject();
-	   saverLoader.setCurrentSequenceNumberByLoading();
-	   ois.close();
-	   return saverLoader;
+	private void copyArray(ArrayList<TimeSlot> baseList, ArrayList<TimeSlot> copyList) {
+		baseList.forEach(timeSlot->{
+			copyList.add(timeSlot);
+		});
+	}
+	
+	// Saving
+	public void serializeDataOut() throws IOException {
+		setSavedCurrentSequenceNumber();
+		String fileName = "samandb.txt";
+		FileOutputStream fos = new FileOutputStream(fileName);
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(this);
+		oos.close();
+	}
+
+	public static SaverLoader serializeDataIn() throws IOException, ClassNotFoundException {
+		String fileName = "samandb.txt";
+		FileInputStream fin = new FileInputStream(fileName);
+		ObjectInputStream ois = new ObjectInputStream(fin);
+		SaverLoader saverLoader = (SaverLoader) ois.readObject();
+		saverLoader.setCurrentSequenceNumberByLoading();
+		ois.close();
+		return saverLoader;
 	}
 
 }
