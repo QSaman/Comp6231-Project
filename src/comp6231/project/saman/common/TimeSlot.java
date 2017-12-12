@@ -15,10 +15,11 @@ import comp6231.project.saman.common.corba.users.corba_timeslot_listHelper;
  *
  */
 public class TimeSlot implements Serializable {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -4806344485309732435L;
 	private int[] hour;
 	private int[] minute;
 	private String booking_id;

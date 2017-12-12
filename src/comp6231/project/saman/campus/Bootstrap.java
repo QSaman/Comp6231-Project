@@ -147,6 +147,7 @@ public class Bootstrap {
 			saverLoader.serializeDataOut();
 			System.out.println("Saved");
 		} catch (IOException e) {
+//			e.printStackTrace();
 			System.out.println("ERROR IN SERIALIZING");
 		}
 	}

@@ -14,10 +14,11 @@ import comp6231.project.saman.common.corba.data_structure.CorbaDateReservation;
  */
 public class DateReservation implements /*Comparable<DateReservation>,*/ Serializable {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2213440418664073340L;
 	private int year;
 	private int month;
 	private int day;

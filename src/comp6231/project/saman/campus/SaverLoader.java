@@ -6,13 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
@@ -24,9 +21,18 @@ public class SaverLoader implements Serializable {
 	 */
 	private static final long serialVersionUID = 8285664676826383466L;
 	private int savedCurrentSequenceNumber;
-	HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> dataBase = new HashMap<>();
-	HashMap<String, StudentRecord> students = new HashMap<>();
-
+	ArrayList<HashMap<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>>> dataBase;
+	ArrayList<HashMap<String, StudentRecord>> students;
+	
+	public SaverLoader() {
+		dataBase = new ArrayList<>();
+		students = new ArrayList<>();
+		for(int i=0 ; i < 6; ++i) {
+			dataBase.add(new HashMap<>());
+			students.add(new HashMap<>());
+		}
+	}
+	
 	public void setCurrentSequenceNumberByLoading() {
 		UdpServer.setCurrentSequenceNumber(savedCurrentSequenceNumber);
 	}
@@ -44,8 +50,8 @@ public class SaverLoader implements Serializable {
 		}
 
 		for (int i = 0; i < 6; ++i) {
-			copyMap(dataBase, Bootstrap.campuses.get(i).db);
-			copyMap(students, Bootstrap.campuses.get(i).student_db);
+			copyDataBase(dataBase.get(i), Bootstrap.campuses.get(i).db);
+			copyMap(students.get(i), Bootstrap.campuses.get(i).student_db);
 		}
 
 	}
@@ -53,8 +59,8 @@ public class SaverLoader implements Serializable {
 	void copyServerToObject() {
 		// setSavedCurrentSequenceNumber();
 		for (int i = 0; i < 6; ++i) {
-			copyMap(Bootstrap.campuses.get(i).db, dataBase);
-			copyMap(Bootstrap.campuses.get(i).student_db, students);
+			copyDataBase(Bootstrap.campuses.get(i).db, dataBase.get(i));
+			copyMap(Bootstrap.campuses.get(i).student_db, students.get(i));
 		}
 	}
 
@@ -64,8 +70,8 @@ public class SaverLoader implements Serializable {
 		});
 	}
 	
-	private void copyDataBase(Map<LocalDate, HashMap<Integer, ArrayList<TimeSlot>>> baseMapDb,
-			Map<LocalDate, HashMap<Integer, ArrayList<TimeSlot>>> copyMapDb) {
+	private void copyDataBase(Map<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> baseMapDb,
+			Map<DateReservation, HashMap<Integer, ArrayList<TimeSlot>>> copyMapDb) {
 		baseMapDb.forEach((date, record) -> {
 			record.forEach((roomNumber, times) -> {
 				times.forEach((time) -> {

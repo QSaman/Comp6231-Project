@@ -3,6 +3,7 @@
  */
 package comp6231.project.saman.common.users;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import comp6231.project.saman.common.DateReservation;
@@ -13,7 +14,12 @@ import comp6231.project.saman.common.TimeSlot;
  *
  * It represents both students and admins
  */
-public class CampusUser {
+public class CampusUser implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8333723379801657423L;
+
 	public enum UserType
 	{
 		Student,

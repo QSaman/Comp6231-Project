@@ -3,6 +3,7 @@
  */
 package comp6231.project.saman.campus;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import comp6231.project.saman.common.DateReservation;
@@ -13,10 +14,19 @@ import comp6231.project.saman.common.users.CampusUser;
  * @author saman
  *
  */
-public class StudentRecord {	
+public class StudentRecord implements Serializable{	
 
-	private class ReservationRecord 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1023746083247748901L;
+
+	private class ReservationRecord implements Serializable 
 	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8078128760112663216L;
 		private DateReservation date;
 		private TimeSlot time_slot;
 		private String booking_id;
