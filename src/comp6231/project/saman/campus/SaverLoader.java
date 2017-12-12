@@ -6,9 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import comp6231.project.saman.common.DateReservation;
 import comp6231.project.saman.common.TimeSlot;
@@ -57,6 +61,33 @@ public class SaverLoader implements Serializable {
 	private <K, V, M extends Map<K, V>> void copyMap(M baseMap, M copyMap) {
 		baseMap.forEach((k, v) -> {
 			copyMap.put(k, v);
+		});
+	}
+	
+	private void copyDataBase(Map<LocalDate, HashMap<Integer, ArrayList<TimeSlot>>> baseMapDb,
+			Map<LocalDate, HashMap<Integer, ArrayList<TimeSlot>>> copyMapDb) {
+		baseMapDb.forEach((date, record) -> {
+			record.forEach((roomNumber, times) -> {
+				times.forEach((time) -> {
+					if (copyMapDb.containsKey(date)) {
+						if (copyMapDb.get(date).containsKey(roomNumber))
+							copyMapDb.get(date).get(roomNumber).add(time);
+						else {
+							ArrayList<TimeSlot> tempTimes = new ArrayList<>();
+							tempTimes.add(time);
+							HashMap<Integer, ArrayList<TimeSlot>> tempRecord = new HashMap<>();
+							tempRecord.put(roomNumber, tempTimes);
+							copyMapDb.put(date, tempRecord);
+						}
+					} else {
+						ArrayList<TimeSlot> tempTimes = new ArrayList<>();
+						tempTimes.add(time);
+						HashMap<Integer, ArrayList<TimeSlot>> tempRecord = new HashMap<>();
+						tempRecord.put(roomNumber, tempTimes);
+						copyMapDb.put(date, tempRecord);
+					}
+				});
+			});
 		});
 	}
 	
